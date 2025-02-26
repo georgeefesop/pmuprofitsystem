@@ -11,6 +11,7 @@ const ResultsSection = () => {
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(false);
 
   const openLightbox = (imageSrc: string) => {
     setLightboxImage(imageSrc);
@@ -107,7 +108,7 @@ const ResultsSection = () => {
           <div className="card group hover:translate-y-[-4px]">
             <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="heading-4">Before Using Our Training</h3>
+                <h3 className="heading-4">Before</h3>
                 <span className="badge bg-red-100 text-red-800">Struggling</span>
               </div>
               <div 
@@ -116,12 +117,12 @@ const ResultsSection = () => {
               >
                 <SafeImage 
                   src="/images/Before-2.jpg" 
-                  alt="Calendar before using the system" 
+                  alt="Calendar before" 
                   fill
                   className="object-cover"
                 />
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80">
-                  <p className="font-medium text-gray-900">Empty calendar slots</p>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/60">
+                  <p className="font-medium text-gray-900">Before</p>
                   <p className="text-sm text-gray-700">Inconsistent bookings</p>
                 </div>
               </div>
@@ -153,7 +154,7 @@ const ResultsSection = () => {
           <div className="card group hover:translate-y-[-4px]">
             <div className="p-6 border-b border-gray-100">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="heading-4">After Implementing Our Training</h3>
+                <h3 className="heading-4">After</h3>
                 <span className="badge bg-green-100 text-green-800">Thriving</span>
               </div>
               <div 
@@ -162,12 +163,12 @@ const ResultsSection = () => {
               >
                 <SafeImage 
                   src="/images/After-2.jpg" 
-                  alt="Calendar after using the system" 
+                  alt="Calendar after" 
                   fill
                   className="object-cover"
                 />
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80">
-                  <p className="font-medium text-gray-900">Fully booked calendar</p>
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/60">
+                  <p className="font-medium text-gray-900">After</p>
                   <p className="text-sm text-gray-700">Consistent client flow</p>
                 </div>
               </div>
@@ -248,35 +249,35 @@ const ResultsSection = () => {
             <div>
               <h3 className="heading-3 mb-6">The Math Behind Your Success</h3>
               <p className="body-1 mb-6">
-                With just €70 in ad spend per week, you could generate up to €4,000 in potential revenue. Here's how:
+                With just €70 in ad spend per week, you could generate up to €1,980 in potential revenue. Here's how:
               </p>
               
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">1</div>
                   <div>
-                    <p className="font-medium">€10/day reaches ~15,000 people weekly</p>
+                    <p className="font-medium">€10/day reaches ~10,000 people weekly</p>
                     <p className="text-sm text-gray-600">Targeted Facebook & Instagram ads</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</div>
                   <div>
-                    <p className="font-medium">If ~3% show interest (450 people)</p>
+                    <p className="font-medium">If ~2% show interest (200 people)</p>
                     <p className="text-sm text-gray-600">Engage with your content</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">3</div>
                   <div>
-                    <p className="font-medium">If ~5% reach out (24 people)</p>
+                    <p className="font-medium">If only ~5% of those reach out (10 people)</p>
                     <p className="text-sm text-gray-600">Send messages inquiring about services</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">4</div>
                   <div>
-                    <p className="font-medium">If you convert just half (12 clients)</p>
+                    <p className="font-medium">If you convert just 6/10 consultations</p>
                     <p className="text-sm text-gray-600">Each worth €330 (initial + touch-up)</p>
                   </div>
                 </li>
@@ -295,25 +296,25 @@ const ResultsSection = () => {
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <div>
                     <span className="font-medium">Potential New Clients</span>
-                    <span className="text-sm text-gray-500 block">12 clients × €330 each</span>
+                    <span className="text-sm text-gray-500 block">6 clients × €330 each</span>
                   </div>
-                  <span className="text-xl font-bold text-gray-900">€3,960</span>
+                  <span className="text-xl font-bold text-gray-900">€1,980</span>
                 </div>
                 
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <span className="font-medium">Net Profit</span>
-                  <span className="text-2xl font-bold text-green-600">€3,890</span>
+                  <span className="text-2xl font-bold text-green-600">€1,910</span>
                 </div>
                 
                 <div className="flex justify-between items-center pt-2">
                   <span className="font-medium">Return on Investment</span>
-                  <span className="text-2xl font-bold gradient-text">5,557%</span>
+                  <span className="text-2xl font-bold gradient-text">2,729%</span>
                 </div>
               </div>
               
               <div className="mt-8 p-4 bg-purple-50 rounded-lg">
                 <p className="text-sm text-center text-purple-800">
-                  <strong>Note:</strong> Results may vary based on your location, pricing, and execution. Many of our clients see even better results!
+                  <strong>Note:</strong> Results may vary based on your location, pricing, and execution. These are conservative estimates based on our clients' experiences.
                 </p>
               </div>
             </div>
@@ -330,66 +331,49 @@ const ResultsSection = () => {
           <div className="relative w-full max-w-7xl max-h-[90vh]">
             {/* Close button */}
             <button 
-              className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg z-10"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeLightbox();
-              }}
+              className="absolute -top-12 right-0 text-white hover:text-purple-300 transition-colors p-2 rounded-full bg-black/40 backdrop-blur-sm"
+              onClick={closeLightbox}
+              aria-label="Close lightbox"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-
-            {/* Zoom controls */}
-            <div className="absolute top-4 left-4 flex space-x-2 z-10">
-              <button 
-                className="bg-white rounded-full p-2 shadow-lg"
-                onClick={handleZoomIn}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </button>
-              <button 
-                className="bg-white rounded-full p-2 shadow-lg"
-                onClick={handleZoomOut}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Zoom level indicator */}
-            <div className="absolute bottom-4 left-4 bg-white/80 px-3 py-1 rounded-lg text-sm text-gray-700 z-10">
-              {Math.round(zoomLevel * 100)}% {zoomLevel > 1 ? '(drag to pan)' : ''}
-            </div>
-
-            {/* Image container */}
-            <div 
-              className="w-full h-full flex items-center justify-center overflow-hidden"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              style={{ cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-            >
-              <div 
-                style={{ 
-                  transform: `scale(${zoomLevel}) translate(${dragPosition.x / zoomLevel}px, ${dragPosition.y / zoomLevel}px)`,
-                  transition: isDragging ? 'none' : 'transform 0.2s ease-out'
+            
+            {/* Image */}
+            <div className="relative overflow-hidden rounded-lg">
+              <Image 
+                src={lightboxImage} 
+                alt="Enlarged view" 
+                width={1200} 
+                height={800}
+                className={`w-full h-auto object-contain transition-transform duration-300 ${zoom ? 'scale-150' : 'scale-100'}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setZoom(!zoom);
                 }}
-              >
-                <SafeImage 
-                  src={lightboxImage} 
-                  alt="Enlarged view" 
-                  width={2000} 
-                  height={1500}
-                  className="w-auto h-auto max-w-full max-h-[85vh] object-contain"
-                  priority
-                />
-              </div>
+              />
             </div>
+            
+            {/* Zoom button */}
+            <button 
+              className="absolute bottom-4 right-4 text-white hover:text-purple-300 transition-colors p-2 rounded-full bg-black/40 backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoom(!zoom);
+              }}
+              aria-label={zoom ? "Zoom out" : "Zoom in"}
+            >
+              {zoom ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       )}

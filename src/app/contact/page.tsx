@@ -59,14 +59,14 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen">
       {/* Header Section */}
-      <section className="bg-gradient-to-b from-purple-50 to-white pt-24 pb-16">
+      <section className="bg-gradient-to-b from-purple-50 to-white pt-24 pb-12">
         <Container>
           <div className="text-center max-w-3xl mx-auto">
             <span className="inline-block px-3 py-1 text-sm font-medium text-purple-700 bg-purple-100 rounded-full mb-4">Get In Touch</span>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Contact <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">Our Team</span>
             </h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
               Have questions about the PMU Profit System video training program? We're here to help you transform your PMU business and achieve consistent bookings.
             </p>
           </div>
@@ -74,9 +74,9 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Form Section */}
-      <section className="py-16">
+      <section className="py-8">
         <Container>
-          <div className="grid md:grid-cols-2 gap-12 items-start">
+          <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Contact Form */}
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
@@ -193,7 +193,7 @@ export default function ContactPage() {
             </div>
             
             {/* Contact Information */}
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div className="bg-white rounded-2xl shadow-lg p-8">
                 <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
                 
@@ -212,42 +212,6 @@ export default function ContactPage() {
                       </a>
                     </div>
                   </div>
-                  
-                  <div className="flex items-start">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mr-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Phone</h3>
-                      <p className="text-gray-600 mb-1">Customer support:</p>
-                      <a href="tel:+1234567890" className="text-purple-600 hover:text-purple-800 transition-colors">
-                        +1 (234) 567-890
-                      </a>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Monday - Friday, 9am - 5pm CET
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0 mr-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-1">Live Chat</h3>
-                      <p className="text-gray-600 mb-1">Chat with our support team:</p>
-                      <button className="text-purple-600 hover:text-purple-800 transition-colors font-medium">
-                        Start a conversation
-                      </button>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Average response time: 5 minutes
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
               
@@ -260,45 +224,6 @@ export default function ContactPage() {
                 <Link href="/#faq" className="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-md text-purple-700 bg-white hover:bg-gray-100 shadow-sm transition-colors">
                   View FAQ
                 </Link>
-              </div>
-              
-              {/* Course Information */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-purple-100">
-                <h2 className="text-2xl font-bold mb-4">About Our Video Training</h2>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">1</div>
-                    <div>
-                      <p className="font-medium">Step-by-Step Video Lessons</p>
-                      <p className="text-sm text-gray-600">Clear instructions you can follow at your own pace</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</div>
-                    <div>
-                      <p className="font-medium">Ready-to-Use Templates</p>
-                      <p className="text-sm text-gray-600">Copy our proven ad campaigns and messaging</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">3</div>
-                    <div>
-                      <p className="font-medium">Lifetime Access</p>
-                      <p className="text-sm text-gray-600">Learn at your own pace with unlimited access</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">One-time investment:</span>
-                    <div className="relative">
-                      <span className="text-xl font-bold text-purple-700">€37</span>
-                      <span className="absolute -bottom-5 -right-2 text-xs">
-                        <span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">1-time payment</span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

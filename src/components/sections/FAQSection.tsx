@@ -7,14 +7,10 @@ import { Container } from '@/components/ui/container';
 import SafeImage from '@/components/ui/image';
 
 const FAQSection = () => {
-  const [openIndices, setOpenIndices] = useState<number[]>([]);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleFAQ = (index: number) => {
-    setOpenIndices(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    );
+    setOpenIndex(prev => prev === index ? null : index);
   };
 
   const faqs = [
@@ -68,6 +64,10 @@ const FAQSection = () => {
     }
   ];
 
+  // Split the FAQs into two columns
+  const leftColumnFaqs = faqs.slice(0, Math.ceil(faqs.length / 2));
+  const rightColumnFaqs = faqs.slice(Math.ceil(faqs.length / 2));
+
   return (
     <section className="section bg-white" id="faq">
       <Container>
@@ -80,46 +80,96 @@ const FAQSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-x-12 gap-y-4 max-w-5xl mx-auto">
-          {faqs.map((faq, index) => (
-            <div 
-              key={index} 
-              className="card overflow-hidden transition-all duration-200 ease-in-out"
-            >
-              <button 
-                className="w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => toggleFAQ(index)}
-                aria-expanded={openIndices.includes(index)}
-              >
-                <h3 className="text-lg font-semibold flex items-start">
-                  <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 flex-shrink-0">
-                    <span className="text-sm">Q</span>
-                  </span>
-                  <span>{faq.question}</span>
-                </h3>
-                <span className="ml-4 flex-shrink-0">
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className={`h-5 w-5 transition-transform duration-200 ${openIndices.includes(index) ? 'transform rotate-180' : ''}`} 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
+        <div className="flex flex-col md:flex-row gap-x-12 gap-y-4 max-w-5xl mx-auto">
+          {/* Left Column */}
+          <div className="md:w-1/2 space-y-4">
+            {leftColumnFaqs.map((faq, index) => {
+              const actualIndex = index;
+              return (
+                <div 
+                  key={actualIndex} 
+                  className="card overflow-hidden transition-all duration-200 ease-in-out"
+                >
+                  <button 
+                    className="w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleFAQ(actualIndex)}
+                    aria-expanded={openIndex === actualIndex}
                   >
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </span>
-              </button>
-              <div 
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  openIndices.includes(index) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                }`}
-                style={{ zIndex: openIndices.includes(index) ? 10 : 0 }}
-              >
-                <div className="p-6 pt-0 text-gray-600 pl-9 ml-6 border-t border-gray-100">
-                  {faq.answer}
+                    <h3 className="text-lg font-semibold flex items-start">
+                      <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 flex-shrink-0">
+                        <span className="text-sm">Q</span>
+                      </span>
+                      <span>{faq.question}</span>
+                    </h3>
+                    <span className="ml-4 flex-shrink-0">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className={`h-5 w-5 transition-transform duration-200 ${openIndex === actualIndex ? 'transform rotate-180' : ''}`} 
+                        viewBox="0 0 20 20" 
+                        fill="currentColor"
+                      >
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  </button>
+                  <div 
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      openIndex === actualIndex ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="p-6 pt-0 text-gray-600 pl-9 ml-6 border-t border-gray-100">
+                      {faq.answer}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
+
+          {/* Right Column */}
+          <div className="md:w-1/2 space-y-4">
+            {rightColumnFaqs.map((faq, index) => {
+              const actualIndex = index + leftColumnFaqs.length;
+              return (
+                <div 
+                  key={actualIndex} 
+                  className="card overflow-hidden transition-all duration-200 ease-in-out"
+                >
+                  <button 
+                    className="w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleFAQ(actualIndex)}
+                    aria-expanded={openIndex === actualIndex}
+                  >
+                    <h3 className="text-lg font-semibold flex items-start">
+                      <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3 flex-shrink-0">
+                        <span className="text-sm">Q</span>
+                      </span>
+                      <span>{faq.question}</span>
+                    </h3>
+                    <span className="ml-4 flex-shrink-0">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className={`h-5 w-5 transition-transform duration-200 ${openIndex === actualIndex ? 'transform rotate-180' : ''}`} 
+                        viewBox="0 0 20 20" 
+                        fill="currentColor"
+                      >
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </span>
+                  </button>
+                  <div 
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      openIndex === actualIndex ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="p-6 pt-0 text-gray-600 pl-9 ml-6 border-t border-gray-100">
+                      {faq.answer}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* CTA Section */}

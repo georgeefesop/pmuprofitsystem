@@ -196,7 +196,7 @@ const FeaturesSection = () => {
                 ))}
               </div>
               <p className="text-gray-600 mb-6">
-                "I was having trouble finding consistent clients for my microblading business. After implementing this system, I've seen a steady increase in bookings. I went from 2-3 clients per week to 5-6, which has made a noticeable difference in my monthly income."
+                "I was having trouble finding consistent clients for my microblading business. After implementing this system, I've seen a steady increase in bookings and my monthly income has improved noticeably."
               </p>
               <div className="flex items-center justify-center">
                 <div className="w-10 h-10 rounded-full overflow-hidden mr-3">

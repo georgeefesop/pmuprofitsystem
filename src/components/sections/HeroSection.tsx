@@ -6,7 +6,7 @@ import SafeImage from '@/components/ui/image';
 
 const HeroSection = () => {
   return (
-    <section className="relative pt-20 pb-32 overflow-hidden bg-gradient-to-b from-white to-purple-50/30">
+    <section className="relative pt-28 pb-32 overflow-hidden bg-gradient-to-b from-white to-purple-50/30">
       {/* Clean background without decorative elements */}
       
       <Container>
@@ -136,41 +136,41 @@ const HeroSection = () => {
         {/* Brands/Features section */}
         <div className="mt-20 pt-10 border-t border-gray-100">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center transform transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-200 to-purple-400 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="font-bold">15 Video Lessons</h3>
-              <p className="text-sm text-gray-500">Step-by-step training</p>
+              <h3 className="font-bold text-gray-800">15 Video Lessons</h3>
+              <p className="text-sm text-gray-600">Step-by-step training</p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center transform transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-200 to-purple-400 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-bold">Simple Setup</h3>
-              <p className="text-sm text-gray-500">Ready in 3 hours</p>
+              <h3 className="font-bold text-gray-800">Simple Setup</h3>
+              <p className="text-sm text-gray-600">Ready in 3 hours</p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center transform transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-200 to-purple-400 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-bold">Cost-Effective</h3>
-              <p className="text-sm text-gray-500">Only €10/day ad budget</p>
+              <h3 className="font-bold text-gray-800">Cost-Effective</h3>
+              <p className="text-sm text-gray-600">Only €10/day ad budget</p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center transform transition-all duration-300 hover:scale-105">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-200 to-purple-400 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="font-bold">Consultation Blueprint</h3>
-              <p className="text-sm text-gray-500">Convert 4 out of 5</p>
+              <h3 className="font-bold text-gray-800">Consultation Blueprint</h3>
+              <p className="text-sm text-gray-600">Convert 4 out of 5</p>
             </div>
           </div>
         </div>
