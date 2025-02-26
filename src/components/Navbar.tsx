@@ -30,6 +30,17 @@ export default function Navbar() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  // Close mobile menu when a link is clicked
+  const handleLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
+
+  // Handle logout with menu close
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    logout();
+  };
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-800 to-purple-700 text-white shadow-md border-b border-purple-500/30 py-3`}>
       <div className="container-custom">
@@ -111,30 +122,30 @@ export default function Navbar() {
           }`}
         >
           <div className="space-y-4 px-2 py-2 bg-purple-900/80 rounded-lg shadow-lg">
-            <Link href="/" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+            <Link href="/" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
               Home
             </Link>
-            <Link href="/#features" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+            <Link href="/#features" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
               Features
             </Link>
-            <Link href="/#results" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+            <Link href="/#results" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
               Results
             </Link>
-            <Link href="/#faq" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+            <Link href="/#faq" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
               FAQ
             </Link>
-            <Link href="/contact" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+            <Link href="/contact" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
               Contact
             </Link>
             
             {/* Authentication Links */}
             {user ? (
               <>
-                <Link href="/dashboard" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+                <Link href="/dashboard" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
                   Dashboard
                 </Link>
                 <button 
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm"
                 >
                   Logout
@@ -142,11 +153,12 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/login" className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+                <Link href="/login" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
                   Login
                 </Link>
                 <Link 
                   href="/checkout" 
+                  onClick={handleLinkClick}
                   className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm"
                 >
                   Register
