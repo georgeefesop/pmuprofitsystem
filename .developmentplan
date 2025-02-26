@@ -1,0 +1,697 @@
+The PMU Profit System – Detailed Development Plan
+This plan outlines the end-to-end development of The PMU Profit System as a modern SaaS-style web application. The new application will replace the existing WordPress site, using Next.js for the frontend, Supabase for backend (database, authentication, storage), Tailwind CSS for styling, and Stripe for payment processing. We break down the plan into key sections: Tech Stack, Site Structure & User Flow, Deployment & Hosting, and a step-by-step implementation guide for developers (including AI developers). Each section is detailed for clarity and ease of execution.
+Tech Stack Overview
+Frontend – Next.js (React) & Tailwind CSS:
+Use Next.js to build a performant React-based frontend. Next.js will provide server-side rendering and routing, which is beneficial for SEO (important for the landing page) and a smooth user experience. Tailwind CSS will be used for rapid UI development with a modern, responsive design. Tailwind’s utility classes help maintain a consistent SaaS-style look and feel without writing lots of custom CSS. The combination of Next.js and Tailwind allows for a visually appealing and mobile-responsive UI out of the box.
+Backend – Supabase (PostgreSQL + Auth + Storage):
+Supabase will serve as the primary backend. It provides a hosted PostgreSQL database with an integrated authentication system and file storage. Key advantages of Supabase: it manages user accounts (with secure password hashing and optional email verification) and offers easy integration through its JavaScript client library. We will use Supabase to store user data, course content (e.g. module info), purchase records, and any generated content (like AI-generated ads logs). Supabase Auth will handle user sign-up, login, and email verification, eliminating the need to build auth from scratch​
+engineering.udacity.com
+. We can also leverage Supabase Storage for hosting course videos or downloadable resources, and Supabase Functions (if needed) for any server-side logic (like calling external APIs securely).
+Payments – Stripe (Checkout & Subscriptions):
+Stripe will handle all payments, including one-time purchases and potential subscriptions. We will integrate Stripe Checkout for a simplified, secure checkout experience. Stripe’s API will be used to create checkout sessions for purchasing the main product (the PMU Profit System course) and any upsells. If subscriptions are needed (for example, if the PMU Ad Generator becomes a subscription service), Stripe’s subscription and billing features will be utilized. The integration will include Stripe webhooks to notify our app of successful payments or subscription status changes, allowing us to update our database accordingly (e.g., mark a purchase as complete, grant access to content)​
+engineering.udacity.com
+. We will also use Stripe’s Customer Portal if needed for users to manage billing, though for initial scope we can keep it simple. One-Click Upsell functionality will be implemented either by including upsell products as additional line items in the initial Stripe Checkout or via a post-checkout offer flow (more details in the Checkout section below).
+Hosting – Asmallorange (initially) with option for Vercel:
+Initially, the app will be deployed on the existing hosting provider (A Small Orange). This host supports Node.js, which allows running the Next.js app in production. We will set up the deployment via SSH/FileZilla (details in the Deployment section). To future-proof the project, we will structure it such that migrating to Vercel is straightforward. This means keeping configuration in environment variables, using platform-agnostic services (Supabase, Stripe), and not relying on any proprietary features of the initial host. Vercel is a recommended future hosting platform for Next.js, offering automated deployments and serverless functions out-of-the-box. The codebase will be maintained in a Git repository, so setting up CI/CD or moving to Vercel can be done with minimal changes (just pointing environment variables and domain settings to Vercel).
+Other Services & Integrations:
+Email Service (Supabase Auth + SMTP): Supabase can handle the basic email verification link for new users. We will configure Supabase Auth to require email confirmation on sign-up (users receive a verification email with a link). For other emails (purchase confirmation, welcome email with credentials/instructions), we may use Supabase’s built-in email triggers or an external email service (like SendGrid or Mailgun) integrated via API or SMTP. These automated emails ensure users know how to access their purchase and have a record of the transaction.
+Facebook Pixel: The Facebook Pixel code will be added to the application (likely in the <Head> of Next.js pages or via a custom _document.js) to track user interactions. This includes page views on the landing page and conversion events (like when a purchase is completed or when a user signs up). We will set up specific Pixel events such as PageView (on page load), InitiateCheckout (when the user clicks the checkout CTA), and Purchase (after successful payment), enabling better Facebook ad tracking and optimization.
+AI-generated Ads API: The member dashboard will include a PMU Ad Generator tool. We plan to create an API endpoint (e.g., a Next.js API route or a serverless function) that interfaces with an AI service to generate ad copy. This could be powered by an AI model (e.g., OpenAI’s GPT-4 or a similar service) that takes input parameters like tone, pricing, and offer type, and returns generated ad text variations. The integration will involve sending an API request to the AI service with these parameters and receiving a list of ad copy suggestions. These suggestions will then be displayed to the user in the dashboard. We will include functionality for the user to easily copy the text and potentially save it. Each generation event will be logged in the database (for example, storing the prompt and result in an “Ad Generator Logs” table with a timestamp) so we can monitor usage and quality.
+With the tech stack defined, we can now detail the site’s structure, pages, and user flow, followed by how to implement each part.
+Site Structure & User Flow
+The application consists of several key pages and components, following a typical SaaS product flow: a public-facing marketing site (landing page), a checkout process, user onboarding via email, and a members-only dashboard for content and tools. Below is a breakdown of each part of the site and the expected user experience:
+1. Landing Page (Public Home)
+Purpose & Features: This is the marketing page that introduces The PMU Profit System. It should be visually engaging and clearly communicate the value proposition to potential customers, much like modern SaaS landing pages.
+Hero Section: A bold header with a tagline, a brief description of the product (the PMU Profit System course), and a prominent Call-To-Action (CTA) button (e.g., “Get Started” or “Buy Now”). This section creates the first impression, so it will use an appealing background (maybe relevant imagery or a graphic), and clear text highlighting the main benefit of the system.
+Product Overview: A section that explains what the PMU Profit System offers. This might include an outline of course features (e.g., “Learn how to increase your Permanent Makeup business profits through marketing and consultation techniques”), perhaps broken down into bullet points or icons representing each module or benefit.
+Testimonials: Social proof is key for conversion. We will include a testimonials section with quotes from satisfied customers or industry experts. Using Tailwind CSS, we can style these as cards or rotating carousel quotes. If available, include customer photos or names (with permission) to add authenticity.
+Pricing Summary: An overview of pricing options. If the PMU Profit System is sold as a one-time purchase, state the price clearly. If there are additional products (Ad Generator tool and Consultation Blueprint) available, they can be mentioned here or on a dedicated pricing page. For simplicity, we might show a “Base package vs. Pro package” comparison, where the Pro includes the upsells, or just highlight that additional resources are available at checkout.
+Call-To-Action Buttons: Throughout the page, include multiple CTA buttons (“Enroll Now”, “Get Instant Access”) that jump the user to the checkout process. These should be placed in logical spots – e.g., in the hero, after the overview, after testimonials, and at the bottom of the page – to capture interest once the user is convinced.
+Footer: A footer with additional links and information: contact email, social media links, maybe an FAQ or “Terms and Conditions/Privacy Policy” links. Also, if using Facebook Pixel, we might include any necessary code or opt-out links (to comply with privacy laws).
+Facebook Pixel Integration on Landing: The landing page will include the Facebook Pixel script to track visits. We will use Next.js’s Head component (in _app.js or a custom _document.js) to insert the Pixel base code (with the Pixel ID). Once integrated, the Pixel will automatically track page views. We’ll also configure custom events: for example, clicking the CTA could trigger a Pixel event InitiateCheckout. This involves adding a small script or using Facebook’s fbq function in an onClick handler for the CTA button. No UI change, but it sends data to Facebook for ad tracking. We will test the Pixel with Facebook’s Pixel Helper to ensure it’s firing correctly.
+Tech Notes: The landing page will be a Next.js page (e.g., pages/index.js if using the Pages Router). It will primarily be static content (with perhaps some dynamic bits like testimonials fetched from a JSON or database, but likely static initially). Tailwind CSS will be heavily used to style sections (e.g., utility classes for layout, typography, colors). We should ensure images are optimized (using Next/Image component for automatic optimization) and the page loads fast. This page is critical for conversion, so both design and performance are priorities.
+2. Checkout Page & Purchase Flow
+Purpose: Handle the purchase of the PMU Profit System and upsells through a secure, user-friendly flow. This includes integrating Stripe for payments and collecting necessary user info for account creation.
+Checkout Form: When a user clicks “Buy Now” from the landing page, they should be taken to the Checkout page. This page will summarize the product and price, collect user details, and then redirect to Stripe’s secure payment. Key fields and components on this page:
+Product Summary: Outline what the user is buying (e.g., “PMU Profit System Course”) and the price. If multiple pricing tiers or upsells are offered, they should be clearly presented (see Upsell below).
+User Information: Collect the user’s email (required for both Stripe receipt and account creation). If we want account creation as part of checkout, we can also collect a password here (or we generate a temporary password and send a reset link later). Alternatively, we might allow checkout with just email and payment, then prompt the user to set a password afterward. However, to streamline access, it can be good to set the password during checkout so the account is ready immediately after payment.
+Upsell Options (One-Click Upsells): On the checkout page, present the additional products as optional add-ons:
+PMU Ad Generator Tool: A description of this AI-powered ad copy generator and its price.
+Consultation Success Blueprint: A brief about this downloadable resource and its price. Each upsell can have a checkbox or toggle. If the user selects them, the item(s) will be added to their purchase. We want this to feel seamless (“one-click”) – meaning the user doesn’t have to enter payment info twice. Implementation: If using Stripe Checkout, we can create a single checkout session with multiple line items (the main course and any selected upsells) so that one payment covers all selected products. If we need a post-payment upsell (for example, offering the upsell on the thank-you page if they didn’t choose it initially), we could implement a secondary Stripe Checkout that uses the customer’s saved payment info for a quick charge​
+checkoutpage.co
+. Initially, the simpler approach is to include upsells in the first checkout. We’ll configure Stripe products/prices for each item and dynamically create the Checkout session based on selections. (Note: Stripe doesn’t natively do “one-click upsell after initial purchase” without a new checkout or using Payment Intents, so our approach is to handle it in the initial transaction for simplicity.)
+Stripe Checkout Integration: When the user submits the checkout form (with email and any selected items), our app will call a backend API route (Next.js API) to create a Stripe Checkout Session. This involves using the Stripe SDK with our secret key. We’ll send Stripe the line items (at least the main course, plus upsells if any), the customer’s email, and success/cancel URLs. Stripe will return a Session ID which we then use to redirect the user to the Stripe hosted payment page. On Stripe’s checkout, the user enters their payment details securely. We’ll also ensure to handle taxes or currency if needed (Stripe can manage those if configured).
+Account Creation During Checkout: We want the user to have an account to access the course immediately after payment. There are a couple of ways to handle this:
+Pre-creation: Create the user in Supabase before redirecting to Stripe. For example, when the user submits the form, we sign them up via Supabase Auth (using the provided email and password). Then proceed to payment. This way, the account exists once they return from Stripe. We must handle the case of payment failure or cancellation by perhaps marking their account as pending until payment completes.
+Post-payment: Alternatively, wait for the Stripe webhook (or the return to success URL) to create the user. Stripe Checkout can return to our site (success URL) with a session ID. We can fetch the session details (which include the customer email) and then trigger account creation. This avoids creating accounts for people who abandon checkout. However, it introduces a slight delay after payment where we create the account and log the user in. We will likely use the pre-creation approach for a smoother user experience: the user provides email/password once, and after payment they can log in immediately. Supabase Auth API allows creating a user account programmatically. We’ll ensure email verification is still required; meaning after account creation, an email verification link is sent. But we might allow them provisional access immediately (since they paid) and remind them to verify email.
+Redirect After Payment: Upon successful payment on Stripe, the user is sent to a success page on our site (we’ll configure success_url in Stripe to a route like /checkout/success?session_id={CHECKOUT_SESSION_ID}). This success page will use the session_id to confirm the payment status via Stripe API (or we rely on a webhook in the backend to mark the purchase complete). Once confirmed, we thank the user for the purchase and prompt them to log in to their new account (or if we already created an account and have a way to auto-login via a token, we could also immediately log them in and redirect to the dashboard). Simpler: show a message “Payment successful! An account has been created for you. Please check your email for verification and login details.” and a link/button to go to the login page or dashboard.
+Failure / Cancellation: If payment is canceled or fails, Stripe will redirect to a cancel URL (maybe back to the checkout page or a specific cancel page). We’ll handle that by showing a message allowing the user to try again.
+Stripe Webhooks for Payment Confirmation: In addition to the front-end flow, we will set up a Stripe webhook endpoint on our backend to listen for events like checkout.session.completed (which indicates a successful purchase). This is a secure way to confirm payment and handle post-payment actions. When the webhook receives the event, it can:
+Mark the user’s purchase as paid in the database (create an entry in the Purchases table indicating user X bought product Y).
+Send a purchase confirmation email (we can trigger an email to the user with receipt info and how to access the course).
+If the user account was not already created, create it now (but in our plan we likely create it earlier).
+If using subscriptions, handle events like invoice.paid or customer.subscription.updated to update the user’s subscription status.
+One-Click Upsell Flow Details: To elaborate, one-click upsell means minimal friction to add additional products. Our strategy is to include those products in the initial Stripe session if selected. If we ever wanted to offer an upsell after the initial purchase (for example, the user buys the course, then on the thank-you page we say “wait, add the Ad Generator for $X”), we can leverage the fact that the user’s Stripe payment method is saved as a customer. We could call Stripe’s API to create a PaymentIntent or new Checkout Session for the upsell that doesn’t require re-entering card details. However, this adds complexity (and Stripe’s standard Checkout doesn’t fully support one-click post-checkout upsells without a new click from the user). For now, our plan keeps it within one combined checkout unless otherwise specified by marketing.
+Summary: The checkout page will be a Next.js page (e.g., pages/checkout.js or a multi-step form under /checkout/*). It interacts with both Stripe (for payment) and Supabase (for user creation). It must be mobile-friendly and extremely clear to reduce abandonment. By integrating Stripe securely and handling account creation seamlessly, users will have a straightforward path from interest to purchase to accessing the content.
+3. Email Notifications & Verification
+A robust email flow ensures users verify their email and have the information they need to get started. We will implement the following email features:
+Email Verification for New Accounts: Using Supabase Auth’s built-in email confirmation mechanism, when a user signs up (either manually or via our checkout flow), Supabase will send an automated verification email to the provided address. The email contains a secure link for the user to confirm their email address. We will enable “Email Confirmation” in the Supabase Auth settings for the project. This reduces fake accounts and ensures we have a valid contact for the user. The user will be prompted to check their email and verify as part of onboarding (though as mentioned, we may still allow immediate access after purchase, we still want them to verify eventually for security and future communications). Supabase handles the sending of this verification email using its default templates, which we can customize with our branding and wording (in Supabase project settings).
+Purchase Confirmation Email: When a user successfully purchases the course (and any add-ons), the system will send a confirmation email. This email serves as a receipt and a welcome message. It should include:
+A thank you message for purchasing The PMU Profit System.
+If the account was created with a temporary password or if they need to set a password, include instructions. (If we already had them create a password at checkout, we might simply say “You can now log in using the credentials you provided.”)
+A link to the login page or directly to the dashboard.
+If relevant, an invoice or summary of their purchase (product names and amounts). Stripe can send its own receipt email as well, but a custom email from us can be more on-brand.
+Contact info for support in case they have issues. Implementation wise, we can trigger this email either on the Stripe webhook (upon checkout.session.completed) or as part of the success page logic after confirming payment. We may integrate an email service – for example, using an SMTP server or an API like SendGrid. Supabase can be configured with an SMTP to send custom emails via its triggers or functions. Alternatively, a Next.js API route could use a library like Nodemailer to send an email. Since reliability is important, using a dedicated email service (SendGrid/Mailgun) is recommended for production.
+Credentials & Access Instructions: Along with purchase confirmation, if any credentials are needed (for example, if we generated a random password for them or an account activation link), those should be emailed. Ideally, since the user either sets their password or gets a verification link, we don’t send plaintext passwords. If we did a post-payment account creation without a password (like an invite flow), the email could contain a one-time link for them to set a password (Supabase supports “magic link” sign-ins or we can create a password reset token email). However, given our plan to collect password at checkout, we likely won’t need to send a set-password link, just the verification link.
+Other Notifications: We might also set up an email when a user completes the course or certain milestones (this is a nice-to-have for engagement). Or if using subscriptions, emails for upcoming renewals or failed payments (though Stripe can handle some of those communications by default). For now, the critical ones are verification and purchase confirmation/welcome.
+All emails should be well-written and on-brand, possibly including the product logo and a professional template. We will test the email flow thoroughly: ensure the verification link works (Supabase takes care of the backend for that), ensure the purchase email arrives promptly and has correct info, etc.
+4. Member Dashboard (Authenticated Area)
+Purpose: Once a user has purchased access, they will log into the member dashboard. This is a secure area (only accessible to authenticated users) where they can consume the course content and use additional resources like the ad generator and download the blueprint. The dashboard can be thought of as a small web application within the site.
+Key components and pages of the member dashboard:
+Dashboard Home / Overview: After login, the user might land on a main dashboard page (e.g., /dashboard route). This page can welcome the user, show their overall progress, and provide quick links to continue the course or use the tools. For example, “Welcome back [Name]! You have completed 3 of 5 modules. Continue where you left off.” and links to the next module, plus icons or sections linking to the Ad Generator and the Blueprint resource.
+Course Module Pages: The PMU Profit System course likely consists of multiple modules or lessons. We will create a dedicated page for each module. There will also be a navigation UI to switch between modules:
+Sidebar Navigation: A sidebar (or top nav on mobile) listing all modules by title. This allows users to jump to any module. The sidebar can highlight which modules are completed or locked/unlocked. (Since the user purchased the course, presumably all modules are unlocked; we might still enforce sequential completion or not, depending on the course design.)
+Module Content Page: In the main content area, display the module content. For each module:
+A title and description or summary of the lesson.
+An embedded video player for the lesson video. We can embed videos via a third-party (YouTube unlisted or Vimeo) or host them on Supabase Storage and use an HTML5 video player. If using YouTube/Vimeo embed, it’s straightforward; if self-hosting via Supabase, ensure the files are secure (perhaps restrict to logged in users) and use a player library. Initially, embedding from a private YouTube/Vimeo might be simplest.
+Any additional content like text, images or downloads for that module.
+A “Mark as Complete” button: When the user finishes watching/reading, they can click this to mark the module done. This will trigger an update to the database recording that this user completed this module (for example, creating an entry in a progress table or updating a JSON field in the user profile). The UI can then show a checkmark or change the styling of that module in the sidebar to indicate completion. This helps the user track progress. We’ll also use this data if we want to display course completion percentage.
+Users should be able to navigate Next/Previous module easily (perhaps buttons at bottom of content “Next Lesson”).
+Progress Tracking: The dashboard should show some indication of how far along the user is. This could be a progress bar or simply text (e.g., “Module 2 of 6 completed”). This encourages continued engagement.
+Consultation Success Blueprint (Downloadable): This is one of the upsell products. If the user purchased it, they should have access to download it. Implementation:
+We can have a section in the dashboard (or a specific page /dashboard/blueprint) where this resource is presented. It might have a description and a download button.
+The Blueprint is likely a PDF or similar document. We can store this file in Supabase Storage (or even in the Next.js public folder if it’s not meant to be protected, but since it’s a paid product, better to keep it secure).
+If stored in Supabase, we can use Supabase’s signed URLs feature: when the user clicks download, our app requests a temporary URL from Supabase that allows download, or we stream it through an API route after verifying the user has access.
+If the user did not purchase the Blueprint but it exists as an upsell, we have options: either hide this section entirely for them or show it with a lock and a prompt “You did not purchase this. Click here to purchase” (allowing a post-sale upgrade). Depending on business preference, we might allow users to get it later. For initial scope, if not purchased, we simply won’t show it (or show a locked state).
+PMU Ad Generator Tool: This is an interactive tool within the dashboard that uses AI to generate advertisement copies:
+Create a page in the dashboard (e.g., /dashboard/ad-generator) with a form where the user can input parameters for the ad. The inputs likely include:
+Tone (e.g., professional, casual, catchy – perhaps a dropdown or a few presets like “Friendly”, “Authoritative”, etc.).
+Pricing or Budget info (maybe a number or range input, or small text they can input about their offer’s price).
+Offer Type (the kind of promotion or angle – e.g., discount offer, new service announcement, testimonial-based ad, etc.). Possibly also fields for target audience or platform, but the prompt specifically mentions tone, pricing, offer type.
+Generate Button: The user fills in the fields and clicks “Generate Ad Copy” (or similar). When clicked, the app will call an API (likely a Next.js API route we create, e.g., POST /api/generate-ad) with the input parameters. This server-side route will then communicate with the AI engine. For example, it might call OpenAI’s API with a prompt constructed from the inputs asking for say 3 variations of advertisement text.
+Display Results: The API route returns the generated ad variations (say 2-3 different versions of ad copy). We then display these on the page, each in its own box. The user can read them. We should format them nicely (maybe as separate cards or a list).
+Copy & Save Options: For each generated ad copy, provide a “Copy to Clipboard” button so the user can easily copy the text and use it in their marketing. Additionally, we could have a “Save this Ad” button if we want to let users save favorite outputs. If we implement saving, we’d store the saved copy in the database associated with the user (maybe in the Ad Generator Logs or a separate saved_ads table). However, saving might be extra – the prompt mainly says copy & save functionality, which likely at least means copying. We will log the generation in any case (so we have a record of what was generated, which could be useful for us but not necessarily shown to the user except via their own saved copies).
+Usage Considerations: We should think about limiting excessive use (to control API cost if using a paid AI API). This could be done by limiting number of generations per minute or total per day per user, or if needed, enforcing that this tool is only for paying users (which it is, since it’s part of the paid package). We’ll monitor usage via the logs.
+AI API Implementation: We’ll need to integrate with an AI service. If OpenAI: we need an API key (stored securely in an environment variable). The prompt to the model might look like: “Write a Facebook ad copy for a Permanent Makeup (PMU) service. Tone: {tone}. Offer: {offer_type}. Include pricing details: {pricing}. Provide one short catchy paragraph.” The exact prompt will be tuned to get useful output. The model (like GPT-4 or GPT-3.5) would return text which we then split into variations if needed (or we ask for multiple). This is all on the server side to keep the key secure, then we send the results to the client.
+We should handle errors (if the AI API fails or times out, show an error message to user and allow retry).
+User Profile & Account Settings: There should be an area where the user can manage their account. At minimum:
+The ability to change their password (Supabase provides methods to update password, which might involve re-authentication or email confirmation for security).
+Possibly update their email or personal info (if we store a profile name, etc.). Email change in Supabase is possible but requires re-verification of the new email.
+If we have a subscription model, show their subscription status, next billing date, and maybe a link to manage billing (Stripe Customer Portal link can be provided for subscription management​
+engineering.udacity.com
+).
+If one-time purchase, maybe just show what products they have access to (e.g., “You own: PMU Profit System Course, Ad Generator Tool, Consultation Blueprint”).
+Provide a logout button as well.
+Security & Routing: All the dashboard pages must be protected so only logged-in users with proper access can see them. We will implement route protection. In Next.js (depending on whether we use the older Pages router or the newer App router), we can do one of a few approaches:
+Check Supabase auth state on the client (in a React useEffect, get the current user session). If not logged in, redirect to login.
+Use Next.js Middleware to protect certain routes (middleware can run on the server edge to check a cookie or token and redirect before rendering protected pages).
+Alternatively, since we have an auth cookie or JWT from Supabase, we could verify that in API routes or server-side calls for data. For simplicity, a client-side check plus server-side verification on data fetch is fine.
+We will use Supabase JS library on the client which keeps track of auth state (it can use local storage or cookies for session). Once the user logs in, Supabase provides a session (with access token). We can also leverage that token to make authenticated requests to Supabase (for e.g., to fetch course content or user progress from the database with row-level security).
+Set up Row-Level Security (RLS) policies in Supabase to ensure users can only access their own records (for example, only allow a user to select their own progress or purchases).
+Login Page: We should also have a login page (/login) for returning users to sign in with email and password. Supabase JS can handle sign-in and will manage session tokens. After login, redirect to dashboard. We can also have a “Forgot Password” which Supabase can do via a password reset email if we enable it.
+User Flow Recap in Dashboard: The user logs in (after purchasing). They see the dashboard home, navigate to Module 1, watch video, mark complete, then move to Module 2, etc. They can anytime access the Ad Generator to get ideas for ads (perhaps to help implement what they learned, presumably). They can download the Blueprint if they bought it. The experience should be smooth, with minimal page reloads (we can use Next’s Link for client-side transitions, and maybe fetch data client-side from Supabase or use server-side data fetching for modules content). We will ensure the UI is consistent: the sidebar and header probably remain constant, only the main content changes.
+5. Database Schema Design
+Designing the database (in Supabase/PostgreSQL) is crucial for managing users, course content, and other dynamic data. Supabase allows us to define tables and also leverages its auth system (which has its own auth.users table for basic user info). Below is a proposed schema with tables and key fields:
+Users Table (users): This table will store user profile and status information. If using Supabase Auth, the auth.users table already holds the user’s unique ID (UUID), email, and hashed password, plus a created_at timestamp. We can create a users table that references auth.users for additional data.
+id (UUID, primary key) – references the Supabase auth user’s ID​
+dev.to
+.
+email (text) – we might store email here for convenience, but it’s also in auth.users. Keeping it in sync via triggers is an option or just join with auth table when needed.
+full_name (text) – if we collect names.
+created_at (timestamp) – registration date.
+email_verified (boolean) – Supabase Auth handles verification status, but we could mirror it if needed.
+purchase_history – This could be a JSON or an array referencing what they bought, but better handled in a separate Purchases table (see below).
+course_progress – We need to track progress. This could be a JSON field storing completed module IDs, or we use a separate table progress for many-to-many relationship between users and modules. A simple approach: a JSON field in users like completed_modules: [module_id, module_id, ...]. But a more normalized approach is below.
+Courses Table (courses): If we plan to possibly have multiple courses in the future (right now it’s mainly the PMU Profit System course), we define a course entity.
+id (serial or UUID) – unique identifier for the course.
+title (text) – e.g., “The PMU Profit System”.
+description (text) – overview of the course.
+created_at (timestamp).
+Other fields like price (but pricing is mostly handled in Stripe).
+We might have a course even for the blueprint (or treat that as a product only, not a course).
+For now, one course (PMU Profit System) with ID 1 can be assumed.
+Modules Table (modules): Each course is composed of modules (lessons).
+id (serial) – module ID.
+course_id (foreign key to courses.id).
+title (text) – e.g., “Introduction to PMU Profit Strategies”.
+content (text or JSON) – could store a description or HTML content for the module.
+video_url (text) – link or path to the module video.
+order (integer) – the sequence of the module in the course (1, 2, 3, …).
+Possibly duration or preview_image etc., for UI enhancements.
+We will populate this table with the modules of the course. This content can be inserted manually or via a script.
+Purchases Table (purchases): Records of which user bought which product and the status.
+id (serial) – primary key for each purchase record.
+user_id (UUID, fk to users.id or auth.users) – who made the purchase.
+product_id (integer or text) – which product was purchased. This could correspond to an enum or a separate Products table. Likely products are: 1 = Course, 2 = Ad Generator, 3 = Blueprint. We can have a Products table for clarity:
+e.g., Products: {id:1, name:"PMU Profit System Course", type:"course"}, {id:2, name:"PMU Ad Generator Tool", type:"tool"}, {id:3, name:"Consultation Success Blueprint", type:"resource"}.
+price (numeric) – store the price paid (for record-keeping, in case of discounts).
+status (text) – e.g., “completed” for successful purchase, “refunded” if refunded, etc.
+timestamp (timestamp) – purchase date/time.
+If using subscriptions, we might have subscription_id or similar to link to Stripe subscription. But if one-time, not needed.
+This table will be filled when Stripe webhook confirms a purchase. It’s our source of truth for what the user owns.
+Course Progress Table (progress): (Optional) If we prefer not to store progress in the users table:
+user_id (UUID), module_id (int), and maybe completed_at (timestamp).
+Primary key could be (user_id, module_id).
+A record exists only if a user completed that module. We mark it when “Mark as Complete” is clicked.
+To get progress, count records for user where module.course_id = given course, etc.
+This is scalable if many courses or many users.
+If simplicity is fine, this can be replaced by an array in the users table, but relational is cleaner.
+Ad Generator Logs Table (ad_generator_logs):
+id (serial) – log entry id.
+user_id (UUID) – who generated the ad.
+inputs (JSON) – what inputs were given (tone, offer, etc).
+generated_ads (JSON or text) – the output from the AI (perhaps store the variations).
+created_at (timestamp).
+This table will store each time a user uses the ad generator. This can be useful to analyze usage or retrieve past generations if needed. If we implement a “save ad” feature, we could either flag entries in this table as saved or have a separate “saved_ads” table referencing an entry from logs or storing the text.
+Auth Table (Supabase): Note that Supabase’s auth system uses a schema auth in the DB with tables like users (for authentication). We typically do not modify that, but we reference it. For example, our users.id will reference auth.users.id as a foreign key (Supabase by default sets up such relationships in their starter templates)​
+dev.to
+. This means when we want to get a user’s email or check if a user exists, we might join or use Supabase auth functions. Most of the time, we’ll use the Supabase client library which abstracts this.
+Other Tables (if needed): If in the future there is a need to store content for other pages (like testimonials or FAQ), we might have tables for those, but those can also be hard-coded or stored in a CMS. For now, the above covers the core data.
+We will also define Row Level Security (RLS) policies on these tables because Supabase will require it for secure access from the client. For example:
+On purchases, allow a user to select their own purchases (user_id = auth.uid()).
+On progress, allow user to update/select where user_id = auth.uid().
+On ad_generator_logs, insert/select where user_id = auth.uid() etc. This ensures one user cannot read another’s data even if they fiddle with the client.
+Database Initialization: We will set up these tables either through Supabase’s web UI or using SQL scripts. Supabase allows running SQL scripts or using their migration CLI to apply schema. For example, we’ll execute SQL to create the tables and constraints as described. (The Supabase SaaS starter kits often include migrations that set up a similar schema for users, products, etc​
+engineering.udacity.com
+.)
+Deployment & Hosting Strategy
+Initial Deployment on A Small Orange (Existing Host):
+Since the current WordPress site is hosted on A Small Orange, we will deploy the new Next.js application there initially. The process will involve:
+Build the Next.js App: After development, we will create a production build of the Next.js app (e.g., running npm run build). This compiles the application and prepares it to run. Next.js can either be run as a Node.js server or output a static build. Given our app has dynamic features (auth, server-side rendering, API routes for Stripe and AI), we will run it as a Node server (not a fully static export).
+Set Up Node Environment on Server: Ensure that the A Small Orange hosting environment supports Node.js. (ASO does support Node.js on shared hosting, likely via Passenger or a specific process​
+blog.asmallorange.com
+.) We may need to use SSH to access the server and configure the environment:
+Upload the project files to the server (possibly using FileZilla for initial transfer or git pull if git is available on the server).
+Install dependencies by running npm install (make sure Node and npm are installed on the server).
+Set environment variables for production on the server. This includes Supabase keys (the public anon key for client, the secret service key for server if needed for webhooks), Stripe secret keys, Stripe webhook secret, Facebook Pixel ID, and any API keys (AI service key). On ASO shared hosting, we might set these in a .env file and ensure it’s loaded, or configure them in the hosting control panel if available. We must never commit secrets in code; they remain in env vars.
+Start the Next.js server. In production, this is typically npm run start after building, which starts a Node process listening on a port (usually 3000). On a shared host, we might have to configure the app to run on a specific port and use a process manager. ASO might use something like Phusion Passenger that automatically runs Node apps. If not, we can use a tool like PM2 to daemonize the app. For instance, pm2 start npm --name "pmu-app" -- start which will keep it running.
+Domain routing: The domain (e.g., yoursite.com) should point to this Node application. If the host uses Apache or Nginx by default, we may need to set up a reverse proxy or use Passenger to direct traffic to the Node app. This part can be technical: on cPanel hosts, there’s often an option to enable Node for a folder. Alternatively, we can proxy requests from Apache to the Node app’s port. We should consult ASO docs for Node deployment specifics. (The ASO blog mentions Node.js support, possibly meaning they have instructions to follow​
+blog.asmallorange.com
+.)
+Testing on the server: Once deployed, test that accessing the site URL shows the Next.js app, and that all routes (landing, login, dashboard after login, etc.) work. Also test the Stripe webhook if possible (Stripe needs a public URL; we might use a tool like Stripe CLI or temporarily expose with ngrok for initial testing).
+Replacing the WordPress site: The old WordPress content should be backed up if needed and then removed or put aside so it doesn’t conflict. That means removing WordPress files or database (if not needed). However, if the domain is the same and now pointing to our Next app, simply ensuring the domain directs to our app is enough. We might still keep the WordPress database for legacy, but it’s not needed for the new site. Essentially, the new Next.js app will completely take over the domain’s web root.
+Maintaining SEO and Links: Since replacing an existing site, ensure that important URLs either remain the same or proper redirects are set up. For example, if the WordPress site had blog posts or pages that people might still visit, consider recreating them or redirecting to relevant sections in the new site. The landing page likely takes over the root URL. If needed, use Next.js rewrites or a simple catch-all to handle any known old links (or set up redirect rules in the server or Next config).
+Environment Configuration: We will maintain config files for different environments. For local development, a .env.local with development keys (and maybe test Stripe keys). For production, .env.production or environment variables set on the server. This way, deploying to a new environment (like Vercel) is easier by just setting the vars.
+Migration Path to Vercel:
+We intend to keep the option open to migrate hosting to Vercel for better scalability and developer experience:
+The app will be structured to work on Vercel (which means using Next.js best practices, avoiding any server state that can’t be reproduced, and using environment variables for secrets).
+To migrate to Vercel:
+We’d create a new project on Vercel and import the Git repository. Vercel will auto-detect a Next.js app and configure the build.
+Set the environment variables in Vercel’s dashboard (all the keys and IDs).
+Vercel will handle deploying the app, including building and enabling serverless functions for our API routes (Stripe webhooks, AI generator route, etc.). We should verify that our Stripe webhook logic can run as a serverless function (it can, but on Vercel the function URL might be different, and Stripe needs an endpoint – we’d update the webhook to the new URL).
+We can then point the production domain DNS to Vercel. Since initially we’re on ASO, when ready, this DNS switch would make Vercel serve the site and we could decomission the ASO deployment.
+CI/CD: By using a Git repo and Vercel (or even something like GitHub Actions), any push to a main branch can automatically deploy the new version. This ensures easy updates. Even if staying on ASO for a while, we can manually deploy by pulling from git on the server.
+Our instructions and configuration scripts will include how to do this migration so future developers or an AI agent can seamlessly transition the hosting.
+Deployment via SSH & FileZilla (for ASO):
+We will document step-by-step how to deploy for the current hosting:
+SSH Access: Log into the server via SSH using provided credentials (host, username, password or key). On ASO, SSH might be available via cPanel enabling it.
+Upload Code: Either clone the repository from GitHub (if available) using git clone or upload the code manually. FileZilla can be used to upload the project folder. (If uploading, exclude local node_modules to reduce size; we will run fresh npm install on the server).
+Install Dependencies: On SSH, navigate to the project directory and run npm install --production (or just npm install, since devDependencies won't be needed after building if we already built locally, but if building on server, both dev and prod deps are needed then run build).
+Build the Project: npm run build to generate the optimized production build.
+Configure Environment: Ensure that the environment variables are set. On ASO, one way is to edit the .bashrc or use a process manager config to include env vars. Alternatively, create a .env file in the project directory with contents like:
+ini
+Copy
+NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key for server if needed for webhooks>
+STRIPE_SECRET_KEY=<stripe secret>
+STRIPE_WEBHOOK_SECRET=<webhook signing secret>
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=<stripe publishable key>
+FACEBOOK_PIXEL_ID=<your pixel id>
+OPENAI_API_KEY=<if using openai for ads>
+and so on. The NEXT_PUBLIC_ prefix for Supabase URL and anon key is because those are used client-side. We keep secrets like service role key and Stripe secret without that prefix so they are only available server-side.
+Start the Application: Depending on the host’s recommended method: if using Passenger (common in cPanel for Node), it might automatically start if it detects an app.js or something. If not, we use npm start to run. If we use PM2, we run pm2 start npm -- start. Confirm the app is running (maybe try curl locally on the server, or open the site in a browser).
+Monitoring: Ensure the process stays running. PM2 helps keep it alive and can auto-start on server reboot if configured. If using a provided Node app tool, ensure the configuration points to the correct start script and that it’s running under the correct Node version.
+Swap DNS or Go Live: If this is a new deployment in parallel, once it’s ready and tested (maybe at a temporary subdomain or the server’s IP and port), update the DNS for the domain to point to this new app. If we deployed over the WordPress site in-place, then it’s immediate (but likely safer to test on a subdomain first).
+These steps will be written in a README for the team. The key is that after these, the WordPress site will be fully replaced by the Next.js app, with minimal downtime.
+Maintenance & Updates:
+After deployment, any updates to the site (content changes or feature additions) would involve updating the code and re-deploying:
+On ASO, that means pulling the changes via SSH and restarting the app.
+We should script some of this if possible (maybe a simple shell script to pull latest and restart, to reduce manual steps).
+On Vercel (if migrated), it’s just pushing to main branch.
+We will also maintain backups: the Supabase database is separate and Supabase will handle backups (plus we can export data if needed). The code is in git. So we can recover or replicate the environment easily.
+
+Detailed Implementation Plan (Step-by-Step for Developers)
+In this section, we outline a highly detailed set of instructions to implement the above plan. This is written for an experienced developer or AI agent to follow sequentially, covering necessary API calls, component structures, and integration points. The development will be broken into phases and tasks:
+1. Project Initialization and Setup
+a. Create the Next.js project: Use create-next-app to bootstrap a new Next.js application. For example:
+bash
+Copy
+npx create-next-app@latest pmu-profit-system --typescript
+
+(TypeScript is optional but recommended for robustness; we can also do JavaScript if preferred). This sets up the basic structure. Verify that the development server runs (npm run dev).
+b. Add Tailwind CSS: Install Tailwind via npm (npm install tailwindcss postcss autoprefixer) and initialize it (npx tailwindcss init -p). Configure tailwind.config.js to include Next.js default paths (./pages/**/*.{js,ts,jsx,tsx}, etc.). Import Tailwind in the global CSS (e.g., in styles/globals.css add @tailwind base; @tailwind components; @tailwind utilities;). Verify Tailwind is working by adding a test class in a page.
+c. Set up Supabase project: Go to Supabase and create a new project (if not done already). Note the Project URL and the anon/public API key from the API settings. Also generate a service role key (for secure admin tasks like webhooks). In the Supabase dashboard, enable email confirmations in Authentication settings (so that new users must verify their emails). Prepare the database by creating the tables for users profiles, modules, purchases, etc. You can use the SQL editor in Supabase:
+Create users table (with id referencing auth.users as discussed).
+Create courses, modules, purchases, progress, ad_generator_logs tables and define foreign keys. (Alternatively, use Supabase’s Table editor UI for quick setup.)
+Enable Row Level Security and write policies for each table to restrict access to the record owners (Supabase has templates for common policies – e.g., for purchases, a select policy like user_id = auth.uid()).
+Insert initial data: e.g., if there’s one course, add it to courses. Add all the modules with their titles, descriptions, video links to modules. Also, define the products if using a products table (course, ad generator, blueprint) with corresponding IDs that match what we’ll use in code/Stripe.
+Note: Supabase Auth will have its own auth.users table automatically; we might not need a separate users table if we only rely on auth.users + a profile table. The approach can vary; for simplicity, one can use just auth.users and a separate profile table for extended info. d. Install Supabase client library: In the Next.js project, install supabase JS:
+bash
+Copy
+npm install @supabase/supabase-js
+
+This will allow us to interact with Supabase from our Next.js app (both on client and server).
+e. Configure Supabase in Next.js: Create a utility file (e.g., utils/supabaseClient.js) that initializes and exports a Supabase client:
+js
+Copy
+import { createClient } from "@supabase/supabase-js";  
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;  
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;  
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+This uses the anon public key for client-side. For server-side admin tasks, we might create a second client with the service role key when needed (for example, in API routes verifying webhooks, we’d use service key to bypass RLS if needed).
+f. Install Stripe SDK:
+bash
+Copy
+npm install stripe
+
+We will use the Stripe Node.js library in API routes for creating checkout sessions and handling webhooks. Also, to use Stripe Checkout on the client (if redirect method), we might install @stripe/stripe-js to redirect to checkout and potentially for elements if needed.
+g. Initialize Stripe in code: In an API route (or a helper), initialize Stripe with secret key:
+js
+Copy
+import Stripe from 'stripe';  
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });  
+
+(Use the latest API version that matches your account’s version.)
+h. Set up environment variables: As mentioned, ensure .env.local has placeholders for keys (Supabase URL, keys, Stripe keys, etc.). For now, during dev, use Stripe test mode keys. Also include a NEXT_PUBLIC_FACEBOOK_PIXEL_ID.
+i. Git repository: Initiate a git repo for the project (git init), commit the boilerplate, and optionally push to a platform like GitHub. This will be used later for CI/CD or Vercel deployment.
+2. Implementing the Landing Page
+a. Create the Landing page component: In Next.js pages/index.js, create a functional component for the landing page. This page will be mostly static content with some dynamic behavior (like Pixel tracking and maybe pulling testimonials from DB or a constant). Structure the JSX into sections:
+Hero section div
+Overview section div
+Testimonials section
+Pricing/CTA section
+Footer Use semantic HTML where appropriate (<header>, <section>, <footer> tags, etc.) and Tailwind classes for styling and layout. Ensure each section has distinct styling (background colors or images as needed, spacing with Tailwind utilities like py-16, px-4, etc.). b. Add content: Fill in the text for headings, subheadings, and placeholders for testimonials. Use attention-grabbing text for hero (maybe something like "Skyrocket Your PMU Business Profits" as a tagline). Under testimonials, we could hard-code a few quotes for now. If available, real testimonials can be inserted. Use <blockquote> or styled <p> for quotes with a small italic style perhaps. c. Add CTA buttons: For each CTA (“Buy Now” etc.), use a <Link> from next/link to navigate to the checkout page (we’ll create /checkout page soon). For example:
+jsx
+Copy
+<Link href="/checkout">
+  <a className="bg-blue-600 text-white font-semibold py-3 px-6 rounded hover:bg-blue-700">Enroll Now</a>
+</Link>
+
+Tailwind classes here produce a styled button (blue background etc.).
+d. Mobile responsiveness: Use Tailwind’s responsive utilities (sm:, md:, lg: breakpoints) to adjust layout for smaller screens. E.g., in hero, maybe stack elements on mobile, whereas on desktop have them side by side. e. Facebook Pixel code: We need to include the Pixel script. The pixel code snippet (from Facebook) consists of a script include and an initialization script with the Pixel ID. In Next.js, a good place is _app.js using next/script or _document.js. For example, in _app.js you can do:
+jsx
+Copy
+import Script from 'next/script';
+function MyApp({ Component, pageProps }) {
+  return (
+    <>
+      {/* Facebook Pixel Script */}
+      <Script id="fb-pixel" strategy="afterInteractive">
+        {`
+          !function(f,b,e,v,n,t,s)
+          { if(f.fbq)return; n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n; n.push=n; n.loaded=!0; n.version='2.0';
+          n.queue=[]; t=b.createElement(e); t.async=!0;
+          t.src=v; s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s) }(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID}');
+          fbq('track', 'PageView');
+        `}
+      </Script>
+      {/* Pixel NoScript fallback for noscript browsers */}
+      <noscript><img height="1" width="1" style={{display:'none'}} alt=""
+        src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID}&ev=PageView&noscript=1`} 
+      /></noscript>
+      <Component {...pageProps} />
+    </>
+  );
+}
+export default MyApp;
+
+This will load the Pixel. The fbq('track', 'PageView') ensures page views are tracked. For CTA click events, we add onClick handlers on those buttons, e.g.:
+jsx
+Copy
+onClick={() => { fbq('track', 'InitiateCheckout'); }}
+
+which will log that event to Facebook (assuming fbq is available globally; we might attach fbq to window for TypeScript to not complain). f. Test the Landing page: Run npm run dev and open the page. Ensure content appears, styling is good, links go to the right place (checkout page might 404 until built). Check the browser console for any errors (especially from Pixel script). Use the Pixel Helper extension to see if it’s detected. Iterate on design as needed.
+3. Building the Checkout Page and Stripe Integration
+a. Create Checkout Page and Form: Make a new page at pages/checkout.js. This page will render a form or directly initiate Stripe checkout. A simple approach:
+If we want a custom form collecting name, email, etc., build a controlled form component with state hooks for each field.
+Alternatively, skip directly to Stripe Checkout with just an email field. But we likely want to show upsell options here too. So layout:
+Heading: “Secure Checkout”
+If one product only: display that product name + price.
+If upsells: display them with checkboxes. For each upsell, we might maintain a boolean state includeAdTool, includeBlueprint based on checkboxes.
+Email field (and possibly password field) – since we decided account creation here.
+Password field: if we collect password now, ensure it’s at least 6 characters etc., maybe add a confirm password field for safety.
+Submit button: “Continue to Payment”. Use Tailwind to style the form nicely (labels, inputs, etc.). Maybe use a two-column layout on desktop (order summary on one side, form on the other). b. Client-side handling of form submission: We will handle submission by calling a Next.js API route that we’ll create (say pages/api/create-checkout-session.js). The flow on submit:
+jsx
+Copy
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Gather form data
+    const userEmail = email;
+    const userPassword = password;
+    const includeAd = includeAdTool; 
+    const includeBlueprint = includeBlueprint;
+    // Prepare payload
+    const res = await fetch('/api/create-checkout-session', {
+       method: 'POST',
+       headers: {'Content-Type': 'application/json'},
+       body: JSON.stringify({ email: userEmail, password: userPassword, includeAd, includeBlueprint })
+    });
+    const data = await res.json();
+    if(data.sessionUrl) {
+        window.location.href = data.sessionUrl; // redirect to Stripe Checkout
+    } else {
+        // handle error
+        alert("Error creating checkout, please try again.");
+        setLoading(false);
+    }
+};
+
+The API will return either an error or the URL to redirect (Stripe Checkout session URL). c. Create API route for Stripe Checkout: File: pages/api/create-checkout-session.js (for App Router, it would be under app/api, but using Pages for simplicity). Inside this:
+Parse the request body to get email, password, and which upsells are included.
+Create or find the user in Supabase:
+Check if a user with that email already exists (Supabase auth). This can be done via Supabase Admin API (with service key) or we attempt a sign-up directly (if the email is new). Supabase has an admin function to create user accounts. Use the service role key here because only that can create users server-side without email confirmation.
+If user exists already (maybe a returning customer using same email), you might skip creation or handle accordingly (maybe it's an error if they already have access? But possibly someone could buy again for a friend – unlikely scenario, we can assume unique email per user).
+If not exist, create the user: await supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: false }). We might set email_confirm: false to require them to verify after, or true to mark as confirmed since they’re paying (could go either way).
+Store any initial data if needed (like insert into our users profile table with default progress etc. if we use one).
+Stripe line items: Prepare an array of line items for Stripe Checkout. We should have the Price IDs from Stripe for each product:
+In Stripe’s dashboard, or via API, we should create Products and Prices for:
+PMU Profit System Course (e.g., price id price_course_123).
+PMU Ad Generator add-on (price_ad_123).
+Consultation Blueprint (price_blueprint_123). These Price IDs will be used in the API call. It’s good to store them in an environment variable or config. For now, we can reference them as constants or better, store them in Supabase products table and fetch. Simpler: define in code as constants.
+Example:
+js
+Copy
+const lineItems = [
+  { price: process.env.STRIPE_PRICE_COURSE, quantity: 1 }
+];
+if(body.includeAd) {
+  lineItems.push({ price: process.env.STRIPE_PRICE_ADTOOL, quantity: 1 });
+}
+if(body.includeBlueprint) {
+  lineItems.push({ price: process.env.STRIPE_PRICE_BLUEPRINT, quantity: 1 });
+}
+
+
+Create Stripe Session: Use the Stripe SDK:
+js
+Copy
+const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  customer_email: email, // use provided email so Stripe can link receipt
+  line_items: lineItems,
+  mode: 'payment', // 'payment' for one-time charges; use 'subscription' if was subscription
+  success_url: `${YOUR_DOMAIN}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${YOUR_DOMAIN}/checkout?cancelled=true`
+});
+This returns a session object with an ID and URL. We’ll respond with session.url to redirect the user.
+If any error occurs (e.g., Stripe error), handle it by returning a 500 and an error message.
+Note: We may need to handle if the user creation fails or Stripe fails after user created – in worst case, the user might be created but payment not done. That’s okay; they won’t have a purchase record until payment. We should possibly clean up or mark something, but it’s edge. We can send a flag in the session metadata of stripe linking the user ID, so we know who the payment is for in the webhook.
+Attach Metadata (optional): We can attach some metadata to the Stripe session like metadata: { userId: newUser.id, product: 'PMU Profit System' }. This metadata comes back in webhook, so we can know which user and what was bought if needed (though we can also look up by email).
+Use the Supabase service role client (with service key) for user creation to bypass RLS and have admin privileges.
+d. Implement Stripe Webhook Handler: Create another API route pages/api/stripe-webhook.js. This will be called by Stripe after payment. We have to make sure the route’s full URL is registered in Stripe Dashboard (or via their API) for events like checkout.session.completed. Implementation:
+First, retrieve the raw request body (Next.js by default parses to JSON, but for verifying Stripe signature we need the raw body). We will disable body parsing for this route by exporting config = { api: { bodyParser: false } } and then use a stream to get raw buffer. Stripe’s library can verify the signature header using the webhook signing secret.
+Once verified, parse the event. If event.type == 'checkout.session.completed':
+Extract the session = event.data.object.
+Get the customer email or the metadata with userId.
+Mark the purchase in the DB: For example, find the user by email (or use metadata userId). Insert records in purchases table for each item. Or set a flag if the course access is now active.
+If we didn’t create the user before, we would create now (since our approach created before, we mostly update).
+Possibly send a confirmation email here (though might also do that on success redirect).
+If the event includes subscription creation, handle that (not in our one-time scenario).
+Respond with 200 to Stripe.
+We will need to use the Stripe webhook secret (from Stripe Dashboard) to verify. That is stored in env as STRIPE_WEBHOOK_SECRET.
+Test this webhook using Stripe CLI or by doing a test purchase once deployed to a reachable URL.
+e. Checkout Success Page: Create a page at pages/checkout/success.js. This page is shown after Stripe redirects back.
+It should read the session_id from query (router.query.session_id). If present, you can optionally call Stripe API (using our secret) to retrieve the session and confirm status. Or, rely on the webhook to have done it. It might be okay to trust that if we got here, payment succeeded (although Stripe docs still recommend verifying).
+It can display a thank you message: e.g., “Thank you for your purchase! Your account has been created.” If we created the account earlier and maybe auto-logged them in, we could also immediately push them to dashboard. But auto-login is tricky since we would need to have a token.
+Simpler: Ask them to “Log in now to access your course”. Provide a login form or a login link.
+If we wanted, we could log them in automatically by calling Supabase signIn (but we’d need their password or a magic link). We did have the password at checkout in memory on client but after redirect we lost that state. We could store a temp token, but it's not worth complexity. Better just let them log in manually.
+Include any next steps: “Check your email for a confirmation and verification link.”
+If upsells were included, maybe mention “You also have access to X and Y.”
+This page can also trigger a Facebook Pixel event for Purchase:
+js
+Copy
+useEffect(() => {
+  fbq('track', 'Purchase', { currency: 'USD', value: purchaseValue });
+}, []);
+with the total value. The purchaseValue we could pass via query or recompute from session if needed.
+f. Test End-to-End (in test mode): Run the app locally, try the checkout flow:
+Use a test email and password, select/deselect upsells.
+The API should create a Stripe session, redirect to Stripe’s test checkout (with the items and correct prices).
+Complete payment with Stripe test card (4242 4242...).
+Stripe will redirect to success page. See the success message.
+Meanwhile, run stripe listen (with Stripe CLI) to catch the webhook event hitting localhost (if configured) or check in Stripe dashboard that the event exists. We might need to forward the webhook if local (Stripe CLI can forward events to local dev).
+Check the Supabase database: the user should be created (auth.users entry), purchases recorded, etc.
+This test ensures our integration works before deploying.
+4. Setting Up Authentication and User Accounts
+a. Supabase Auth Settings: Confirm in Supabase dashboard that “Enable Email Confirmations” is on. Also set up SMTP settings if we want to use a custom sender for emails (by default, it might send from a Supabase domain). b. Authentication in Next.js (Client Side): We will use the Supabase client library to manage auth state. In our app’s root (maybe in _app.js or using a context provider), we can listen for auth state changes:
+js
+Copy
+import { supabase } from '../utils/supabaseClient';
+useEffect(() => {
+  const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    // handle login/logout
+    if(session) {
+      // User is logged in
+    } else {
+      // User is logged out
+    }
+  });
+  return () => {
+    listener.subscription.unsubscribe();
+  };
+}, []);
+
+However, since we are mostly using email/password login, we might handle it manually on login form submission rather than listening globally. c. Create Login Page: pages/login.js with a simple email and password form for existing users. On submit, call supabase.auth.signInWithPassword({ email, password }). If successful, Supabase will set the session (it stores tokens in local storage or cookies depending on settings). We then router.push('/dashboard') to take them to the members area. Handle error (show error if credentials invalid). d. Route Guard (Protecting Dashboard Routes): We have multiple pages under dashboard (like /dashboard/index.js, /dashboard/[moduleId].js, etc.). To protect them:
+Approach 1: In each of those pages’ getServerSideProps (if using that) or in useEffect if purely client-side, check supabase.auth.getSession() or use the session from a higher context. If no session, redirect to login.
+Approach 2: Use Next.js middleware. Create a middleware.js in project root:
+js
+Copy
+import { NextResponse } from 'next/server';
+export function middleware(req) {
+  const { cookies } = req;
+  const supabaseToken = cookies.get('sb-access-token'); // Supabase by default can use cookies for auth if set.
+  const requestedPath = req.nextUrl.pathname;
+  if (!supabaseToken && requestedPath.startsWith('/dashboard')) {
+    // If not logged in and trying to access dashboard, redirect to login
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+  return NextResponse.next();
+}
+We have to ensure Supabase is set to use cookies (Supabase auth can send a httpOnly cookie if we use the OAuth or magic link. For email/password, by default it might not, but we can set persistSession=true which uses localStorage). Alternatively, simpler: just do client-side redirect in each protected page (less secure but fine if RLS is in place server-side).
+For initial simplicity, in each page in dashboard we can do an effect:
+js
+Copy
+const session = supabase.auth.getSession();
+if(!session) { router.replace('/login'); return null; }
+and maybe show a loading while checking. e. Verification Flow: When a user verifies their email (clicks the link), Supabase will mark them confirmed. We can optionally reflect that in the UI (e.g., if not confirmed, show a banner “Please verify your email”). We can get that info via the user object (Supabase provides user.email_confirmed_at or similar). f. Password Reset: Not explicitly asked, but maybe set up a link in login “Forgot password?” which calls Supabase’s resetPasswordForEmail function. Supabase will email a reset link. This can be low priority.
+5. Building the Member Dashboard and Course Pages
+a. Dashboard Layout Component: Create a layout component for the dashboard section. This could be components/DashboardLayout.js. It would include the common sidebar and header. For example:
+jsx
+Copy
+const DashboardLayout = ({ children }) => {
+  return (
+    <div className="min-h-screen flex">
+      <aside className="w-64 bg-gray-800 text-white"> ... sidebar content ... </aside>
+      <main className="flex-1 p-8 bg-gray-50"> ... children ... </main>
+    </div>
+  );
+};
+export default DashboardLayout;
+
+The sidebar can have:
+Logo or site name at top.
+A menu: “Course Modules” (expandable list of module links), “Ad Generator”, “Blueprint”, maybe “Profile/Settings”, and “Logout” button.
+We can highlight the current page’s link.
+For modules list: we will need the list of modules. We can fetch all modules from Supabase (e.g., a useEffect in the layout to load modules and store in state, or fetch server-side). Alternatively, since modules don’t change often, we could embed them via getStaticProps or just have a static list if not too burdensome. But better to fetch from DB to be consistent.
+Each module link: <Link href={/dashboard/module/${module.id}}>{module.title}</Link>. If the user completed it, maybe show a checkmark (we can compare user’s completed modules list).
+If using a separate progress table, we can fetch the completed modules for the user as well and store in context or pass as props to layout. b. Dashboard Home Page: pages/dashboard/index.js – This could simply redirect to the first module or show a summary:
+Possibly, fetch user’s profile and progress.
+Display “Welcome [name]! You have completed X of Y lessons.”
+Provide a button “Continue Learning” that goes to the next incomplete module.
+Also show quick links: one for Ad Generator, one for Blueprint (if owned). This is mostly a nice-to-have. We can implement a basic version that just says “Welcome” and maybe repeats the menu options. c. Module Page: pages/dashboard/module/[id].js – A dynamic route for modules. Use getStaticPaths and getStaticProps (if we want to pre-generate modules pages) or getServerSideProps to fetch on each request. Since content might be behind auth, if we pre-generate we have to hide content behind a client check anyway. It might be simpler to use getServerSideProps to fetch module data (title, video link, content) by ID and also ensure user is auth. But Next SSR with Supabase auth can be tricky because we need the user's session on the server (we would need to parse a token). Instead, might do it client-side:
+Approach: Use a static generation for module pages (so they at least exist), then in the component use Supabase query to fetch the content if user is logged in. However, with RLS, calling supabase from client is fine.
+Or use a hybrid: do getServerSideProps that simply checks for a cookie and redirects if not authed, and also fetch module content publicly (since module content isn’t super secret maybe, or one could protect it via RLS by requiring login anyway). Simpler: fetch module content on the client side in a useEffect:
+jsx
+Copy
+const ModulePage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  const [module, setModule] = useState(null);
+  useEffect(() => {
+    if(id) {
+      supabase.from('modules').select('*').eq('id', id).single().then(({data, error})=>{
+         if(data) setModule(data);
+      });
+    }
+  }, [id]);
+  ...
+  if(!module) return <div>Loading...</div>;
+  return (
+    <DashboardLayout>
+      <h1 className="text-2xl font-bold mb-4">{module.title}</h1>
+      <p className="mb-6">{module.description}</p>
+      {module.video_url && (
+        <div className="mb-6">
+          <video controls className="w-full max-w-2xl">
+            <source src={module.video_url} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      )}
+      <button onClick={handleMarkComplete} className="px-4 py-2 bg-green-600 text-white rounded">Mark as Complete</button>
+    </DashboardLayout>
+  );
+};
+export default ModulePage;
+
+The above snippet shows roughly how to render a module. (If using an embed from YouTube, we’d use an <iframe> instead of <video> tag.)
+handleMarkComplete: This function will insert a record into progress table or update the user profile. Example using Supabase:
+js
+Copy
+const handleMarkComplete = async () => {
+  const user = supabase.auth.user();
+  if(!user) return;
+  const { error } = await supabase.from('progress').upsert({ user_id: user.id, module_id: id, completed_at: new Date() });
+  if(error) {
+    console.error(error);
+  } else {
+    // update local state or UI to show completed
+  }
+};
+If we used the JSON field approach, then we'd fetch user profile, update the array, and update the record. The relational approach is cleaner as above.
+After marking complete, we might update some state so the UI immediately can reflect (like maybe disable the button or change text to "Completed").
+Also, the sidebar could reflect the completion by shading the link differently. If we pass down user's completed modules to the layout, the sidebar generation can check each module id against that list. d. Ad Generator Page: pages/dashboard/ad-generator.js – This page will use DashboardLayout as well.
+Create a form with the fields: Tone (could be a select with options like "Professional, Casual, Enthusiastic, Luxury", etc.), Offer Type (maybe "Discount, New Service, Limited Time Offer, Testimonial-based" etc.), Pricing/Details (could be a text input where they type e.g. "$100 off" or "starting at $299", etc.).
+Provide examples or placeholders in inputs to guide the user.
+A Generate button that triggers the API call.
+Use a piece of state for generatedAds, an array of strings, initially empty.
+On form submit:
+js
+Copy
+const res = await fetch('/api/generate-ad', {
+  method: 'POST', 
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({ tone, offerType, pricing })
+});
+const data = await res.json();
+if(data.success) {
+  setGeneratedAds(data.ads); // assuming data.ads is an array of strings
+} else {
+  alert("Failed to generate ads, please try again.");
+}
+
+
+After receiving generatedAds, display them:
+jsx
+Copy
+{generatedAds.map((adText, index) => (
+  <div key={index} className="bg-white p-4 rounded shadow mb-4">
+    <p>{adText}</p>
+    <button onClick={() => copyToClipboard(adText)} className="mt-2 text-blue-600 underline">Copy</button>
+  </div>
+))}
+Use navigator.clipboard.writeText(adText) in copyToClipboard function.
+We might also add a “Save” button next to copy, which could simply save to ad_generator_logs with a flag or insert into a saved_ads table. But logging will already happen in backend. e. Ad Generation API Endpoint: Create pages/api/generate-ad.js.
+This will receive the POST with tone, offerType, pricing.
+Implement a call to the AI service. For example, if using OpenAI:
+js
+Copy
+import { Configuration, OpenAIApi } from 'openai';
+const config = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAIApi(config);
+...
+const prompt = `Write 3 variations of a Facebook ad copy for a Permanent Makeup service. 
+  Tone: ${tone}. 
+  Offer: ${offerType}. 
+  Include pricing details: ${pricing}. 
+  Each variation should be a short promotional paragraph.`;
+const response = await openai.createCompletion({
+  model: "text-davinci-003",
+  prompt,
+  max_tokens: 150,
+  n: 3, // number of completions
+  stop: null,
+  temperature: 0.7
+});
+const results = response.data.choices.map(choice => choice.text.trim());
+(The exact API usage might differ, e.g., if using chat models you’d use createChatCompletion. But the idea is to get n variations.)
+If not using OpenAI, perhaps an internal model or different API endpoint. Adjust accordingly.
+Once we have the results array, log it in the database:
+js
+Copy
+const userId = getUserIdFromReq(req); // perhaps by checking Supabase token cookie or session (this is tricky in API route since we didn't automatically get supabase auth in API).
+// One approach: send supabase auth token in the fetch request header and verify it here using supabase server client.
+if(userId) {
+  await supabaseAdmin.from('ad_generator_logs').insert({
+    user_id: userId,
+    inputs: { tone, offerType, pricing },
+    generated_ads: results,
+    created_at: new Date()
+  });
+}
+Getting the user in an API route: If the user is logged in, they have a Supabase JWT. We could have the client include supabase.auth.session() token in the request (or just enable Supabase's built-in SSR help, but let's assume passing token manually). Alternatively, since it's a protected route, maybe call supabase from client to do an RPC. But it's fine as is for now.
+Return the results as JSON: res.status(200).json({ success: true, ads: results });.
+Include error handling: if AI API fails, catch and return error message.
+Secure the endpoint: Only allow authenticated requests. We can check a header or token. Simpler: when calling fetch, instead of fetch, use Supabase’s RPC or something. But to keep it straightforward, do:
+js
+Copy
+const token = req.headers.authorization?.split("Bearer ")[1];
+const { data: user } = await supabaseAuthServer.auth.getUser(token);
+if(!user) { return res.status(401).json({ error: "Not authorized" }); }
+where supabaseAuthServer is a supabase client initialized with service role, or use the Supabase Admin auth API to get user from token.
+This ensures only logged in users can generate ads. f. Profile/Settings Page: (Optional early on, but for completeness)
+pages/dashboard/profile.js – allow user to update name, maybe view their email (with note if unverified). Possibly a change password flow (Supabase has updateUser method).
+Also, if subscription was a thing, put a “Manage Subscription” link that leads to a Stripe customer portal session (Stripe can create a link to portal via API).
+Provide a Logout button: which calls supabase.auth.signOut() and redirects to home or login.
+g. Connect Data to UI and Polish:
+Ensure the sidebar module list uses the actual modules from DB. We might fetch modules and store in context or pass via props. For simplicity, in DashboardLayout, do a Supabase query for modules of the course:
+js
+Copy
+const [modules, setModules] = useState([]);
+useEffect(() => {
+  supabase.from('modules').select('*').eq('course_id', 1).order('order').then(({data}) => {
+    setModules(data);
+  });
+  // Also fetch progress for user:
+  supabase.from('progress').select('module_id').eq('user_id', user.id).then(({data}) => {
+    setCompleted(data.map(r => r.module_id));
+  });
+}, []);
+Now modules and completed arrays are in state, use them to render sidebar links with checks.
+Style the sidebar with Tailwind (e.g., use different background for active link, maybe use icons for completed check).
+Test each dashboard feature with a logged-in user: navigate between modules, mark complete, check progress, use ad generator, download blueprint (for blueprint, just ensure link works or file loads).
+For the blueprint, store a file e.g., blueprint.pdf in Supabase Storage. In dashboard page, use supabase.storage.from('resources').createSignedUrl('blueprint.pdf', 60) to get a short-lived URL and then set that as the download link href. Or use an <a> with download attribute linking to a route that proxies the file. Because only purchasers should get it, ensure to check purchase status before offering the link.
+6. Final Testing and Deployment
+a. Comprehensive Testing: Before going live, test all user flows thoroughly:
+New user purchase flow (from landing to Stripe to email to login to consuming content).
+Logging out and logging in normally.
+Using the ad generator with different inputs (see if any bad inputs break it).
+If possible, test on mobile devices to ensure responsiveness.
+Test the Facebook Pixel events by performing actions and checking if they show up in Facebook’s test events tool.
+If multiple roles or products (like not buying upsell), test that scenario: e.g., buy just the course, ensure in dashboard the Ad Generator or Blueprint either don’t appear or prompt to upgrade.
+Ensure database entries are correctly created (no duplicate users, purchase records correct).
+Test email verification: does the email link properly allow the user to verify and then, can they still log in if not verified (depending on settings, Supabase may block unverified login unless we allow it).
+Test error cases: wrong password login, try generating ad when not logged (shouldn’t allow if our checks are right), etc.
+b. Deployment to Production (A Small Orange): Follow the steps outlined in Deployment & Hosting section:
+Use SSH to log in, upload files or use git pull.
+Set environment variables on the server (.env file).
+Run build and start the app.
+Configure domain to serve the app (maybe through a proxy or directly).
+Monitor logs (if using PM2, pm2 logs pmu-app to see output) for any runtime errors.
+Once deployed, run through the critical paths again on the live domain with Stripe in test mode or using test environment.
+Then switch Stripe keys to live mode in env for real transactions.
+Keep the WordPress offline or disabled.
+c. Documentation: Document how the system is set up:
+Write a README or Confluence page for the team on how the Next.js app is structured.
+Include how to update content (e.g., if adding a new module, need to update DB and maybe content).
+Document the .env variables needed so nothing is forgotten when deploying or migrating (Supabase URL, keys, Stripe keys, etc., as enumerated).
+Also instructions on how to run locally for development, how to run migrations on DB if schema changes, etc.
+d. Set up CI/CD Pipeline (if needed): Although not immediately required, we ensure the project is ready for CI/CD:
+Connect the GitHub repository to a CI service or to Vercel for auto deployment on push.
+Write a simple GitHub Actions workflow file if using another host, for example to run tests (if any) and then deploy via FTP/SSH (some CI can deploy via FTP to shared host).
+Since eventually Vercel is likely, just having the repo and environment set is enough.
+e. Migration to Vercel (Optional Final Step): When we decide to switch to Vercel:
+In Vercel, import the repo, set environment vars, and deploy.
+Test on the Vercel-provided domain.
+Update DNS to point to Vercel’s servers.
+Decommission or backup the ASO environment.
+Throughout the development, keep in mind to preserve data (user accounts and purchases). If migrating from WordPress users, consider if any old user data needs importing (not mentioned, likely no because WordPress might have blog content not relevant to this new system, unless WordPress had user accounts which seems not likely for a sales page).
+Each step above can be executed by a developer or an AI coding assistant methodically. By following this plan, we will rebuild The PMU Profit System website into a modern, maintainable web application, providing a much improved user experience and a solid foundation for future growth.
+

@@ -1,0 +1,39 @@
+{
+  "name": "pmuprofitsystem",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/launcher.js",
+    "dev:direct": "node scripts/start-dev.js",
+    "dev:next": "next dev",
+    "dev:alt": "next dev -p 3001",
+    "prebuild": "node scripts/check-image-domains.js",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "check-errors": "node scripts/check-build-errors.js"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.1.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.476.0",
+    "next": "^14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^3.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.57",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "open": "^9.1.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  }
+}
