@@ -248,7 +248,7 @@ const ResultsSection = () => {
             <div>
               <h3 className="heading-3 mb-6">The Math Behind Your Success</h3>
               <p className="body-1 mb-6">
-                With just €70 in ad spend per week, you can generate nearly €4,000 in potential revenue. Here's how:
+                With just €70 in ad spend per week, you could generate up to €4,000 in potential revenue. Here's how:
               </p>
               
               <ul className="space-y-4">
@@ -262,21 +262,21 @@ const ResultsSection = () => {
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</div>
                   <div>
-                    <p className="font-medium">~3% show interest (450 people)</p>
+                    <p className="font-medium">If ~3% show interest (450 people)</p>
                     <p className="text-sm text-gray-600">Engage with your content</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">3</div>
                   <div>
-                    <p className="font-medium">~5% reach out (24 people)</p>
+                    <p className="font-medium">If ~5% reach out (24 people)</p>
                     <p className="text-sm text-gray-600">Send messages inquiring about services</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">4</div>
                   <div>
-                    <p className="font-medium">Convert just half (12 clients)</p>
+                    <p className="font-medium">If you convert just half (12 clients)</p>
                     <p className="text-sm text-gray-600">Each worth €330 (initial + touch-up)</p>
                   </div>
                 </li>
@@ -294,7 +294,7 @@ const ResultsSection = () => {
                 
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <div>
-                    <span className="font-medium">New Clients</span>
+                    <span className="font-medium">Potential New Clients</span>
                     <span className="text-sm text-gray-500 block">12 clients × €330 each</span>
                   </div>
                   <span className="text-xl font-bold text-gray-900">€3,960</span>

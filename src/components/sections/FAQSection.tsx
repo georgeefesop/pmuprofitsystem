@@ -44,15 +44,15 @@ const FAQSection = () => {
     },
     {
       question: "What if I've tried other marketing methods before and they didn't work?",
-      answer: "We understand how frustrating that can be. Our system is different because it's simple, targeted, and proven to work specifically for PMU artists. We'll show you exactly what we did to get more clients consistently, without the guesswork."
+      answer: "We understand how frustrating that can be. Our system is different because it's specifically designed for PMU artists. The Consultation Success Blueprint alone has helped many artists who were previously struggling to convert inquiries into bookings. We focus on simple, targeted strategies that have been proven to work in the PMU industry."
     },
     {
-      question: "Is this system suitable for someone who is just starting out?",
-      answer: "Yes! Whether you're new or have been in the business for a while, the PMU Profit System can help you attract more clients and grow your income. The system is designed to work for artists at all experience levels."
+      question: "What exactly is included in the Consultation Success Blueprint?",
+      answer: "The Consultation Success Blueprint is a comprehensive guide that teaches you how to conduct consultations that convert prospects into paying clients. It includes the exact 20-minute consultation structure, word-for-word scripts to handle objections, pre-consultation preparation checklist, post-consultation follow-up templates, and pricing presentation strategies. This blueprint alone has helped many artists achieve a 80% consultation-to-booking conversion rate."
     },
     {
-      question: "Does the course cover setting up Facebook ads step by step?",
-      answer: "Yes, we provide clear, step-by-step instructions on how to set up and optimize your Facebook ads. We'll walk you through the entire process, from creating your ad account to launching your first campaign."
+      question: "How many video lessons are included in the course?",
+      answer: "The PMU Profit System includes 15 in-depth video lessons covering everything from setting up your Meta Business Manager to crafting high-converting ad copy, targeting the right audience, handling client inquiries, and scaling your business. Each lesson is designed to be actionable and easy to implement."
     },
     {
       question: "How quickly can I implement the system?",
@@ -76,7 +76,7 @@ const FAQSection = () => {
           <h2 className="heading-2 mb-6">Frequently Asked Questions</h2>
           <p className="subtitle-1">
             Everything you need to know about the PMU Profit System. 
-            Can't find the answer you're looking for? Email us at support@pmuprofitsystem.com
+            Can't find the answer you're looking for? Email us at <span className="text-purple-600 font-medium">support@pmuprofitsystem.com</span>
           </p>
         </div>
 
@@ -112,6 +112,7 @@ const FAQSection = () => {
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
                   openIndices.includes(index) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                 }`}
+                style={{ zIndex: openIndices.includes(index) ? 10 : 0 }}
               >
                 <div className="p-6 pt-0 text-gray-600 pl-9 ml-6 border-t border-gray-100">
                   {faq.answer}
@@ -138,9 +139,6 @@ const FAQSection = () => {
                     <span className="inline-block px-2 py-0.5 bg-amber-300 text-amber-900 rounded-full">1-time payment</span>
                   </span>
                 </div>
-                <Link href="#results" className="btn-outline-white">
-                  See Results
-                </Link>
               </div>
             </div>
             <div className="space-y-6">
@@ -156,7 +154,7 @@ const FAQSection = () => {
                     />
                   </div>
                   <div>
-                    <p className="font-medium">Sophia, PMU Artist</p>
+                    <p className="font-medium">Sophia K., PMU Artist</p>
                     <div className="flex text-amber-300">
                       {[1, 2, 3, 4, 5].map((i) => (
                         <svg key={i} xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -167,7 +165,7 @@ const FAQSection = () => {
                   </div>
                 </div>
                 <p className="text-sm">
-                  "I was skeptical at first, but this system has completely changed my business. I'm now earning more than double what I was before, with less stress!"
+                  "I was skeptical at first, but this system has completely changed my business. I went from struggling to find clients to being fully booked 6 weeks in advance! The consultation blueprint was a game-changer - I'm now converting 4 out of 5 consultations into bookings."
                 </p>
               </div>
               
