@@ -55,7 +55,7 @@ export default function CheckoutSuccess() {
           </div>
           
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 mb-2">Need help? Contact us at support@pmuprofitsystem.com</p>
+            <p className="text-sm text-gray-600 mb-2">Need help? Contact us at pmuprofitsystem@gmail.com</p>
           </div>
         </div>
       </div>

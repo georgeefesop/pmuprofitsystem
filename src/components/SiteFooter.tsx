@@ -127,6 +127,14 @@ const SiteFooter = () => {
                   Terms
                 </Link>
               </li>
+              <li>
+                <Link 
+                  href="/cookies" 
+                  className="text-xs text-gray-600 hover:text-purple-600 transition-colors"
+                >
+                  Cookies
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
@@ -134,18 +142,18 @@ const SiteFooter = () => {
         <div className="mt-10 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
           <p className="text-xs text-gray-600 mb-4 md:mb-0">© {new Date().getFullYear()} PMU Profit System. All rights reserved.</p>
           <div className="flex space-x-6">
-            <a href="#" className="text-xs text-gray-500 hover:text-purple-600 transition-colors">
+            <Link href="/privacy" className="text-xs text-gray-500 hover:text-purple-600 transition-colors">
               <span className="sr-only">Privacy Policy</span>
               Privacy
-            </a>
-            <a href="#" className="text-xs text-gray-500 hover:text-purple-600 transition-colors">
+            </Link>
+            <Link href="/terms" className="text-xs text-gray-500 hover:text-purple-600 transition-colors">
               <span className="sr-only">Terms of Service</span>
               Terms
-            </a>
-            <a href="#" className="text-xs text-gray-500 hover:text-purple-600 transition-colors">
+            </Link>
+            <Link href="/cookies" className="text-xs text-gray-500 hover:text-purple-600 transition-colors">
               <span className="sr-only">Cookie Policy</span>
               Cookies
-            </a>
+            </Link>
           </div>
         </div>
       </Container>

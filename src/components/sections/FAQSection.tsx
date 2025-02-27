@@ -76,7 +76,7 @@ const FAQSection = () => {
           <h2 className="heading-2 mb-6">Frequently Asked Questions</h2>
           <p className="subtitle-1">
             Everything you need to know about the PMU Profit System. 
-            Can't find the answer you're looking for? Email us at <span className="text-purple-600 font-medium">support@pmuprofitsystem.com</span>
+            Can't find the answer you're looking for? Email us at <span className="text-purple-600 font-medium">pmuprofitsystem@gmail.com</span>
           </p>
         </div>
 

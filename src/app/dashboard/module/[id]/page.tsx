@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { ModuleNavBar } from '@/components/ModuleNavBar';
+import { VideoPlayer } from '@/components/VideoPlayer';
 
 // Mock data for modules with Google Drive video IDs
 const modules = [
@@ -265,28 +266,18 @@ const modules = [
   }
 ];
 
-// Function to generate a fallback thumbnail if needed
-const generateFallbackThumbnail = (moduleNumber: number) => {
-  return `https://via.placeholder.com/640x360/7c3aed/ffffff?text=Module+${moduleNumber}`;
+// Google Drive folder URL
+const googleDriveFolderUrl = "https://drive.google.com/drive/folders/1QaDS6BEnN-Ei3-ehi11W1YRJjPd7zlZN?usp=drive_link";
+
+// Google Drive direct download URL for a specific video
+const getGoogleDriveDownloadUrl = (fileId: string) => {
+  return `https://drive.google.com/uc?export=download&id=${fileId}`;
 };
 
 export default function ModulePage({ params }: { params: { id: string } }) {
   // Find the module based on the ID from the URL
   const module = modules.find(m => m.id === params.id) || modules[0];
-
-  // Google Drive folder URL
-  const googleDriveFolderUrl = "https://drive.google.com/drive/folders/1QaDS6BEnN-Ei3-ehi11W1YRJjPd7zlZN?usp=drive_link";
   
-  // Google Drive embed URL for videos - using the correct format
-  const getGoogleDriveEmbedUrl = (fileId: string) => {
-    return `https://drive.google.com/file/d/${fileId}/preview`;
-  };
-
-  // Google Drive direct download URL for a specific video
-  const getGoogleDriveDownloadUrl = (fileId: string) => {
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
-  };
-
   // Action button for the header
   const actionButton = (
     <a 
@@ -308,49 +299,34 @@ export default function ModulePage({ params }: { params: { id: string } }) {
       actionButton={actionButton}
       currentModuleId={module.id}
     >
-      <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
-        {/* Fix for video stretching - use a container with proper aspect ratio */}
-        <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-gray-100 mb-6">
-          <div className="w-full h-full relative">
-            <Image
-              src={`https://drive.google.com/thumbnail?id=${module.videoId}`}
-              alt={module.title}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
-              className="object-cover"
-              priority
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = generateFallbackThumbnail(parseInt(params.id));
-              }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-purple-600 bg-opacity-80 rounded-full flex items-center justify-center cursor-pointer hover:bg-opacity-90 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-10 md:w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
+      {/* Module Navigation Bar */}
+      <ModuleNavBar 
+        currentModuleId={module.id}
+        totalModules={modules.length}
+        moduleTitle={module.title}
+      />
+
+      {/* Video Player */}
+      <VideoPlayer 
+        videoId={module.videoId}
+        title={module.title}
+        moduleId={module.id}
+      />
+      
+      {/* Module Content */}
+      <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">{module.title}</h2>
+            <p className="text-gray-600">{module.description}</p>
           </div>
-        </div>
-        
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">{module.title}</h2>
-          <p className="text-gray-600 mb-6">{module.description}</p>
           
-          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: module.content }}></div>
-          
-          <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between space-y-4 md:space-y-0">
-            <button className="btn-primary">
-              Mark as Complete
-            </button>
-            
+          <div className="mt-4 md:mt-0">
             <a 
               href={getGoogleDriveDownloadUrl(module.videoId)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -359,20 +335,11 @@ export default function ModulePage({ params }: { params: { id: string } }) {
             </a>
           </div>
         </div>
-      </div>
-      
-      <div className="flex justify-between mb-8">
-        {parseInt(module.id) > 1 && (
-          <Link href={`/dashboard/module/${parseInt(module.id) - 1}`} className="text-purple-600 font-medium">
-            ← Previous Module
-          </Link>
-        )}
         
-        {parseInt(module.id) < modules.length && (
-          <Link href={`/dashboard/module/${parseInt(module.id) + 1}`} className="text-purple-600 font-medium">
-            Next Module →
-          </Link>
-        )}
+        <div className="bg-purple-50 p-6 rounded-lg mb-8">
+          <h3 className="text-lg font-semibold mb-4">Module Content</h3>
+          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: module.content }}></div>
+        </div>
       </div>
     </DashboardLayout>
   );

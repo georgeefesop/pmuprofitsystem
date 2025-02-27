@@ -17,9 +17,11 @@ export function DashboardLayout({
   currentModuleId
 }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -38,18 +40,25 @@ export function DashboardLayout({
         </div>
         
         {/* Background for sidebar on large screens */}
-        <div className="hidden md:block bg-purple-900 w-full max-w-[280px] shrink-0"></div>
-        
-        {/* Sidebar - hidden on mobile, visible on desktop */}
-        <div className={`md:block fixed md:absolute inset-0 z-50 md:z-10 ${sidebarOpen ? 'block' : 'hidden'}`}>
-          <div 
-            className="absolute inset-0 bg-black bg-opacity-50 md:hidden"
-            onClick={closeSidebar}
-          ></div>
-          <div className="relative h-full md:h-auto md:max-w-[280px] md:shadow-lg">
-            <Sidebar onClose={closeSidebar} currentModuleId={currentModuleId} />
+        <div className={`hidden md:block bg-purple-900 w-full ${sidebarCollapsed ? 'max-w-[60px]' : 'max-w-[280px]'} shrink-0 transition-all duration-300`}>
+          {/* Desktop Sidebar - Always visible on desktop */}
+          <div className="h-screen sticky top-0">
+            <Sidebar currentModuleId={currentModuleId} collapsed={sidebarCollapsed} />
           </div>
         </div>
+        
+        {/* Mobile Sidebar - Only shown when sidebarOpen is true */}
+        {sidebarOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <div 
+              className="absolute inset-0 bg-black bg-opacity-50"
+              onClick={closeSidebar}
+            ></div>
+            <div className="relative h-full w-[280px] max-w-[80%]">
+              <Sidebar onClose={closeSidebar} currentModuleId={currentModuleId} />
+            </div>
+          </div>
+        )}
         
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
@@ -57,12 +66,19 @@ export function DashboardLayout({
             <div className="py-4 px-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 max-w-7xl mx-auto w-full">
               <div className="flex items-center">
                 <button 
-                  className="mr-4 md:hidden text-gray-700 focus:outline-none"
-                  onClick={openSidebar}
+                  className="mr-4 text-gray-700 focus:outline-none hover:text-purple-600 transition-colors md:block hidden"
+                  onClick={toggleSidebar}
+                  aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
+                  {sidebarCollapsed ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                  )}
                 </button>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900">{title}</h1>
               </div>

@@ -207,8 +207,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="text-lg font-semibold mb-1">Email</h3>
                       <p className="text-gray-600 mb-1">For general inquiries:</p>
-                      <a href="mailto:support@pmuprofitsystem.com" className="text-purple-600 hover:text-purple-800 transition-colors">
-                        support@pmuprofitsystem.com
+                      <a href="mailto:pmuprofitsystem@gmail.com" className="text-purple-600 hover:text-purple-800 transition-colors">
+                        pmuprofitsystem@gmail.com
                       </a>
                     </div>
                   </div>

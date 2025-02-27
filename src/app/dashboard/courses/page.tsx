@@ -195,48 +195,43 @@ export default function CoursesPage() {
         </div>
       </div>
       
-      {/* Course Progress */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="mb-2 flex justify-between">
-          <span className="text-sm font-medium text-gray-700">Course Progress</span>
-          <span className="text-sm font-medium text-gray-700">0/15 Modules</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div className="bg-purple-600 h-2.5 rounded-full" style={{ width: '0%' }}></div>
-        </div>
-      </div>
-      
       {/* Modules Grid/List View */}
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
           {filteredModules.map((module) => (
-            <Link key={module.id} href={`/dashboard/module/${module.id}`} className="block h-full">
-              <div className="bg-white rounded-lg shadow overflow-hidden transition-transform hover:transform hover:scale-105 h-full flex flex-col">
-                <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
-                  <div className="w-full h-full relative">
-                    <Image
-                      src={module.thumbnail}
-                      alt={module.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      className="object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = generateFallbackThumbnail(parseInt(module.id));
-                      }}
-                    />
-                  </div>
-                  <div className="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded">
-                    Module {module.id}
-                  </div>
+            <Link 
+              key={module.id} 
+              href={`/dashboard/module/${module.id}`}
+              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full"
+            >
+              <div className="relative aspect-video">
+                <Image
+                  src={module.thumbnail}
+                  alt={module.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = generateFallbackThumbnail(parseInt(module.id));
+                  }}
+                />
+                
+                {/* Module number badge */}
+                <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded">
+                  Module {module.id}
                 </div>
-                <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="font-semibold text-lg mb-2">{module.title}</h3>
-                  <p className="text-gray-600 text-sm line-clamp-2 mb-4 flex-grow">{module.description}</p>
-                  <div className="flex justify-between items-center mt-auto">
-                    <span className="text-purple-600 font-medium text-sm">Start Module</span>
-                    <span className="text-xs text-gray-500">Not Started</span>
-                  </div>
+              </div>
+              <div className="p-4 flex-grow flex flex-col">
+                <h3 className="text-lg font-semibold mb-2">{module.title}</h3>
+                <p className="text-gray-600 text-sm mb-4 flex-grow">{module.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-purple-600 font-medium text-sm">
+                    View Module
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
             </Link>
@@ -262,17 +257,18 @@ export default function CoursesPage() {
                         }}
                       />
                     </div>
-                    <div className="absolute top-1 right-1 bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                    <div className="absolute top-1 left-1 bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                       {module.id}
                     </div>
                   </div>
                   <div className="p-4 flex-1">
                     <div className="flex justify-between items-start">
                       <h3 className="font-semibold text-lg mb-2">{module.title}</h3>
-                      <span className="text-xs text-gray-500 ml-2">Not Started</span>
                     </div>
                     <p className="text-gray-600 text-sm mb-2">{module.description}</p>
-                    <span className="text-purple-600 font-medium text-sm">Start Module</span>
+                    <span className="text-purple-600 font-medium text-sm">
+                      View Module
+                    </span>
                   </div>
                 </div>
               </div>
