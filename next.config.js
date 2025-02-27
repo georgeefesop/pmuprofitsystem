@@ -23,7 +23,7 @@ const nextConfig = {
   },
   // Add image domains configuration
   images: {
-    domains: ['randomuser.me', 'images.pexels.com', 'images.unsplash.com'],
+    domains: ['randomuser.me', 'images.pexels.com', 'images.unsplash.com', 'drive.google.com', 'ui-avatars.com'],
   },
 };
 

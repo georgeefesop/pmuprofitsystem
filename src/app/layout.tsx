@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: 'PMU Profit System – Mini Marketing Course for PMU Specialists',
   description: 'The PMU Profit System is a targeted mini course designed specifically for qualified permanent makeup artists who are struggling to get clients consistently.',
   viewport: 'width=device-width, initial-scale=1.0, viewport-fit=cover',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/favicon/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
@@ -20,15 +24,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} min-h-full overflow-x-hidden`}>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+      </head>
+      <body className={`${inter.className} flex flex-col min-h-screen bg-gray-50`}>
         <AuthProvider>
-          <div className="flex flex-col min-h-screen overflow-hidden">
-            <Navbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <SiteFooter />
-          </div>
+          <Navbar />
+          <main className="flex-grow flex flex-col relative">
+            {children}
+          </main>
+          <SiteFooter />
         </AuthProvider>
       </body>
     </html>

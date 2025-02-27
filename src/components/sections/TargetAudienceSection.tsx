@@ -111,14 +111,14 @@ const TargetAudienceSection = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
                   <Image 
-                    src="https://images.pexels.com/photos/3373716/pexels-photo-3373716.jpeg" 
+                    src="/images/beautician-doing-microblading-procedure-client-s-eyebrows.jpg" 
                     alt="PMU Artist Success" 
                     width={250} 
                     height={300}
                     className="rounded-xl object-cover h-40 w-full"
                   />
                   <Image 
-                    src="https://images.pexels.com/photos/3738339/pexels-photo-3738339.jpeg" 
+                    src="/images/young-woman-getting-beauty-treatment-her-eyebrows.jpg" 
                     alt="PMU Artist Success" 
                     width={250} 
                     height={300}
@@ -127,14 +127,14 @@ const TargetAudienceSection = () => {
                 </div>
                 <div className="space-y-4 pt-8">
                   <Image 
-                    src="https://images.pexels.com/photos/3762453/pexels-photo-3762453.jpeg" 
+                    src="/images/bride-getting-makeup-done-medium-shot.jpg" 
                     alt="PMU Artist Success" 
                     width={250} 
                     height={300}
                     className="rounded-xl object-cover h-56 w-full"
                   />
                   <Image 
-                    src="https://images.pexels.com/photos/3765114/pexels-photo-3765114.jpeg" 
+                    src="/images/female-doctor-using-digital-tablet-consult-patient.jpg" 
                     alt="PMU Artist Success" 
                     width={250} 
                     height={300}

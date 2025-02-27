@@ -40,10 +40,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // For demo purposes, any email/password combination works
     // In a real app, you would validate credentials against your backend
+    
+    // Try to get the stored user with this email to preserve their name
+    const storedUsers = localStorage.getItem('pmu_users');
+    let userRecord = null;
+    
+    if (storedUsers) {
+      const users = JSON.parse(storedUsers);
+      userRecord = users.find((u: any) => u.email === email);
+    }
+    
     const mockUser = {
       id: '1',
       email,
-      name: email.split('@')[0], // Use part of email as name
+      name: userRecord?.name || email, // Use stored name or email as fallback
     };
     
     setUser(mockUser);
@@ -64,12 +74,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
+    const userId = Date.now().toString();
+    
     const mockUser = {
-      id: Date.now().toString(),
+      id: userId,
       email,
-      name: name || email.split('@')[0],
+      name: name || email, // Use provided name or email as fallback
     };
     
+    // Store user in a "database" (localStorage)
+    const storedUsers = localStorage.getItem('pmu_users') || '[]';
+    const users = JSON.parse(storedUsers);
+    users.push({
+      id: userId,
+      email,
+      name,
+      password, // In a real app, you would NEVER store passwords in plain text
+    });
+    localStorage.setItem('pmu_users', JSON.stringify(users));
+    
+    // Log the user in
     setUser(mockUser);
     localStorage.setItem('pmu_user', JSON.stringify(mockUser));
     setIsLoading(false);

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Checkout() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [adGenerator, setAdGenerator] = useState(false);
@@ -29,7 +30,7 @@ export default function Checkout() {
     setIsLoading(true);
 
     try {
-      const success = await register(email, password, '');
+      const success = await register(email, password, name);
       if (success) {
         router.push('/checkout/success');
       } else {
@@ -116,6 +117,22 @@ export default function Checkout() {
               
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                
+                <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email Address
                   </label>
@@ -189,7 +206,7 @@ export default function Checkout() {
                           Consultation Success Blueprint (+€33)
                         </label>
                         <p className="text-sm text-gray-600">
-                          Our proven consultation framework that converts 9 out of 10 prospects into paying clients
+                          Our proven consultation framework that converts more prospects into paying clients
                         </p>
                       </div>
                     </div>

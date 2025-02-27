@@ -1,8 +1,14 @@
 const { spawn, exec } = require('child_process');
 const net = require('net');
+const fs = require('fs');
+const path = require('path');
 
 // Port to use
 const PORT = 3000;
+
+// Check if this is the first run by looking for a marker file
+const markerFilePath = path.join(__dirname, '.browser_opened');
+const shouldOpenBrowser = !fs.existsSync(markerFilePath);
 
 // Function to check if a port is available
 function isPortAvailable(port) {
@@ -93,32 +99,45 @@ async function startServer() {
       shell: true
     });
     
-    // Wait a bit for the server to start before opening the browser
-    setTimeout(() => {
-      console.log(`Opening browser at http://localhost:${PORT}`);
-      
-      // Determine the command to open a URL based on the platform
-      let command;
-      switch (process.platform) {
-        case 'darwin': // macOS
-          command = `open http://localhost:${PORT}`;
-          break;
-        case 'win32': // Windows
-          command = `start http://localhost:${PORT}`;
-          break;
-        default: // Linux and others
-          command = `xdg-open http://localhost:${PORT}`;
-          break;
-      }
-      
-      // Execute the command to open the browser
-      exec(command, (error) => {
-        if (error) {
-          console.error('Failed to open browser:', error);
-          console.log(`Please manually open your browser and navigate to http://localhost:${PORT}`);
+    // Only open the browser on first run
+    if (shouldOpenBrowser) {
+      // Wait a bit for the server to start before opening the browser
+      setTimeout(() => {
+        console.log(`Opening browser at http://localhost:${PORT}`);
+        
+        // Determine the command to open a URL based on the platform
+        let command;
+        switch (process.platform) {
+          case 'darwin': // macOS
+            command = `open http://localhost:${PORT}`;
+            break;
+          case 'win32': // Windows
+            command = `start http://localhost:${PORT}`;
+            break;
+          default: // Linux and others
+            command = `xdg-open http://localhost:${PORT}`;
+            break;
         }
-      });
-    }, 3000); // Wait 3 seconds
+        
+        // Execute the command to open the browser
+        exec(command, (error) => {
+          if (error) {
+            console.error('Failed to open browser:', error);
+            console.log(`Please manually open your browser and navigate to http://localhost:${PORT}`);
+          } else {
+            // Create marker file to indicate browser has been opened
+            try {
+              fs.writeFileSync(markerFilePath, 'opened');
+              console.log('Browser opened successfully. Future runs will not open a new tab.');
+            } catch (err) {
+              console.error('Failed to create marker file:', err);
+            }
+          }
+        });
+      }, 3000); // Wait 3 seconds
+    } else {
+      console.log(`Server running at http://localhost:${PORT} (browser not opened)`);
+    }
     
     // Handle process termination
     process.on('SIGINT', () => {

@@ -249,35 +249,35 @@ const ResultsSection = () => {
             <div>
               <h3 className="heading-3 mb-6">The Math Behind Your Success</h3>
               <p className="body-1 mb-6">
-                With just €70 in ad spend per week, you could generate up to €1,980 in potential revenue. Here's how:
+                With just €70 in ad spend per week, you could generate up to €2,640 in potential revenue. Here's how:
               </p>
               
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">1</div>
                   <div>
-                    <p className="font-medium">€10/day reaches ~10,000 people weekly</p>
+                    <p className="font-medium">€10/day reaches ~15,000 people weekly</p>
                     <p className="text-sm text-gray-600">Targeted Facebook & Instagram ads</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</div>
                   <div>
-                    <p className="font-medium">If ~2% show interest (200 people)</p>
-                    <p className="text-sm text-gray-600">Engage with your content</p>
+                    <p className="font-medium">If only 0.2% of those people reach out (30 people)</p>
+                    <p className="text-sm text-gray-600">Send messages inquiring about services</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">3</div>
                   <div>
-                    <p className="font-medium">If only ~5% of those reach out (10 people)</p>
-                    <p className="text-sm text-gray-600">Send messages inquiring about services</p>
+                    <p className="font-medium">If half turn into consultations (15 people)</p>
+                    <p className="text-sm text-gray-600">Book a consultation call with you</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">4</div>
                   <div>
-                    <p className="font-medium">If you convert just 6/10 consultations</p>
+                    <p className="font-medium">If you convert 2 out of 3 consultations (10 clients)</p>
                     <p className="text-sm text-gray-600">Each worth €330 (initial + touch-up)</p>
                   </div>
                 </li>
@@ -296,24 +296,24 @@ const ResultsSection = () => {
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <div>
                     <span className="font-medium">Potential New Clients</span>
-                    <span className="text-sm text-gray-500 block">6 clients × €330 each</span>
+                    <span className="text-sm text-gray-500 block">10 clients × €330 each</span>
                   </div>
-                  <span className="text-xl font-bold text-gray-900">€1,980</span>
+                  <span className="text-xl font-bold text-gray-900">€3,300</span>
                 </div>
                 
                 <div className="flex justify-between items-center pb-3 border-b border-gray-100">
                   <span className="font-medium">Net Profit</span>
-                  <span className="text-2xl font-bold text-green-600">€1,910</span>
+                  <span className="text-2xl font-bold text-green-600">€3,230</span>
                 </div>
                 
                 <div className="flex justify-between items-center pt-2">
                   <span className="font-medium">Return on Investment</span>
-                  <span className="text-2xl font-bold gradient-text">2,729%</span>
+                  <span className="text-2xl font-bold gradient-text">4,614%</span>
                 </div>
               </div>
               
               <div className="mt-8 p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-center text-purple-800">
+                <p className="text-xs text-center text-purple-800">
                   <strong>Note:</strong> Results may vary based on your location, pricing, and execution. These are conservative estimates based on our clients' experiences.
                 </p>
               </div>

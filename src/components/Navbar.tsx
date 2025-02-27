@@ -52,9 +52,6 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-5">
-            <Link href="/" className="text-sm text-white hover:text-purple-100 transition-colors">
-              Home
-            </Link>
             <Link href="/#features" className="text-sm text-white hover:text-purple-100 transition-colors">
               Features
             </Link>
@@ -122,9 +119,6 @@ export default function Navbar() {
           }`}
         >
           <div className="space-y-4 px-2 py-2 bg-purple-900/80 rounded-lg shadow-lg">
-            <Link href="/" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-              Home
-            </Link>
             <Link href="/#features" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
               Features
             </Link>

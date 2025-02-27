@@ -93,7 +93,7 @@ const FeaturesSection = () => {
                     <span className="badge-primary">15 Video Lessons</span>
                   </div>
                   <Image 
-                    src="https://images.pexels.com/photos/6476260/pexels-photo-6476260.jpeg"
+                    src="/images/close-up-girl-online-school.jpg"
                     alt="PMU Profit System Dashboard" 
                     width={600} 
                     height={400}

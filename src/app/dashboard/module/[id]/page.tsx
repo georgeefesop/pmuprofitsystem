@@ -1,14 +1,18 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { DashboardLayout } from '@/components/DashboardLayout';
 
-// Mock data for modules
+// Mock data for modules with Google Drive video IDs
 const modules = [
   {
     id: '1',
     title: 'Introduction to PMU Marketing',
     description: 'Learn the fundamentals of marketing for your PMU business and how to stand out in a competitive market.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '17Uc7DfpneaRcuyabvvEsyt9T0fpvjziY', // Full PMU Course - Part 1.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=17Uc7DfpneaRcuyabvvEsyt9T0fpvjziY',
     content: `
       <p>Welcome to the PMU Profit System! In this introductory module, we'll cover:</p>
       <ul>
@@ -24,7 +28,8 @@ const modules = [
     id: '2',
     title: 'Understanding Your Target Market',
     description: 'Identify and understand your ideal clients to create marketing that resonates with them.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1gJBqhP9JKN0XFF32O9JQNQGIKWxx1AWM', // Full PMU Course - Part 2 - Earning Potentials.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1gJBqhP9JKN0XFF32O9JQNQGIKWxx1AWM',
     content: `
       <p>In this module, we'll dive deep into understanding your ideal clients. You'll learn:</p>
       <ul>
@@ -40,7 +45,8 @@ const modules = [
     id: '3',
     title: 'Creating Your Unique Value Proposition',
     description: 'Develop a compelling value proposition that sets you apart from other PMU artists.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1GA_UCUn7TBwerOklTCUNZ6w_jtrVc7dq', // Full PMU Course - Part 3 - Foundations.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1GA_UCUn7TBwerOklTCUNZ6w_jtrVc7dq',
     content: `
       <p>In this module, we'll help you develop your unique value proposition. You'll learn:</p>
       <ul>
@@ -56,7 +62,8 @@ const modules = [
     id: '4',
     title: 'Setting Up Meta Business Manager',
     description: 'A step-by-step guide to setting up your Meta Business Manager account for effective advertising.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1FXLhxaVX0u3lJyrTMgcEuWMQpWPs82N8', // Full PMU Course - Part 4 - Analyze Local Market.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1FXLhxaVX0u3lJyrTMgcEuWMQpWPs82N8',
     content: `
       <p>In this module, we'll walk through the exact process of setting up your Meta Business Manager account. You'll learn:</p>
       <ul>
@@ -72,7 +79,8 @@ const modules = [
     id: '5',
     title: 'Crafting High-Converting Ad Copy',
     description: 'Learn how to write ad copy that resonates with your target audience and drives action.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1l2T8m4C0IyJPRnjU8GtlCCuKBaEl-Lyi', // Full PMU Course - Part 5 - Niche.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1l2T8m4C0IyJPRnjU8GtlCCuKBaEl-Lyi',
     content: `
       <p>In this module, we'll teach you how to write compelling ad copy that converts. You'll learn:</p>
       <ul>
@@ -88,7 +96,8 @@ const modules = [
     id: '6',
     title: 'Designing Eye-Catching Visuals',
     description: 'Create stunning visuals for your ads that showcase your work and attract attention.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '12jOyZKPLYR4RZH3g7RX57EGCb751y9fq', // Full PMU Course - Part 6 - Online Presence.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=12jOyZKPLYR4RZH3g7RX57EGCb751y9fq',
     content: `
       <p>In this module, we'll show you how to create visuals that make your ads stand out. You'll learn:</p>
       <ul>
@@ -104,7 +113,8 @@ const modules = [
     id: '7',
     title: 'Targeting the Right Audience',
     description: 'Master the art of audience targeting to reach potential clients who are most likely to book with you.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1GTmc2qOQuEbgetMjMDNLUDYMjy72asX-', // Full PMU Course - Part 7 - Creating Your Offers (With AI).mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1GTmc2qOQuEbgetMjMDNLUDYMjy72asX-',
     content: `
       <p>In this module, we'll dive deep into audience targeting strategies. You'll learn:</p>
       <ul>
@@ -120,7 +130,8 @@ const modules = [
     id: '8',
     title: 'Setting Up Your First Campaign',
     description: 'A step-by-step guide to creating and launching your first ad campaign.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1uS5cSr2WW-b5FM9IfOR4PR5DaL9rF-do', // Full PMU Course - Part 8 - Designing Ad Variations.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1uS5cSr2WW-b5FM9IfOR4PR5DaL9rF-do',
     content: `
       <p>In this module, we'll walk you through creating your first ad campaign. You'll learn:</p>
       <ul>
@@ -136,7 +147,8 @@ const modules = [
     id: '9',
     title: 'Optimizing Ad Performance',
     description: 'Learn how to monitor and optimize your ads for better results and lower costs.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1jPUoVDovJALbVZGBPrzdqZK8_EFOM9Sl', // Full PMU Course - Part 9 - Set up Ads.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1jPUoVDovJALbVZGBPrzdqZK8_EFOM9Sl',
     content: `
       <p>In this module, we'll show you how to optimize your ad campaigns for better performance. You'll learn:</p>
       <ul>
@@ -152,7 +164,8 @@ const modules = [
     id: '10',
     title: 'Handling Client Inquiries',
     description: 'Develop a system for managing and responding to client inquiries effectively.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1Nk5WV9rt8qrq-xMpoas_s_s9FOKgSMRQ', // Full PMU Course - Part 10 - Retargeting.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1Nk5WV9rt8qrq-xMpoas_s_s9FOKgSMRQ',
     content: `
       <p>In this module, we'll teach you how to handle the influx of client inquiries you'll receive. You'll learn:</p>
       <ul>
@@ -167,12 +180,13 @@ const modules = [
   {
     id: '11',
     title: 'The Consultation Success Blueprint',
-    description: 'Master our proven consultation framework that converts 9 out of 10 prospects into paying clients.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    description: 'Master our proven consultation framework that helps convert more prospects into paying clients.',
+    videoId: '1DYgIy3rye3NOEbnutU5tFj61VeaOnAWI', // Full PMU Course - Part 11 - Managing Incoming Messages.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1DYgIy3rye3NOEbnutU5tFj61VeaOnAWI',
     content: `
       <p>In this crucial module, we'll share our Consultation Success Blueprint. You'll learn:</p>
       <ul>
-        <li>The exact 20-minute consultation structure that converts 90% of prospects</li>
+        <li>The exact 20-minute consultation structure that converts prospects effectively</li>
         <li>Building rapport and establishing trust quickly</li>
         <li>Assessing client suitability and setting clear expectations</li>
         <li>Addressing common concerns and objections effectively</li>
@@ -185,7 +199,8 @@ const modules = [
     id: '12',
     title: 'Pricing Strategies for Maximum Profit',
     description: 'Develop pricing strategies that reflect your value and maximize your profit.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1akbQEaETd2Sz1HXa1KhNBX4lT79j0E6z', // Full PMU Course - Part 12 - Conducting Consultations.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1akbQEaETd2Sz1HXa1KhNBX4lT79j0E6z',
     content: `
       <p>In this module, we'll help you optimize your pricing for maximum profit. You'll learn:</p>
       <ul>
@@ -201,7 +216,8 @@ const modules = [
     id: '13',
     title: 'Client Retention Techniques',
     description: 'Learn strategies to keep clients coming back and referring others to you.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1P5oeb_v1gNM2GlDHAy_Z-3gEMniPMc3P', // Full PMU Course - Part 13 - Booking Confirmations.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1P5oeb_v1gNM2GlDHAy_Z-3gEMniPMc3P',
     content: `
       <p>In this module, we'll focus on client retention and referrals. You'll learn:</p>
       <ul>
@@ -217,7 +233,8 @@ const modules = [
     id: '14',
     title: 'Building a Referral System',
     description: 'Create a systematic approach to generating referrals from your existing clients.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1Od0emvuo8hkOMTd1PscMbf2V2VxA7WJ_', // Full PMU Course - Part 14 - PMU Sessions & Photography.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1Od0emvuo8hkOMTd1PscMbf2V2VxA7WJ_',
     content: `
       <p>In this module, we'll show you how to build a powerful referral system. You'll learn:</p>
       <ul>
@@ -233,7 +250,8 @@ const modules = [
     id: '15',
     title: 'Scaling Your PMU Business',
     description: 'Learn strategies for growing your business beyond just yourself.',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder
+    videoId: '1SCSYfpVpTqxytOxRJzAroe74hIYP2yRy', // Full PMU Course - Part 15 - Payments Reviews & Referals.mp4
+    thumbnail: 'https://drive.google.com/thumbnail?id=1SCSYfpVpTqxytOxRJzAroe74hIYP2yRy',
     content: `
       <p>In this final module, we'll explore options for scaling your PMU business. You'll learn:</p>
       <ul>
@@ -247,99 +265,115 @@ const modules = [
   }
 ];
 
+// Function to generate a fallback thumbnail if needed
+const generateFallbackThumbnail = (moduleNumber: number) => {
+  return `https://via.placeholder.com/640x360/7c3aed/ffffff?text=Module+${moduleNumber}`;
+};
+
 export default function ModulePage({ params }: { params: { id: string } }) {
   // Find the module based on the ID from the URL
   const module = modules.find(m => m.id === params.id) || modules[0];
 
+  // Google Drive folder URL
+  const googleDriveFolderUrl = "https://drive.google.com/drive/folders/1QaDS6BEnN-Ei3-ehi11W1YRJjPd7zlZN?usp=drive_link";
+  
+  // Google Drive embed URL for videos - using the correct format
+  const getGoogleDriveEmbedUrl = (fileId: string) => {
+    return `https://drive.google.com/file/d/${fileId}/preview`;
+  };
+
+  // Google Drive direct download URL for a specific video
+  const getGoogleDriveDownloadUrl = (fileId: string) => {
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  };
+
+  // Action button for the header
+  const actionButton = (
+    <a 
+      href={googleDriveFolderUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      Download All Videos
+    </a>
+  );
+
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <aside className="w-64 bg-purple-800 text-white">
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-6">PMU Profit System</h2>
-            
-            <nav className="space-y-1">
-              <Link href="/dashboard" className="block py-2.5 px-4 rounded hover:bg-purple-700">
-                Dashboard
-              </Link>
-              <div className="py-2 px-4 text-purple-200 text-sm font-medium">COURSE MODULES</div>
-              {modules.map((m) => (
-                <Link 
-                  key={m.id}
-                  href={`/dashboard/module/${m.id}`} 
-                  className={`block py-2.5 px-4 rounded ${m.id === params.id ? 'bg-purple-700' : 'hover:bg-purple-700'}`}
-                >
-                  {m.id}: {m.title.length > 20 ? `${m.title.substring(0, 20)}...` : m.title}
-                </Link>
-              ))}
-              <div className="py-2 px-4 text-purple-200 text-sm font-medium">BONUS MATERIALS</div>
-              <Link href="/dashboard/blueprint" className="block py-2.5 px-4 rounded hover:bg-purple-700">
-                Consultation Blueprint
-              </Link>
-              <Link href="/dashboard/profile" className="block py-2.5 px-4 rounded hover:bg-purple-700">
-                My Profile
-              </Link>
-            </nav>
-          </div>
-          
-          <div className="p-6 border-t border-purple-700 mt-6">
-            <Link href="/logout" className="block text-sm">
-              Logout
-            </Link>
-          </div>
-        </aside>
-        
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-          <header className="bg-white shadow">
-            <div className="py-4 px-8">
-              <h1 className="text-2xl font-bold text-gray-900">Module {module.id}: {module.title}</h1>
-            </div>
-          </header>
-          
-          <div className="p-8">
-            <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
-              <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                <iframe
-                  src={module.videoUrl}
-                  title={module.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-96"
-                ></iframe>
+    <DashboardLayout 
+      title={`Module ${module.id}: ${module.title}`} 
+      actionButton={actionButton}
+      currentModuleId={module.id}
+    >
+      <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+        {/* Fix for video stretching - use a container with proper aspect ratio */}
+        <div className="relative w-full aspect-video overflow-hidden rounded-lg bg-gray-100 mb-6">
+          <div className="w-full h-full relative">
+            <Image
+              src={`https://drive.google.com/thumbnail?id=${module.videoId}`}
+              alt={module.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
+              className="object-cover"
+              priority
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = generateFallbackThumbnail(parseInt(params.id));
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-purple-600 bg-opacity-80 rounded-full flex items-center justify-center cursor-pointer hover:bg-opacity-90 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 md:h-10 md:w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-4">{module.title}</h2>
-                <p className="text-gray-600 mb-6">{module.description}</p>
-                
-                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: module.content }}></div>
-                
-                <div className="mt-8 pt-6 border-t border-gray-200">
-                  <button className="btn-primary">
-                    Mark as Complete
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-between">
-              {parseInt(module.id) > 1 && (
-                <Link href={`/dashboard/module/${parseInt(module.id) - 1}`} className="text-purple-600 font-medium">
-                  ← Previous Module
-                </Link>
-              )}
-              
-              {parseInt(module.id) < modules.length && (
-                <Link href={`/dashboard/module/${parseInt(module.id) + 1}`} className="text-purple-600 font-medium">
-                  Next Module →
-                </Link>
-              )}
             </div>
           </div>
         </div>
+        
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">{module.title}</h2>
+          <p className="text-gray-600 mb-6">{module.description}</p>
+          
+          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: module.content }}></div>
+          
+          <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between space-y-4 md:space-y-0">
+            <button className="btn-primary">
+              Mark as Complete
+            </button>
+            
+            <a 
+              href={getGoogleDriveDownloadUrl(module.videoId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download This Video
+            </a>
+          </div>
+        </div>
       </div>
-    </main>
+      
+      <div className="flex justify-between mb-8">
+        {parseInt(module.id) > 1 && (
+          <Link href={`/dashboard/module/${parseInt(module.id) - 1}`} className="text-purple-600 font-medium">
+            ← Previous Module
+          </Link>
+        )}
+        
+        {parseInt(module.id) < modules.length && (
+          <Link href={`/dashboard/module/${parseInt(module.id) + 1}`} className="text-purple-600 font-medium">
+            Next Module →
+          </Link>
+        )}
+      </div>
+    </DashboardLayout>
   );
 } 
