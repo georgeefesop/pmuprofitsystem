@@ -41,14 +41,7 @@ export function ModuleNavBar({
         </div>
       </div>
       
-      <div className="flex items-center space-x-2">
-        <Link
-          href="/dashboard/courses"
-          className="text-sm text-purple-600 hover:text-purple-800 font-medium"
-        >
-          All Modules
-        </Link>
-        
+      <div className="flex items-center">
         {hasNext && (
           <Link
             href={`/dashboard/module/${currentId + 1}`}

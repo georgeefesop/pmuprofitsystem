@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { usePurchases } from '@/context/PurchaseContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
 
 export default function ProfilePage() {
@@ -317,40 +318,63 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        {/* Subscription Information */}
+        {/* Purchase Information */}
         <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
           <div className="p-6">
-            <h2 className="text-xl font-semibold mb-6">Subscription Information</h2>
+            <h2 className="text-xl font-semibold mb-6">Purchase Information</h2>
             
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                <div>
-                  <h3 className="font-semibold text-gray-900">PMU Profit System</h3>
-                  <p className="text-sm text-gray-600">Full Access to Course Materials</p>
+            <div className="space-y-6">
+              {/* PMU Profit System */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">PMU Profit System</h3>
+                    <p className="text-sm text-gray-600">Full Access to Course Materials</p>
+                  </div>
+                  <div className="mt-2 md:mt-0">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Active
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-2 md:mt-0">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Active
-                  </span>
+                
+                <div className="mt-4 border-t border-gray-200 pt-4">
+                  <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div>
+                      <dt className="text-gray-500">Purchase Date</dt>
+                      <dd className="font-medium text-gray-900">January 15, 2024</dd>
+                    </div>
+                    <div>
+                      <dt className="text-gray-500">Order ID</dt>
+                      <dd className="font-medium text-gray-900">ORD-2024-01-15-001</dd>
+                    </div>
+                    <div className="md:col-span-2">
+                      <dt className="text-gray-500">Amount Paid</dt>
+                      <dd className="font-medium text-gray-900">€37.00</dd>
+                    </div>
+                  </dl>
                 </div>
               </div>
               
-              <div className="mt-4 border-t border-gray-200 pt-4">
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <div>
-                    <dt className="text-gray-500">Purchase Date</dt>
-                    <dd className="font-medium text-gray-900">January 15, 2024</dd>
-                  </div>
-                  <div>
-                    <dt className="text-gray-500">Order ID</dt>
-                    <dd className="font-medium text-gray-900">ORD-2024-01-15-001</dd>
-                  </div>
-                  <div className="md:col-span-2">
-                    <dt className="text-gray-500">Amount Paid</dt>
-                    <dd className="font-medium text-gray-900">€37.00</dd>
-                  </div>
-                </dl>
-              </div>
+              {/* Consultation Success Blueprint */}
+              <PurchaseItem 
+                title="Consultation Success Blueprint"
+                description="Framework for Converting Consultations into Bookings"
+                purchaseDate="February 10, 2024"
+                orderId="ORD-2024-02-10-003"
+                amount="€97.00"
+                productId="consultation-success-blueprint"
+              />
+              
+              {/* PMU Ad Generator */}
+              <PurchaseItem 
+                title="PMU Ad Generator"
+                description="AI-Powered Ad Creation Tool for PMU Artists"
+                purchaseDate="March 5, 2024"
+                orderId="ORD-2024-03-05-002"
+                amount="€67.00"
+                productId="pmu-ad-generator"
+              />
             </div>
           </div>
         </div>
@@ -376,5 +400,79 @@ export default function ProfilePage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+// Purchase Item Component
+function PurchaseItem({ 
+  title, 
+  description, 
+  purchaseDate, 
+  orderId, 
+  amount, 
+  productId 
+}: { 
+  title: string; 
+  description: string; 
+  purchaseDate: string; 
+  orderId: string; 
+  amount: string; 
+  productId: string;
+}) {
+  const { hasPurchased } = usePurchases();
+  const isPurchased = hasPurchased(productId as any);
+  
+  if (!isPurchased) {
+    return (
+      <div className="bg-gray-50 rounded-lg p-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+          <div>
+            <h3 className="font-semibold text-gray-900">{title}</h3>
+            <p className="text-sm text-gray-600">{description}</p>
+          </div>
+          <div className="mt-2 md:mt-0">
+            <Link 
+              href={`/dashboard/${productId.replace('pmu-', '').replace('-blueprint', '')}/purchase`}
+              className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+            >
+              Purchase Now
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="bg-gray-50 rounded-lg p-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+        <div>
+          <h3 className="font-semibold text-gray-900">{title}</h3>
+          <p className="text-sm text-gray-600">{description}</p>
+        </div>
+        <div className="mt-2 md:mt-0">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Active
+          </span>
+        </div>
+      </div>
+      
+      <div className="mt-4 border-t border-gray-200 pt-4">
+        <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <div>
+            <dt className="text-gray-500">Purchase Date</dt>
+            <dd className="font-medium text-gray-900">{purchaseDate}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">Order ID</dt>
+            <dd className="font-medium text-gray-900">{orderId}</dd>
+          </div>
+          <div className="md:col-span-2">
+            <dt className="text-gray-500">Amount Paid</dt>
+            <dd className="font-medium text-gray-900">{amount}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
   );
 } 

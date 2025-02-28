@@ -1,13 +1,39 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { DashboardLayout } from '@/components/DashboardLayout';
+import { usePurchases } from '@/context/PurchaseContext';
 
 export default function ConsultationBlueprint() {
+  const router = useRouter();
+  const { hasPurchased } = usePurchases();
+  
+  // Check if the user has purchased the blueprint
+  useEffect(() => {
+    if (!hasPurchased('consultation-success-blueprint')) {
+      router.push('/dashboard/blueprint/purchase');
+    }
+  }, [hasPurchased, router]);
+  
   // Consultation Blueprint Google Doc URL
   const consultationBlueprintUrl = "https://docs.google.com/document/d/1qNyoDDkOUPmr3DIMJe7UfACM0Woh0SKc-VU4c75zXMY/edit?usp=drive_link";
+
+  // If the user hasn't purchased, don't render the content
+  if (!hasPurchased('consultation-success-blueprint')) {
+    return (
+      <DashboardLayout title="Consultation Success Blueprint">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700 mx-auto mb-4"></div>
+            <p className="text-gray-600">Checking access...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Consultation Success Blueprint">

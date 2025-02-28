@@ -63,7 +63,7 @@ export function DashboardLayout({
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           <header className="bg-white shadow-sm">
-            <div className="py-4 px-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 max-w-7xl mx-auto w-full">
+            <div className="py-4 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 max-w-7xl mx-auto w-full">
               <div className="flex items-center">
                 <button 
                   className="mr-4 text-gray-700 focus:outline-none hover:text-purple-600 transition-colors md:block hidden"
@@ -86,7 +86,7 @@ export function DashboardLayout({
             </div>
           </header>
           
-          <div className="p-4 md:p-8 flex-1 overflow-auto">
+          <div className="p-4 sm:p-6 lg:p-8 flex-1 overflow-auto">
             <div className="max-w-7xl mx-auto w-full">
               {children}
             </div>

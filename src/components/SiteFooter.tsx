@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/container';
 
 const SiteFooter = () => {
   return (
-    <footer className="bg-gray-50 border-t border-gray-100">
+    <footer className="bg-gray-100 border-t border-gray-200">
       <Container className="py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
