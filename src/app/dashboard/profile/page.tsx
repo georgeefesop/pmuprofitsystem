@@ -348,10 +348,6 @@ export default function ProfilePage() {
                       <dt className="text-gray-500">Order ID</dt>
                       <dd className="font-medium text-gray-900">ORD-2024-01-15-001</dd>
                     </div>
-                    <div className="md:col-span-2">
-                      <dt className="text-gray-500">Amount Paid</dt>
-                      <dd className="font-medium text-gray-900">€37.00</dd>
-                    </div>
                   </dl>
                 </div>
               </div>
@@ -432,7 +428,7 @@ function PurchaseItem({
           </div>
           <div className="mt-2 md:mt-0">
             <Link 
-              href={`/dashboard/${productId.replace('pmu-', '').replace('-blueprint', '')}/purchase`}
+              href={`/dashboard/${productId === 'consultation-success-blueprint' ? 'blueprint' : 'ad-generator'}/purchase`}
               className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
             >
               Purchase Now
@@ -466,10 +462,6 @@ function PurchaseItem({
           <div>
             <dt className="text-gray-500">Order ID</dt>
             <dd className="font-medium text-gray-900">{orderId}</dd>
-          </div>
-          <div className="md:col-span-2">
-            <dt className="text-gray-500">Amount Paid</dt>
-            <dd className="font-medium text-gray-900">{amount}</dd>
           </div>
         </dl>
       </div>

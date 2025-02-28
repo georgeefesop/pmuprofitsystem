@@ -1,0 +1,118 @@
+# PMU Profit System Development Plan
+
+## Component Structure
+
+All components are located in the `src/components` directory for consistency and easy reference.
+
+### Core Components
+- `Navbar.tsx` - Main navigation bar with mobile menu functionality
+- `Sidebar.tsx` - Dashboard sidebar navigation
+- `DashboardLayout.tsx` - Layout wrapper for dashboard pages
+- `Footer.tsx` - Site footer
+
+### Dashboard Components
+- `AdGenerator.tsx` - Ad generation tool
+- `Handbook.tsx` - PMU handbook component
+- `Blueprint.tsx` - Consultation success blueprint
+
+### UI Components
+- Various UI components using Shadcn UI and Radix UI
+
+## Development Guidelines
+
+1. **Component Organization**:
+   - All components should be placed in the `src/components` directory
+   - Use subdirectories for related components (e.g., `src/components/dashboard`)
+   - Maintain consistent naming conventions
+
+2. **Mobile Navigation**:
+   - Mobile menu is handled in `Navbar.tsx`
+   - Dashboard navigation items appear in the mobile menu when user is logged in
+   - The mobile menu slides down from the top when the hamburger icon is clicked
+   - The menu includes both main site navigation and dashboard items (when logged in)
+   - Navigation menu items order: Results, Features, FAQ, Contact
+
+3. **Styling Approach**:
+   - Use Tailwind CSS for styling
+   - Follow mobile-first responsive design principles
+   - Maintain consistent color scheme and UI patterns
+
+4. **Performance Considerations**:
+   - Minimize client components with 'use client'
+   - Optimize for Core Web Vitals
+   - Use React Server Components where possible
+
+5. **Authentication & Authorization**:
+   - User authentication is managed through `AuthContext.tsx`
+   - User data is stored in both cookies and localStorage
+   - Cookies are used for middleware authentication checks
+   - Protected routes are handled by `middleware.ts`
+   - Unauthenticated users are redirected to login page with redirect parameter
+   - After login, users are redirected to their originally requested page
+   - Logout redirects users to the home page
+
+## Known Issues
+
+- Next.js version 14.2.24 is outdated and should be updated
+- Chunk loading errors may require clearing the `.next` cache and rebuilding
+- To fix chunk loading errors:
+  1. Stop the development server
+  2. Delete the `.next` directory using `Remove-Item -Recurse -Force .next`
+  3. Rebuild the application with `npm run build`
+  4. Restart the development server with `npm run dev`
+
+## Mobile Menu Implementation
+
+The mobile menu is implemented in the `Navbar.tsx` component with the following features:
+
+1. **Toggle Functionality**:
+   - The menu is toggled using the `mobileMenuOpen` state variable
+   - The hamburger icon changes to an X icon when the menu is open
+   - Debug logging is added to track toggle events
+
+2. **Menu Structure**:
+   - The menu slides down from the top with a smooth animation
+   - Contains main navigation links (Results, Features, FAQ, Contact)
+   - When logged in, includes dashboard navigation items
+   - Dashboard items are separated with a heading and border
+
+3. **Styling**:
+   - Uses a semi-transparent purple background with rounded corners
+   - Includes hover effects for better user experience
+   - Properly handles overflow with scrolling for many items
+
+4. **Responsive Behavior**:
+   - Only visible on mobile devices (hidden on md breakpoint and above)
+   - Uses `display: block/none` to ensure visibility regardless of CSS transitions
+
+## Authentication Protection
+
+The application implements route protection using Next.js middleware:
+
+1. **Middleware Implementation**:
+   - Located in `src/middleware.ts`
+   - Intercepts requests to protected routes (e.g., `/dashboard/*`)
+   - Checks for authentication via cookies
+   - Redirects unauthenticated users to login page with redirect parameter
+
+2. **Login Page Enhancements**:
+   - Reads redirect parameter from URL
+   - After successful login, redirects user to originally requested page
+   - Falls back to dashboard if no redirect parameter is present
+
+3. **AuthContext Updates**:
+   - Uses js-cookie for cookie management
+   - Stores user data in both cookies and localStorage
+   - Cookies are accessible to middleware for authentication checks
+   - Handles cookie removal on logout
+
+4. **Logout Behavior**:
+   - Clears user data from state, localStorage, and cookies
+   - Redirects user to home page after logout
+
+## Future Improvements
+
+- Consolidate navigation logic between components
+- Enhance mobile responsiveness
+- Optimize performance for better user experience
+- Consider updating Next.js to the latest version 

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -12,6 +13,14 @@ interface SidebarProps {
 
 export function Sidebar({ onClose, currentModuleId, collapsed = false }: SidebarProps) {
   const pathname = usePathname();
+  const { logout } = useAuth();
+  
+  // Handle logout with redirection
+  const handleLogout = () => {
+    logout();
+    // Redirect to home page after logout
+    window.location.href = '/';
+  };
   
   // Determine which link is active
   const isActive = (path: string) => {
@@ -61,20 +70,6 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false }: Sidebar
             </Link>
             
             <Link 
-              href="/dashboard/blueprint" 
-              className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 ${
-                isActive('/dashboard/blueprint') 
-                  ? 'bg-white/15 text-white shadow-sm' 
-                  : 'text-purple-100 hover:bg-white/10 hover:text-white'
-              }`}
-              title="Consultation Success"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </Link>
-            
-            <Link 
               href="/dashboard/handbook" 
               className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 ${
                 isActive('/dashboard/handbook') 
@@ -85,6 +80,20 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false }: Sidebar
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </Link>
+            
+            <Link 
+              href="/dashboard/blueprint" 
+              className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 ${
+                isActive('/dashboard/blueprint') 
+                  ? 'bg-white/15 text-white shadow-sm' 
+                  : 'text-purple-100 hover:bg-white/10 hover:text-white'
+              }`}
+              title="Consultation Success"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </Link>
             
@@ -119,15 +128,15 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false }: Sidebar
         </div>
         
         <div className="p-3 border-t border-purple-700/50 mt-auto flex justify-center">
-          <Link 
-            href="/logout" 
+          <button 
+            onClick={handleLogout}
             className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
             title="Logout"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-          </Link>
+          </button>
         </div>
       </aside>
     );
@@ -196,20 +205,6 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false }: Sidebar
           </div>
           
           <Link 
-            href="/dashboard/blueprint" 
-            className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
-              isActive('/dashboard/blueprint') 
-                ? 'bg-white/15 text-white font-medium shadow-sm' 
-                : 'text-purple-100 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="whitespace-nowrap">Consultation Success</span>
-          </Link>
-          
-          <Link 
             href="/dashboard/handbook" 
             className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
               isActive('/dashboard/handbook') 
@@ -221,6 +216,20 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false }: Sidebar
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             <span className="whitespace-nowrap">Handbook</span>
+          </Link>
+          
+          <Link 
+            href="/dashboard/blueprint" 
+            className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
+              isActive('/dashboard/blueprint') 
+                ? 'bg-white/15 text-white font-medium shadow-sm' 
+                : 'text-purple-100 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="whitespace-nowrap">Consultation Success</span>
           </Link>
           
           <Link 
@@ -258,15 +267,15 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false }: Sidebar
       </div>
       
       <div className="p-6 border-t border-purple-700/50 mt-auto">
-        <Link 
-          href="/logout" 
-          className="flex items-center text-sm text-purple-200 hover:text-white transition-colors group"
+        <button 
+          onClick={handleLogout}
+          className="flex items-center text-sm text-purple-200 hover:text-white transition-colors group w-full text-left"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
           <span className="whitespace-nowrap">Logout</span>
-        </Link>
+        </button>
       </div>
     </aside>
   );

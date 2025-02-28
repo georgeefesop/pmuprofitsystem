@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
@@ -12,6 +12,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/dashboard';
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,7 +24,8 @@ export default function Login() {
     try {
       const success = await login(email, password);
       if (success) {
-        router.push('/dashboard');
+        // Redirect to the original intended destination or dashboard
+        router.push(redirectPath);
       } else {
         setError('Invalid login credentials');
       }
@@ -35,7 +38,7 @@ export default function Login() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12">
+    <main className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
       <div className="container-custom">
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="p-8">

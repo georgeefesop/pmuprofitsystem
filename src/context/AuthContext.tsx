@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 interface User {
   id: string;
@@ -23,10 +24,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for user in localStorage on initial load
-    const storedUser = localStorage.getItem('pmu_user');
+    // Check for user in cookies on initial load
+    const storedUser = Cookies.get('pmu_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse user from cookie:', e);
+        Cookies.remove('pmu_user');
+      }
     }
     setIsLoading(false);
   }, []);
@@ -57,7 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     
     setUser(mockUser);
+    // Store in both localStorage (for backward compatibility) and cookies (for middleware)
     localStorage.setItem('pmu_user', JSON.stringify(mockUser));
+    Cookies.set('pmu_user', JSON.stringify(mockUser), { expires: 7 }); // Expires in 7 days
     setIsLoading(false);
     return true;
   };
@@ -65,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('pmu_user');
+    Cookies.remove('pmu_user');
   };
 
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
@@ -96,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Log the user in
     setUser(mockUser);
     localStorage.setItem('pmu_user', JSON.stringify(mockUser));
+    Cookies.set('pmu_user', JSON.stringify(mockUser), { expires: 7 }); // Expires in 7 days
     setIsLoading(false);
     return true;
   };

@@ -14,7 +14,6 @@ export default function DeleteAccountPage() {
   const [confirmChecks, setConfirmChecks] = useState({
     loseAccess: false,
     permanentDelete: false,
-    cancelSubscription: false,
   });
   
   const router = useRouter();
@@ -45,6 +44,30 @@ export default function DeleteAccountPage() {
       // });
       
       // if (!response.ok) throw new Error('Failed to delete account');
+      
+      // Send email notification about account deletion
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: 'pmuprofitsystem@gmail.com',
+            subject: 'Account Deletion Notification',
+            text: `
+              User Account Deletion:
+              
+              Email: ${user?.email}
+              Name: ${user?.name}
+              Reason for deletion: ${reason || 'No reason provided'}
+              
+              This account has been deleted from the PMU Profit System.
+            `
+          })
+        });
+      } catch (emailError) {
+        console.error('Failed to send deletion notification email:', emailError);
+        // Continue with deletion even if email fails
+      }
       
       // For demo, we'll simulate success
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -103,20 +126,6 @@ export default function DeleteAccountPage() {
                 />
                 <label htmlFor="permanentDelete" className="text-sm text-gray-700">
                   I understand that all my data will be permanently deleted and cannot be recovered.
-                </label>
-              </div>
-              
-              <div className="flex items-start">
-                <input
-                  type="checkbox"
-                  id="cancelSubscription"
-                  name="cancelSubscription"
-                  checked={confirmChecks.cancelSubscription}
-                  onChange={handleCheckChange}
-                  className="mt-1 mr-3"
-                />
-                <label htmlFor="cancelSubscription" className="text-sm text-gray-700">
-                  I understand that any active subscriptions will be canceled.
                 </label>
               </div>
             </div>

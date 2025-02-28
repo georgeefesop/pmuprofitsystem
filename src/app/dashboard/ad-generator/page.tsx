@@ -12,8 +12,6 @@ export default function PMUAdGenerator() {
   const [adText, setAdText] = useState('');
   const [generatedAds, setGeneratedAds] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [targetAudience, setTargetAudience] = useState('women-25-45');
-  const [adType, setAdType] = useState('facebook');
   
   // Check if the user has purchased the ad generator
   useEffect(() => {
@@ -93,43 +91,6 @@ export default function PMUAdGenerator() {
                     placeholder="e.g., Microblading, Powder Brows, Lip Blush, etc. Include any special offers or unique selling points."
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                   ></textarea>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700 mb-1">
-                      Target Audience
-                    </label>
-                    <select
-                      id="targetAudience"
-                      value={targetAudience}
-                      onChange={(e) => setTargetAudience(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                    >
-                      <option value="women-25-45">Women 25-45</option>
-                      <option value="women-45-plus">Women 45+</option>
-                      <option value="men-25-45">Men 25-45</option>
-                      <option value="men-45-plus">Men 45+</option>
-                      <option value="all-genders">All Genders</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="adType" className="block text-sm font-medium text-gray-700 mb-1">
-                      Ad Platform
-                    </label>
-                    <select
-                      id="adType"
-                      value={adType}
-                      onChange={(e) => setAdType(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                    >
-                      <option value="facebook">Facebook</option>
-                      <option value="instagram">Instagram</option>
-                      <option value="google">Google Ads</option>
-                      <option value="tiktok">TikTok</option>
-                    </select>
-                  </div>
                 </div>
                 
                 <div>

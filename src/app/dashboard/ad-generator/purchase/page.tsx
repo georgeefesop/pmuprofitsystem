@@ -88,8 +88,8 @@ export default function PMUAdGeneratorPurchase() {
               <div className="md:w-1/3">
                 <div className="bg-purple-50 rounded-lg p-6 sticky top-8">
                   <div className="text-center mb-4">
-                    <span className="text-3xl font-bold text-gray-900">$67</span>
-                    <span className="text-gray-500 line-through ml-2">$97</span>
+                    <span className="text-3xl font-bold text-gray-900">€27</span>
+                    <span className="text-gray-500 line-through ml-2">€47</span>
                   </div>
                   
                   <div className="space-y-4 mb-6">

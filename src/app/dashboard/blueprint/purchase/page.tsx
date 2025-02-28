@@ -88,8 +88,8 @@ export default function ConsultationSuccessPurchase() {
               <div className="md:w-1/3">
                 <div className="bg-purple-50 rounded-lg p-6 sticky top-8">
                   <div className="text-center mb-4">
-                    <span className="text-3xl font-bold text-gray-900">$97</span>
-                    <span className="text-gray-500 line-through ml-2">$147</span>
+                    <span className="text-3xl font-bold text-gray-900">€33</span>
+                    <span className="text-gray-500 line-through ml-2">€57</span>
                   </div>
                   
                   <div className="space-y-4 mb-6">

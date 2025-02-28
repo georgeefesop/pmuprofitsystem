@@ -11,8 +11,8 @@ export default function PMUHandbook() {
 
   return (
     <DashboardLayout title="PMU Business Handbook">
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-semibold mb-2">Your PMU Business Handbook</h2>
             <p className="text-gray-600">
@@ -23,7 +23,7 @@ export default function PMUHandbook() {
             href={handbookUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -69,80 +69,7 @@ export default function PMUHandbook() {
         </div>
       </div>
       
-      <div className="grid md:grid-cols-2 gap-8 mb-8">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Key Business Components</h3>
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">1</div>
-              <div>
-                <p className="font-medium">Legal Structure & Compliance</p>
-                <p className="text-sm text-gray-600">Setting up your business entity and meeting regulatory requirements</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</div>
-              <div>
-                <p className="font-medium">Studio Setup & Equipment</p>
-                <p className="text-sm text-gray-600">Creating a professional environment that impresses clients</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">3</div>
-              <div>
-                <p className="font-medium">Client Management</p>
-                <p className="text-sm text-gray-600">Systems for booking, communication, and follow-up</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">4</div>
-              <div>
-                <p className="font-medium">Marketing & Branding</p>
-                <p className="text-sm text-gray-600">Strategies to attract your ideal clients</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold mr-3 flex-shrink-0">5</div>
-              <div>
-                <p className="font-medium">Financial Management</p>
-                <p className="text-sm text-gray-600">Pricing, accounting, and growth planning</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Business Growth Strategies</h3>
-          <div className="space-y-4">
-            <div className="border-b border-gray-100 pb-3">
-              <p className="font-medium text-purple-600">Client Retention</p>
-              <p className="text-sm text-gray-600 mt-1">
-                "Implement a follow-up system that keeps clients coming back for touch-ups and referring their friends."
-              </p>
-            </div>
-            <div className="border-b border-gray-100 pb-3">
-              <p className="font-medium text-purple-600">Service Expansion</p>
-              <p className="text-sm text-gray-600 mt-1">
-                "Add complementary services that increase your average client value and provide additional revenue streams."
-              </p>
-            </div>
-            <div className="border-b border-gray-100 pb-3">
-              <p className="font-medium text-purple-600">Strategic Partnerships</p>
-              <p className="text-sm text-gray-600 mt-1">
-                "Collaborate with related businesses like salons, spas, and beauty professionals to expand your reach."
-              </p>
-            </div>
-            <div>
-              <p className="font-medium text-purple-600">Online Presence</p>
-              <p className="text-sm text-gray-600 mt-1">
-                "Develop a strong social media strategy and website that showcases your work and attracts new clients."
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-purple-50 rounded-lg shadow-sm p-6 mb-8">
+      <div className="bg-purple-50 rounded-lg shadow p-6 mb-8">
         <h3 className="text-lg font-semibold mb-4">Why Business Systems Matter</h3>
         <p className="text-gray-700 mb-4">
           Having proper business systems in place is crucial for the long-term success of your PMU practice. Without systems, you'll find yourself constantly putting out fires, dealing with scheduling conflicts, and struggling to maintain consistent client experiences.
@@ -162,7 +89,7 @@ export default function PMUHandbook() {
       </div>
       
       {/* Google Doc Embed */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h3 className="text-lg font-semibold mb-4">Preview Document</h3>
         <div className="relative w-full" style={{ paddingBottom: '75%' }}>
           <iframe 
