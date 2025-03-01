@@ -2,24 +2,30 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/lib/supabase';
 
 // Define the types of products that can be purchased
 export type ProductId = 'pmu-profit-system' | 'consultation-success-blueprint' | 'pmu-ad-generator';
 
 // Define the purchase record structure
 interface Purchase {
-  productId: ProductId;
-  purchaseDate: string;
-  expiryDate?: string; // Optional expiry date
+  id: string;
+  user_id: string;
+  product_id: ProductId;
+  amount: number;
+  status: string;
+  created_at: string;
 }
 
 // Define the context interface
 interface PurchaseContextType {
   purchases: Purchase[];
+  isLoading: boolean;
   hasPurchased: (productId: ProductId) => boolean;
-  addPurchase: (productId: ProductId) => void;
-  removePurchase: (productId: ProductId) => void;
-  resetPurchasesExceptSystem: () => void; // New utility function
+  addPurchase: (productId: ProductId, amount: number, email?: string) => Promise<{ success: boolean; error?: string }>;
+  refreshPurchases: () => Promise<void>;
+  getPendingPurchases: () => { productId: ProductId; amount: number }[];
+  claimPendingPurchases: () => Promise<void>;
 }
 
 // Create the context with a default value
@@ -29,71 +35,151 @@ const PurchaseContext = createContext<PurchaseContextType | undefined>(undefined
 export function PurchaseProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load purchases from localStorage when the component mounts or user changes
-  useEffect(() => {
-    if (user) {
-      // Use email as a unique identifier instead of uid
-      const userId = typeof user === 'object' && user !== null && 'email' in user ? user.email : 'guest';
-      const storedPurchases = localStorage.getItem(`purchases_${userId}`);
-      if (storedPurchases) {
-        setPurchases(JSON.parse(storedPurchases));
-      } else {
-        // Default purchase for demo purposes - in a real app, this would come from a database
-        setPurchases([
-          {
-            productId: 'pmu-profit-system',
-            purchaseDate: new Date('2024-01-15').toISOString()
-          }
-        ]);
-      }
-    } else {
+  // Fetch purchases from Supabase when the component mounts or user changes
+  const fetchPurchases = async () => {
+    if (!user) {
       setPurchases([]);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'completed');
+
+      if (error) {
+        console.error('Error fetching purchases:', error);
+        return;
+      }
+
+      setPurchases(data || []);
+    } catch (error) {
+      console.error('Error fetching purchases:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPurchases();
+    
+    // If user just logged in, check for pending purchases to claim
+    if (user) {
+      claimPendingPurchases();
     }
   }, [user]);
 
-  // Save purchases to localStorage whenever they change
-  useEffect(() => {
-    if (user) {
-      // Use email as a unique identifier instead of uid
-      const userId = typeof user === 'object' && user !== null && 'email' in user ? user.email : 'guest';
-      localStorage.setItem(`purchases_${userId}`, JSON.stringify(purchases));
-    }
-  }, [purchases, user]);
-
   // Check if the user has purchased a specific product
   const hasPurchased = (productId: ProductId): boolean => {
-    return purchases.some(purchase => purchase.productId === productId);
+    return purchases.some(purchase => purchase.product_id === productId);
+  };
+
+  // Get pending purchases from localStorage
+  const getPendingPurchases = (): { productId: ProductId; amount: number }[] => {
+    if (typeof window === 'undefined') return [];
+    
+    const pendingPurchasesJson = localStorage.getItem('pendingPurchases');
+    if (!pendingPurchasesJson) return [];
+    
+    try {
+      return JSON.parse(pendingPurchasesJson);
+    } catch (error) {
+      console.error('Error parsing pending purchases:', error);
+      return [];
+    }
+  };
+
+  // Claim pending purchases after login
+  const claimPendingPurchases = async (): Promise<void> => {
+    if (!user) return;
+    
+    const pendingPurchases = getPendingPurchases();
+    if (pendingPurchases.length === 0) return;
+    
+    console.log('Claiming pending purchases:', pendingPurchases);
+    
+    // Process each pending purchase
+    for (const purchase of pendingPurchases) {
+      try {
+        const { success, error } = await addPurchase(purchase.productId, purchase.amount);
+        if (!success) {
+          console.error(`Failed to claim pending purchase ${purchase.productId}:`, error);
+        }
+      } catch (error) {
+        console.error(`Error claiming pending purchase ${purchase.productId}:`, error);
+      }
+    }
+    
+    // Clear pending purchases after processing
+    localStorage.removeItem('pendingPurchases');
   };
 
   // Add a new purchase
-  const addPurchase = (productId: ProductId) => {
-    if (!hasPurchased(productId)) {
-      const newPurchase: Purchase = {
-        productId,
-        purchaseDate: new Date().toISOString(),
-      };
-      setPurchases(prev => [...prev, newPurchase]);
+  const addPurchase = async (productId: ProductId, amount: number, email?: string): Promise<{ success: boolean; error?: string }> => {
+    // If user is not authenticated, store the purchase as pending
+    if (!user) {
+      if (typeof window !== 'undefined') {
+        // Store the pending purchase in localStorage
+        const pendingPurchases = getPendingPurchases();
+        pendingPurchases.push({ productId, amount });
+        localStorage.setItem('pendingPurchases', JSON.stringify(pendingPurchases));
+        
+        // Also store the email if provided (for later registration)
+        if (email) {
+          localStorage.setItem('pendingPurchaseEmail', email);
+        }
+        
+        console.log('Stored pending purchase:', { productId, amount });
+        return { success: true, error: 'Purchase stored as pending until you log in or register' };
+      }
+      return { success: false, error: 'Cannot store pending purchase (browser storage not available)' };
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .insert({
+          user_id: user.id,
+          product_id: productId,
+          amount: amount,
+          status: 'completed'
+        })
+        .select();
+
+      if (error) {
+        console.error('Error adding purchase:', error);
+        return { success: false, error: error.message };
+      }
+
+      // Refresh purchases after adding a new one
+      await fetchPurchases();
+      return { success: true };
+    } catch (error) {
+      console.error('Error adding purchase:', error);
+      return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
-  // Remove a purchase (for testing or admin purposes)
-  const removePurchase = (productId: ProductId) => {
-    setPurchases(prev => prev.filter(purchase => purchase.productId !== productId));
-  };
-  
-  // Reset all purchases except the PMU Profit System (for testing purchase flows)
-  const resetPurchasesExceptSystem = () => {
-    setPurchases(prev => prev.filter(purchase => purchase.productId === 'pmu-profit-system'));
+  // Refresh purchases from the database
+  const refreshPurchases = async () => {
+    await fetchPurchases();
   };
 
   return (
     <PurchaseContext.Provider value={{ 
       purchases, 
+      isLoading,
       hasPurchased, 
-      addPurchase, 
-      removePurchase,
-      resetPurchasesExceptSystem
+      addPurchase,
+      refreshPurchases,
+      getPendingPurchases,
+      claimPendingPurchases
     }}>
       {children}
     </PurchaseContext.Provider>

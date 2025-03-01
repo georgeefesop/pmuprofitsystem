@@ -1,5 +1,6 @@
-
   You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+
+  You are also an expert UX and UI designer and you always try to make the design look modern and beautiful, like something that would be featured on dribble.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -7,6 +8,7 @@
   - Prefer iteration and modularization over code duplication.
   - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
   - Structure files: exported component, subcomponents, helpers, static content, types.
+  - Implement code in chunks so as to avoid timeouts 
   
   Naming Conventions
   - Use lowercase with dashes for directories (e.g., components/auth-wizard).
@@ -41,4 +43,12 @@
     - Avoid for data fetching or state management.
   
   Follow Next.js docs for Data Fetching, Rendering, and Routing.
+  
+  Changelog Management
+  - Track all significant changes in referenceassets/.changelog
+  - For each set of related changes, create a new dated entry
+  - Organize changes into categories: Fixed Issues, New Features, Security Enhancements, Code Improvements
+  - Include brief descriptions of what changed and why
+  - Note any known issues that still need to be addressed
+  - Update the changelog before completing a major task or feature
   

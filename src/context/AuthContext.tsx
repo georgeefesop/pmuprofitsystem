@@ -2,19 +2,24 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import { supabase, getSecureSiteUrl } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 interface User {
   id: string;
   email: string;
-  name: string;
+  full_name: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  register: (email: string, password: string, name: string) => Promise<boolean>;
+  sessionCheckFailed: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (data: Partial<User>) => Promise<{ success: boolean; error?: string }>;
+  resendVerificationEmail: (email: string) => Promise<{ success: boolean; error?: string; previewUrl?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,96 +27,513 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionCheckFailed, setSessionCheckFailed] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    // Check for user in cookies on initial load
-    const storedUser = Cookies.get('pmu_user');
-    if (storedUser) {
+    // Check for active session on initial load
+    const checkSession = async () => {
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse user from cookie:', e);
-        Cookies.remove('pmu_user');
+        console.log('Checking session...');
+        
+        // Add a timeout to prevent hanging
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timed out after 10 seconds')), 10000)
+        );
+        
+        // Race the session check against the timeout
+        const { data: { session } } = await Promise.race([
+          sessionPromise,
+          timeoutPromise.then(() => {
+            console.error('Session check timed out - this may indicate connectivity issues with Supabase');
+            console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+            setSessionCheckFailed(true);
+            return { data: { session: null } };
+          })
+        ]) as any;
+        
+        console.log('Session check result:', session ? 'Session found' : 'No session');
+        
+        if (session) {
+          console.log('User from session:', session.user);
+          
+          // Get user profile data
+          try {
+            const { data, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+              
+            if (data) {
+              console.log('User profile data:', data);
+              setUser(data as User);
+            } else if (error) {
+              console.error('Error fetching user profile:', error);
+              
+              // If user exists in auth but not in users table, create a profile
+              if (error.code === 'PGRST116') { // No rows returned
+                console.log('Creating user profile for:', session.user.id);
+                const { data: newProfile, error: insertError } = await supabase
+                  .from('users')
+                  .insert({
+                    id: session.user.id,
+                    email: session.user.email,
+                    full_name: session.user.user_metadata?.full_name || '',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  })
+                  .select()
+                  .single();
+                  
+                if (newProfile) {
+                  console.log('Created new profile:', newProfile);
+                  setUser(newProfile as User);
+                } else if (insertError) {
+                  console.error('Error creating user profile:', insertError);
+                }
+              }
+            }
+          } catch (profileError) {
+            console.error('Error handling user profile:', profileError);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setSessionCheckFailed(true);
+      } finally {
+        // Always set loading to false, even if there was an error
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+    
+    // Start the session check
+    checkSession();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+        
+        if (session) {
+          // Get user profile data
+          const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (data) {
+            console.log('User profile data from auth change:', data);
+            setUser(data as User);
+          } else if (error) {
+            console.error('Error fetching user profile from auth change:', error);
+            
+            // If user exists in auth but not in users table, create a profile
+            if (error.code === 'PGRST116') { // No rows returned
+              console.log('Creating user profile from auth change for:', session.user.id);
+              const { data: newProfile, error: insertError } = await supabase
+                .from('users')
+                .insert({
+                  id: session.user.id,
+                  email: session.user.email,
+                  full_name: session.user.user_metadata?.full_name || '',
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+                
+              if (newProfile) {
+                console.log('Created new profile from auth change:', newProfile);
+                setUser(newProfile as User);
+              } else if (insertError) {
+                console.error('Error creating user profile from auth change:', insertError);
+              }
+            }
+          }
+        } else {
+          setUser(null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock login - in a real app, this would call an API
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      console.log('Attempting login with:', email);
+      
+      // Add a timeout to prevent hanging
+      const loginPromise = supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Login timed out after 15 seconds')), 15000)
+      );
+      
+      // Race the login against the timeout
+      const { data, error } = await Promise.race([
+        loginPromise,
+        timeoutPromise.then(() => {
+          console.error('Login timed out - this may indicate connectivity issues with Supabase');
+          return { data: null, error: { message: 'Login timed out after 15 seconds' } };
+        })
+      ]) as any;
+      
+      console.log('Login response:', data ? 'Success' : 'Failed', error);
+      
+      if (error) {
+        console.error('Login error from Supabase:', error);
+        return { success: false, error: error.message };
+      }
+      
+      if (!data?.user || !data?.session) {
+        console.error('Login succeeded but no user or session returned');
+        return { success: false, error: 'Authentication succeeded but session creation failed' };
+      }
+      
+      console.log('Login successful, user:', data.user.id);
+      
+      // Explicitly check for user profile and create if needed
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (profileError) {
+          console.log('Profile fetch error:', profileError.code, profileError.message);
+          
+          if (profileError.code === 'PGRST116') {
+            // Create profile if it doesn't exist
+            console.log('Creating user profile after login for:', data.user.id);
+            const { data: newProfile, error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: data.user.id,
+                email: data.user.email,
+                full_name: data.user.user_metadata?.full_name || '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .select()
+              .single();
+              
+            if (newProfile) {
+              console.log('Created new profile after login:', newProfile);
+              setUser(newProfile as User);
+            } else if (insertError) {
+              console.error('Error creating user profile after login:', insertError);
+              // Continue anyway, as auth was successful
+            }
+          } else {
+            console.error('Unexpected error fetching profile:', profileError);
+          }
+        } else if (profile) {
+          // Set the user state directly
+          console.log('Setting user from profile after login:', profile);
+          setUser(profile as User);
+        }
+      } catch (profileError) {
+        console.error('Exception during profile handling:', profileError);
+        // Continue anyway, as auth was successful
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'An unexpected error occurred' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    setIsLoading(true);
     
-    // For demo purposes, any email/password combination works
-    // In a real app, you would validate credentials against your backend
+    try {
+      console.log('Logging out...');
+      await supabase.auth.signOut();
+      setUser(null);
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const register = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true);
     
-    // Try to get the stored user with this email to preserve their name
-    const storedUsers = localStorage.getItem('pmu_users');
-    let userRecord = null;
-    
-    if (storedUsers) {
-      const users = JSON.parse(storedUsers);
-      userRecord = users.find((u: any) => u.email === email);
+    try {
+      console.log('Registering user:', email);
+      
+      // First check if the user already exists
+      try {
+        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+        
+        if (!userError && userData) {
+          const existingUser = userData.users.find(u => u.email === email);
+          
+          if (existingUser) {
+            // If the user exists but is banned, unban them
+            if ((existingUser as any).banned_until) {
+              const { error: updateError } = await supabase.auth.admin.updateUserById(
+                existingUser.id,
+                { ban_duration: '0' }
+              );
+              
+              if (updateError) {
+                console.error('Error unbanning existing user:', updateError);
+              } else {
+                console.log('Unbanned existing user:', existingUser.id);
+              }
+            }
+            
+            // If the user exists but doesn't have a password, we'll proceed with sign-up
+            // which will either link the account or return an "already exists" error
+            console.log('User already exists, proceeding with sign-up to potentially update account');
+          }
+        }
+      } catch (checkError) {
+        console.error('Error checking for existing user:', checkError);
+        // Continue with registration attempt
+      }
+      
+      // Get the site URL, preserving the protocol
+      const redirectUrl = `${getSecureSiteUrl()}/auth/callback`;
+      console.log('Using redirect URL for registration:', redirectUrl);
+      
+      // Proceed with registration
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+          // Explicitly set emailRedirectTo to ensure proper redirect after email verification
+          emailRedirectTo: redirectUrl,
+        },
+      });
+      
+      console.log('Registration response:', data ? 'Success' : 'Failed', error);
+      
+      if (error) {
+        console.error('Registration error from Supabase:', error);
+        
+        // If the error is that the user already exists, provide a helpful message
+        if (error.message.includes('already exists')) {
+          return { 
+            success: false, 
+            error: 'An account with this email already exists. Please log in or use the "Forgot Password" option if needed.' 
+          };
+        }
+        
+        return { success: false, error: error.message };
+      }
+      
+      if (!data.user) {
+        console.error('Registration succeeded but no user returned');
+        return { success: false, error: 'Registration succeeded but no user was created' };
+      }
+      
+      console.log('Registration successful, user:', data.user.id);
+      
+      // Check if email confirmation is required
+      if (data.session === null) {
+        console.log('Email confirmation required for:', data.user.id);
+        // Return success but indicate email confirmation is needed
+        return { 
+          success: true, 
+          error: 'Please check your email for a verification link before logging in.' 
+        };
+      }
+      
+      // If user was created, also create a profile
+      // But don't wait for this to complete - it can happen asynchronously
+      // This prevents the timeout issue
+      try {
+        console.log('Creating user profile after registration for:', data.user.id);
+        
+        // Create profile in the background
+        (async () => {
+          try {
+            const { error: profileError } = await supabase
+              .from('users')
+              .insert({
+                id: data.user!.id,
+                email: data.user!.email || email, // Fallback to the email parameter if user.email is null
+                full_name: name,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+              
+            if (profileError) {
+              console.error('Error creating user profile after registration:', profileError);
+            } else {
+              console.log('User profile created successfully');
+            }
+          } catch (err) {
+            console.error('Exception during profile creation:', err);
+          }
+        })();
+        
+        // Return success immediately after auth, don't wait for profile creation
+        return { success: true };
+      } catch (profileError) {
+        console.error('Exception during profile creation setup:', profileError);
+        // Continue anyway, as auth was successful
+        return { success: true };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'An unexpected error occurred' };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateProfile = async (data: Partial<User>): Promise<{ success: boolean; error?: string }> => {
+    if (!user) {
+      return { success: false, error: 'Not authenticated' };
     }
     
-    const mockUser = {
-      id: '1',
-      email,
-      name: userRecord?.name || email, // Use stored name or email as fallback
-    };
-    
-    setUser(mockUser);
-    // Store in both localStorage (for backward compatibility) and cookies (for middleware)
-    localStorage.setItem('pmu_user', JSON.stringify(mockUser));
-    Cookies.set('pmu_user', JSON.stringify(mockUser), { expires: 7 }); // Expires in 7 days
-    setIsLoading(false);
-    return true;
+    try {
+      console.log('Updating profile for:', user.id, data);
+      const { error } = await supabase
+        .from('users')
+        .update({
+          ...data,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+        
+      if (error) {
+        console.error('Profile update error:', error);
+        return { success: false, error: error.message };
+      }
+      
+      setUser({ ...user, ...data });
+      return { success: true };
+    } catch (error) {
+      console.error('Profile update error:', error);
+      return { success: false, error: 'An unexpected error occurred' };
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('pmu_user');
-    Cookies.remove('pmu_user');
-  };
+  const resendVerificationEmail = async (email: string): Promise<{ success: boolean; error?: string; previewUrl?: string }> => {
+    try {
+      console.log('Resending verification email to:', email);
+      
+      // Get the site URL, preserving the protocol
+      const redirectUrl = `${getSecureSiteUrl()}/auth/callback`;
+      console.log('Using redirect URL:', redirectUrl);
+      
+      // We can't check if the user exists from the client side with the regular client
+      // So we'll just attempt to resend the verification email
+      
+      // Attempt to resend the verification email
+      const { data, error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+      
+      console.log('Resend response:', data ? 'Success' : 'Failed', error);
+      
+      if (error) {
+        console.error('Error resending verification email:', error);
+        
+        // Handle specific error cases
+        if (error.message.includes('rate limit')) {
+          return { 
+            success: false, 
+            error: 'Too many verification emails sent recently. Please wait a few minutes and try again.' 
+          };
+        }
+        
+        // Check if the user doesn't exist
+        if (error.message.includes('User not found') || error.message.includes('No user found')) {
+          return { 
+            success: false, 
+            error: 'No account found with this email address. Please check the email or sign up for a new account.' 
+          };
+        }
+        
+        return { success: false, error: error.message };
+      }
+      
+      // Try to send a custom email through our API as a backup
+      let previewUrl: string | undefined;
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: email,
+            subject: 'Verification Email Resent',
+            text: `A verification email has been resent to your address. Please check your inbox and spam folder for an email from Supabase or PMU Profit System.
+            
+If you don't receive it within a few minutes, please contact support.
 
-  const register = async (email: string, password: string, name: string): Promise<boolean> => {
-    // Mock registration - in a real app, this would call an API
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const userId = Date.now().toString();
-    
-    const mockUser = {
-      id: userId,
-      email,
-      name: name || email, // Use provided name or email as fallback
-    };
-    
-    // Store user in a "database" (localStorage)
-    const storedUsers = localStorage.getItem('pmu_users') || '[]';
-    const users = JSON.parse(storedUsers);
-    users.push({
-      id: userId,
-      email,
-      name,
-      password, // In a real app, you would NEVER store passwords in plain text
-    });
-    localStorage.setItem('pmu_users', JSON.stringify(users));
-    
-    // Log the user in
-    setUser(mockUser);
-    localStorage.setItem('pmu_user', JSON.stringify(mockUser));
-    Cookies.set('pmu_user', JSON.stringify(mockUser), { expires: 7 }); // Expires in 7 days
-    setIsLoading(false);
-    return true;
+Verification Link: ${redirectUrl}?type=signup&email=${encodeURIComponent(email)}
+(Note: This is a backup link. The official verification link in the email from Supabase should be used first.)`
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.previewUrl) {
+            console.log('Email preview URL:', data.previewUrl);
+            previewUrl = data.previewUrl;
+          }
+        } else {
+          console.warn('Failed to send backup notification email');
+        }
+      } catch (emailError) {
+        console.error('Error sending backup email:', emailError);
+        // Continue anyway, as this is just a backup notification
+      }
+      
+      return { 
+        success: true,
+        previewUrl
+      };
+    } catch (error) {
+      console.error('Exception during resend verification:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'An unexpected error occurred' };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isLoading, 
+      login, 
+      logout, 
+      register, 
+      updateProfile,
+      sessionCheckFailed,
+      resendVerificationEmail
+    }}>
       {children}
     </AuthContext.Provider>
   );
