@@ -1,9 +1,22 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 
+// Helper function to ensure Supabase URL is using HTTPS in production
+export const getSecureSupabaseUrl = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  
+  // Only convert to HTTPS if it's not localhost and currently using HTTP
+  if (supabaseUrl.startsWith('http://') && !supabaseUrl.includes('localhost')) {
+    console.log('Converting Supabase URL from HTTP to HTTPS for security');
+    return supabaseUrl.replace('http://', 'https://');
+  }
+  
+  return supabaseUrl;
+};
+
 // Create a single supabase client for interacting with your database from the browser
 export const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  getSecureSupabaseUrl(),
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   {
     auth: {
@@ -61,7 +74,7 @@ export const supabase = createBrowserClient(
 
 // For server-side operations that need elevated privileges
 export const getServiceSupabase = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseUrl = getSecureSupabaseUrl();
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   
   // Use the standard createClient for server-side operations

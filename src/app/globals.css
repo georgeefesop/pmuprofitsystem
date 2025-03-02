@@ -31,6 +31,9 @@
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Plus Jakarta Sans', var(--font-sans);
+  
+  /* Navbar height for spacing */
+  --navbar-height: 4rem; /* 64px */
 }
 
 /* Custom Scrollbar Styling */
@@ -100,6 +103,19 @@
       padding-left: 2rem;
       padding-right: 2rem;
     }
+  }
+  
+  /* Navbar spacing utility */
+  .navbar-spacing {
+    padding-top: var(--navbar-height);
+  }
+  
+  .content-with-navbar {
+    min-height: calc(100vh - var(--navbar-height));
+  }
+  
+  .page-header-with-navbar {
+    padding-top: calc(var(--navbar-height) + 2rem);
   }
   
   /* Buttons */

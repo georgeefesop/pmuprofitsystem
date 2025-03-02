@@ -33,7 +33,7 @@ export default function RootLayout({
         <AuthProvider>
           <PurchaseProvider>
             <Navbar />
-            <main className="flex-grow flex flex-col relative">
+            <main className="flex-grow flex flex-col relative navbar-spacing">
               {children}
             </main>
             <SiteFooter />

@@ -330,6 +330,21 @@ function LoginForm() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-700">{error}</p>
+                  
+                  {/* Add diagnostics link for connection errors */}
+                  {connectionError && (
+                    <div className="mt-2">
+                      <Link 
+                        href="/diagnostics" 
+                        className="inline-flex items-center text-sm font-medium text-red-700 hover:text-red-900"
+                      >
+                        <span>View System Diagnostics</span>
+                        <svg className="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle, XCircle, AlertTriangle, RefreshCw, ArrowLeft, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, RefreshCw, ArrowLeft, ExternalLink, Wifi, WifiOff } from 'lucide-react';
 
 export default function DiagnosticsPage() {
   const router = useRouter();
@@ -35,10 +35,33 @@ export default function DiagnosticsPage() {
     isHttps: boolean;
     userAgent: string;
   } | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   useEffect(() => {
     checkConnection();
     collectEnvironmentInfo();
+    
+    // Set initial online status
+    setIsOnline(navigator.onLine);
+    
+    // Add event listeners for online/offline status
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Automatically recheck connection when coming back online
+      checkConnection();
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   const checkConnection = async () => {
@@ -144,7 +167,33 @@ export default function DiagnosticsPage() {
           Back to Home
         </Button>
         <h1 className="text-3xl font-bold">System Diagnostics</h1>
+        
+        {/* Network status indicator */}
+        <div className="ml-auto flex items-center">
+          {isOnline ? (
+            <div className="flex items-center text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm">
+              <Wifi className="h-4 w-4 mr-1" />
+              <span>Online</span>
+            </div>
+          ) : (
+            <div className="flex items-center text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm">
+              <WifiOff className="h-4 w-4 mr-1" />
+              <span>Offline</span>
+            </div>
+          )}
+        </div>
       </div>
+      
+      {/* Offline warning */}
+      {!isOnline && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          <AlertTitle>You are currently offline</AlertTitle>
+          <AlertDescription>
+            Your device is not connected to the internet. Please check your network connection to resolve Supabase connectivity issues.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Tabs defaultValue="connection" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
@@ -185,7 +234,7 @@ export default function DiagnosticsPage() {
               </Button>
               <Button 
                 onClick={attemptFix} 
-                disabled={connectionStatus.status === 'connected' || isFixing}
+                disabled={connectionStatus.status === 'connected' || isFixing || !isOnline}
                 variant={connectionStatus.status === 'error' ? 'default' : 'outline'}
               >
                 {isFixing ? 'Attempting Fix...' : 'Attempt Auto-Fix'}
@@ -243,6 +292,21 @@ export default function DiagnosticsPage() {
                         <>
                           <XCircle className="h-4 w-4 mr-2 text-red-500" />
                           No
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="font-medium">Network Status:</div>
+                    <div className="flex items-center">
+                      {isOnline ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                          Online
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4 mr-2 text-red-500" />
+                          Offline
                         </>
                       )}
                     </div>

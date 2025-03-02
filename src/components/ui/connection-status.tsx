@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { checkSupabaseConnection, logSupabaseDiagnostics } from '@/lib/supabase-utils';
-import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, ExternalLink, Info } from 'lucide-react';
 
 interface ConnectionStatusProps {
   showDetails?: boolean;
@@ -13,6 +13,33 @@ export function ConnectionStatus({ showDetails = false }: ConnectionStatusProps)
   const [message, setMessage] = useState<string>('Checking connection...');
   const [details, setDetails] = useState<Record<string, any> | undefined>(undefined);
   const [isChecking, setIsChecking] = useState<boolean>(true);
+  const [environmentInfo, setEnvironmentInfo] = useState<{
+    protocol: string;
+    hostname: string;
+    supabaseUrl: string;
+    isHttps: boolean;
+  } | null>(null);
+
+  const collectEnvironmentInfo = () => {
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not configured';
+      const isHttps = protocol === 'https:';
+
+      setEnvironmentInfo({
+        protocol,
+        hostname,
+        supabaseUrl,
+        isHttps,
+      });
+
+      // Log protocol mismatch warning
+      if (isHttps && supabaseUrl.startsWith('http://')) {
+        console.warn('Protocol mismatch detected: Site is using HTTPS but Supabase URL is using HTTP');
+      }
+    }
+  };
 
   const checkConnection = async () => {
     setIsChecking(true);
@@ -20,6 +47,9 @@ export function ConnectionStatus({ showDetails = false }: ConnectionStatusProps)
     setMessage('Checking connection...');
 
     try {
+      // Collect environment info first
+      collectEnvironmentInfo();
+      
       // Log diagnostics to console for debugging
       logSupabaseDiagnostics();
       
@@ -47,6 +77,9 @@ export function ConnectionStatus({ showDetails = false }: ConnectionStatusProps)
   useEffect(() => {
     checkConnection();
   }, []);
+
+  // Check for protocol mismatch
+  const hasProtocolMismatch = environmentInfo?.isHttps && environmentInfo?.supabaseUrl.startsWith('http://');
 
   return (
     <div className="rounded-lg border p-4 shadow-sm">
@@ -85,9 +118,37 @@ export function ConnectionStatus({ showDetails = false }: ConnectionStatusProps)
       
       <p className="mt-2 text-sm text-muted-foreground">{message}</p>
       
+      {/* Protocol mismatch warning */}
+      {hasProtocolMismatch && (
+        <div className="mt-4 rounded-md bg-amber-50 p-3">
+          <div className="flex">
+            <Info className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" />
+            <div>
+              <h4 className="font-medium text-amber-800">Protocol Mismatch Detected</h4>
+              <p className="text-sm text-amber-700 mt-1">
+                Your site is using HTTPS but your Supabase URL is using HTTP. This can cause connection issues in modern browsers.
+              </p>
+              <p className="text-sm text-amber-700 mt-2">
+                Solution: Update your NEXT_PUBLIC_SUPABASE_URL environment variable to use HTTPS instead of HTTP.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {showDetails && details && status === 'error' && (
         <div className="mt-4 rounded-md bg-red-50 p-3">
           <h4 className="font-medium text-red-800">Troubleshooting Information</h4>
+          
+          {environmentInfo && (
+            <div className="mt-2 text-sm">
+              <p className="font-medium text-red-800">Environment:</p>
+              <ul className="mt-1 list-disc pl-5 text-red-700">
+                <li>Site Protocol: {environmentInfo.protocol}</li>
+                <li>Supabase URL: {environmentInfo.supabaseUrl.substring(0, 30)}...</li>
+              </ul>
+            </div>
+          )}
           
           {details.possibleCauses && (
             <div className="mt-2">
@@ -128,6 +189,17 @@ export function ConnectionStatus({ showDetails = false }: ConnectionStatusProps)
             <li>If using HTTPS, make sure your Supabase URL also uses HTTPS</li>
             <li>Check if your browser has any extensions blocking the connection</li>
             <li>Try clearing your browser cache and cookies</li>
+            <li>
+              <a 
+                href="https://supabase.com/docs/guides/auth/auth-helpers/nextjs" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-600 hover:underline mt-2"
+              >
+                View Supabase Documentation
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>
+            </li>
           </ul>
         </div>
       )}
