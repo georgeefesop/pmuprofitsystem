@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle, XCircle, AlertTriangle, RefreshCw, ArrowLeft, ExternalLink, Wifi, WifiOff } from 'lucide-react';
+import { isProduction, shouldRenderDiagnostics } from './config';
 
 export default function DiagnosticsPage() {
   const router = useRouter();
@@ -36,15 +37,10 @@ export default function DiagnosticsPage() {
     userAgent: string;
   } | null>(null);
   const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [isProduction, setIsProduction] = useState(false);
 
   useEffect(() => {
-    // Check if we're in production environment
-    const isProductionEnv = process.env.NODE_ENV === 'production';
-    setIsProduction(isProductionEnv);
-    
     // Only run diagnostics in development
-    if (!isProductionEnv) {
+    if (shouldRenderDiagnostics) {
       checkConnection();
     }
     

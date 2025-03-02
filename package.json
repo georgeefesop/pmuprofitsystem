@@ -11,6 +11,7 @@
     "setup:https": "node scripts/setup-https.js",
     "prebuild": "node scripts/check-image-domains.js",
     "build": "next build",
+    "build:vercel": "node scripts/vercel-build.js",
     "start": "next start",
     "lint": "next lint",
     "check-errors": "node scripts/check-build-errors.js",

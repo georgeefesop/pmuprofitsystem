@@ -34,6 +34,45 @@ const nextConfig = {
         } 
       : {},
   },
+  // Conditionally exclude pages from production builds
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'].filter(ext => {
+    // In production, filter out diagnostic pages
+    if (process.env.NODE_ENV === 'production') {
+      return true;
+    }
+    return true;
+  }),
 };
+
+// Special handling for Vercel builds
+if (process.env.VERCEL) {
+  // Create a custom rewrites configuration for Vercel
+  nextConfig.rewrites = async () => {
+    return [
+      {
+        // Redirect any requests to /diagnostics to the home page in production
+        source: '/diagnostics',
+        destination: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'pmuprofitsystem.vercel.app',
+          },
+        ],
+      },
+      {
+        // Redirect any requests to /diagnostics/* to the home page in production
+        source: '/diagnostics/:path*',
+        destination: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'pmuprofitsystem.vercel.app',
+          },
+        ],
+      },
+    ];
+  };
+}
 
 module.exports = nextConfig; 
