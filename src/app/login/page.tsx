@@ -1,13 +1,39 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
+import { motion } from 'framer-motion';
 
-export default function Login() {
+// Loading fallback component
+function LoginFormSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-12 rounded-full bg-gray-200 mb-4"></div>
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-8"></div>
+        </div>
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <div className="space-y-6 animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-1/4 mb-2"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/4 mb-2"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main login component that uses useSearchParams
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +49,26 @@ export default function Login() {
   const { login, resendVerificationEmail } = useAuth();
   const { claimPendingPurchases } = usePurchases();
   const [hasPendingPurchases, setHasPendingPurchases] = useState(false);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
 
   // Set error from URL if present
   useEffect(() => {
@@ -223,161 +269,235 @@ export default function Login() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
-      <div className="container-custom">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="p-8">
-            <div className="text-center mb-8">
-              <h1 className="heading-lg mb-2">Welcome Back</h1>
-              <p className="text-gray-600">Log in to access your PMU Profit System</p>
-            </div>
-            
-            {justRegistered && (
-              <div className="bg-green-50 text-green-700 p-4 rounded-md mb-6">
-                <p className="font-medium">Account created successfully!</p>
-                <p className="mt-1">Please check your email for a verification link. After verifying your email, log in to complete your purchase.</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center">
+          <Link href="/" className="flex items-center">
+            <img
+              className="h-12 w-auto"
+              src="/logo.png"
+              alt="PMU Profit System"
+            />
+          </Link>
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign in to your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+            create a new account
+          </Link>
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <motion.div 
+          className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {justRegistered && (
+            <motion.div 
+              className="mb-4 p-4 bg-green-50 border border-green-100 rounded-md"
+              variants={itemVariants}
+            >
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-green-800">Account created successfully!</p>
+                </div>
               </div>
-            )}
-            
-            {hasPendingPurchases && (
-              <div className="bg-blue-50 text-blue-700 p-4 rounded-md mb-6">
-                <p className="font-medium">You have pending purchases!</p>
-                <p className="mt-1">Log in to claim your purchases and access your content.</p>
+            </motion.div>
+          )}
+
+          {hasPendingPurchases && (
+            <motion.div 
+              className="mb-4 p-4 bg-blue-50 border border-blue-100 rounded-md"
+              variants={itemVariants}
+            >
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-blue-800">You have pending purchases!</p>
+                </div>
               </div>
-            )}
-            
-            {error && (
-              <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
-                {error}
+            </motion.div>
+          )}
+
+          {error && (
+            <motion.div 
+              className="mb-4 p-4 bg-red-50 border border-red-100 rounded-md"
+              variants={itemVariants}
+            >
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
               </div>
-            )}
-            
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
+            </motion.div>
+          )}
+
+          <motion.form className="space-y-6" onSubmit={handleSubmit} variants={itemVariants}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <div className="mt-1">
                 <input
-                  type="email"
                   id="email"
                   name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="your@email.com"
-                  required
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
-              
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
                 <input
-                  type="password"
                   id="password"
                   name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="Enter your password"
-                  required
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                    Remember me
-                  </label>
-                </div>
-                
-                <div className="text-sm">
-                  <Link href="/forgot-password" className="text-purple-600 hover:text-purple-500">
-                    Forgot your password?
-                  </Link>
-                </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  Remember me
+                </label>
               </div>
-              
-              <div>
-                <button
-                  type="submit"
-                  className="w-full btn-primary"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Logging in...' : 'Log In'}
-                </button>
+
+              <div className="text-sm">
+                <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Forgot your password?
+                </Link>
               </div>
-            </form>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
+                )}
+              </button>
+            </div>
+          </motion.form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or</span>
+              </div>
+            </div>
             
-            {/* Resend Verification Email Section */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Didn't receive verification email?</h3>
+            <div className="mt-6">
+              <h3 className="text-center text-sm font-medium text-gray-700 mb-4">
+                Need to verify your email?
+              </h3>
               
-              {resendStatus && (
-                <div className={`p-4 rounded-md mb-4 ${resendStatus.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                  {resendStatus.message}
-                  
-                  {resendStatus.previewUrl && (
-                    <div className="mt-2">
-                      <a 
-                        href={resendStatus.previewUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline"
-                      >
-                        View Test Email
-                      </a>
-                      <p className="text-sm mt-1 text-gray-600">
-                        (This is a test email service. In production, real emails would be sent to your inbox.)
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <form className="space-y-4" onSubmit={handleResendVerification}>
+              <form onSubmit={handleResendVerification} className="space-y-4">
                 <div>
-                  <label htmlFor="resend-email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Email Address
+                  <label htmlFor="resendEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
                   </label>
                   <input
+                    id="resendEmail"
                     type="email"
-                    id="resend-email"
                     value={resendEmail}
                     onChange={(e) => setResendEmail(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="your@email.com"
                     required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="your@email.com"
                   />
                 </div>
+                
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   disabled={isResending}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                 >
                   {isResending ? 'Sending...' : 'Resend Verification Email'}
                 </button>
               </form>
-            </div>
-            
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link href="/checkout" className="text-purple-600 hover:text-purple-500 font-medium">
-                  Purchase the course
-                </Link>
-              </p>
+              
+              {resendStatus && (
+                <div className={`mt-4 p-3 rounded-md ${resendStatus.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                  <p>{resendStatus.message}</p>
+                  {resendStatus.previewUrl && (
+                    <a 
+                      href={resendStatus.previewUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block mt-2 text-indigo-600 hover:underline"
+                    >
+                      View Test Email
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </main>
+    </div>
+  );
+}
+
+// Export the page component with Suspense
+export default function Login() {
+  return (
+    <Suspense fallback={<LoginFormSkeleton />}>
+      <LoginForm />
+    </Suspense>
   );
 } 
