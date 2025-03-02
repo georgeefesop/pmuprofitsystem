@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
 import { motion } from 'framer-motion';
+import { ConnectionStatus } from '@/components/ui/connection-status';
 
 // Loading fallback component
 function LoginFormSkeleton() {
@@ -48,6 +49,7 @@ function LoginForm() {
   const { login, resendVerificationEmail } = useAuth();
   const { claimPendingPurchases } = usePurchases();
   const [hasPendingPurchases, setHasPendingPurchases] = useState(false);
+  const [connectionError, setConnectionError] = useState<boolean>(false);
 
   // Animation variants
   const containerVariants = {
@@ -101,6 +103,7 @@ function LoginForm() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setConnectionError(false);
 
     try {
       const { success, error } = await login(email, password);
@@ -113,11 +116,31 @@ function LoginForm() {
         // Redirect to the original intended destination or dashboard
         router.push(redirectPath);
       } else {
+        // Check if the error is related to connection issues
+        if (error && (
+          error.includes('connect to authentication service') || 
+          error.includes('network connection') ||
+          error.includes('ERR_NAME_NOT_RESOLVED') ||
+          error.includes('timed out')
+        )) {
+          setConnectionError(true);
+        }
+        
         setError(error || 'Invalid login credentials');
       }
     } catch (err) {
       setError('An error occurred during login');
       console.error(err);
+      
+      // Check if the error is related to connection issues
+      if (err instanceof Error && (
+        err.message.includes('connect to authentication service') || 
+        err.message.includes('network connection') ||
+        err.message.includes('ERR_NAME_NOT_RESOLVED') ||
+        err.message.includes('timed out')
+      )) {
+        setConnectionError(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -268,84 +291,84 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <motion.div
+      className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <h1 className="text-3xl font-bold text-indigo-600">PMU Profit System</h1>
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900">PMU Profit System</h2>
+          <p className="mt-2 text-sm text-gray-600">Sign in to your account</p>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-            create a new account
-          </Link>
-        </p>
-      </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <motion.div 
-          className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {justRegistered && (
-            <motion.div 
-              className="mb-4 p-4 bg-green-50 border border-green-100 rounded-md"
-              variants={itemVariants}
-            >
+        <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Show connection status component if there's a connection error */}
+          {connectionError && (
+            <div className="mb-6">
+              <ConnectionStatus showDetails={true} />
+              <div className="mt-4 text-center">
+                <Link 
+                  href="/diagnostics" 
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  View Detailed Diagnostics →
+                </Link>
+              </div>
+            </div>
+          )}
+          
+          {/* Show error message if there's an error */}
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Show success message if just registered */}
+          {justRegistered && !error && (
+            <div className="mb-4 rounded-md bg-green-50 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-green-800">Account created successfully!</p>
+                  <p className="text-sm text-green-700">Registration successful! Please check your email for a verification link.</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-
-          {hasPendingPurchases && (
-            <motion.div 
-              className="mb-4 p-4 bg-blue-50 border border-blue-100 rounded-md"
-              variants={itemVariants}
-            >
+          
+          {/* Show pending purchases message if applicable */}
+          {hasPendingPurchases && !error && (
+            <div className="mb-4 rounded-md bg-blue-50 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-blue-800">You have pending purchases!</p>
+                  <p className="text-sm text-blue-700">You have pending purchases. Log in to claim them.</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
 
-          {error && (
-            <motion.div 
-              className="mb-4 p-4 bg-red-50 border border-red-100 rounded-md"
-              variants={itemVariants}
-            >
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          <motion.form className="space-y-6" onSubmit={handleSubmit} variants={itemVariants}>
+          {/* Login form */}
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
@@ -421,7 +444,7 @@ function LoginForm() {
                 )}
               </button>
             </div>
-          </motion.form>
+          </form>
 
           <div className="mt-6">
             <div className="relative">
@@ -480,9 +503,9 @@ function LoginForm() {
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

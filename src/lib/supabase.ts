@@ -14,18 +14,47 @@ export const supabase = createBrowserClient(
     },
     global: {
       fetch: (...args) => {
-        return fetch(...args).catch(err => {
-          console.error('Supabase fetch error:', err);
-          throw new Error('Failed to connect to Supabase. Please check your network connection.');
+        // Enhanced fetch with retry logic for DNS resolution issues
+        return new Promise((resolve, reject) => {
+          const attemptFetch = (retryCount = 0, maxRetries = 3) => {
+            console.log(`Attempting Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            
+            fetch(...args)
+              .then(resolve)
+              .catch(err => {
+                console.error(`Supabase fetch error (attempt ${retryCount + 1}):`, err);
+                
+                // Check for specific error types
+                const errorMessage = err.toString();
+                if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
+                  console.error('DNS resolution error detected. This may be due to network issues or Supabase service availability.');
+                  
+                  // If we haven't reached max retries, try again
+                  if (retryCount < maxRetries) {
+                    console.log(`Retrying in ${(retryCount + 1) * 1000}ms...`);
+                    setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
+                    return;
+                  }
+                }
+                
+                // If we've exhausted retries or it's not a retriable error, reject with a user-friendly message
+                reject(new Error('Failed to connect to Supabase. Please check your network connection or try again later.'));
+              });
+          };
+          
+          // Start the first attempt
+          attemptFetch();
         });
       },
       headers: {
         'X-Client-Info': 'PMU Profit System',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       }
     },
-    // Increase request timeout
+    // Increase request timeout for slower connections
     realtime: {
-      timeout: 30000
+      timeout: 60000 // 60 seconds
     }
   }
 );
@@ -44,25 +73,63 @@ export const getServiceSupabase = () => {
     global: {
       headers: {
         'X-Client-Info': 'PMU Profit System Server',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      fetch: (...args) => {
+        // Enhanced fetch with retry logic for server-side operations
+        return new Promise((resolve, reject) => {
+          const attemptFetch = (retryCount = 0, maxRetries = 3) => {
+            console.log(`Server: Attempting Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            
+            fetch(...args)
+              .then(resolve)
+              .catch(err => {
+                console.error(`Server: Supabase fetch error (attempt ${retryCount + 1}):`, err);
+                
+                // If we haven't reached max retries, try again
+                if (retryCount < maxRetries) {
+                  console.log(`Server: Retrying in ${(retryCount + 1) * 1000}ms...`);
+                  setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
+                  return;
+                }
+                
+                // If we've exhausted retries, reject with a detailed error
+                reject(err);
+              });
+          };
+          
+          // Start the first attempt
+          attemptFetch();
+        });
       }
     },
     // Increase request timeout
     realtime: {
-      timeout: 30000
+      timeout: 60000 // 60 seconds
     }
   });
 };
 
-// Helper function to get the site URL, preserving the protocol
+// Helper function to get the site URL, ensuring HTTPS for production
 export const getSecureSiteUrl = () => {
   // Use the environment variable if available
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL;
+    // Ensure HTTPS for production URLs
+    const url = process.env.NEXT_PUBLIC_SITE_URL;
+    if (url.startsWith('http://') && !url.includes('localhost')) {
+      return url.replace('http://', 'https://');
+    }
+    return url;
   }
   
-  // Otherwise use the current origin
+  // Otherwise use the current origin, ensuring HTTPS for production
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    const origin = window.location.origin;
+    if (origin.startsWith('http://') && !origin.includes('localhost')) {
+      return origin.replace('http://', 'https://');
+    }
+    return origin;
   }
   
   // Fallback for server-side

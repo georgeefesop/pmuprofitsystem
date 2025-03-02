@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Add a timeout to prevent hanging
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session check timed out after 15 seconds')), 15000)
+          setTimeout(() => reject(new Error('Session check timed out after 30 seconds')), 30000)
         );
         
         // Race the session check against the timeout
@@ -48,6 +48,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           timeoutPromise.then(() => {
             console.error('Session check timed out - this may indicate connectivity issues with Supabase');
             console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+            
+            // Try to diagnose the issue
+            if (typeof window !== 'undefined') {
+              // Check if we can ping the Supabase domain
+              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+              const domain = supabaseUrl.replace(/^https?:\/\//, '').split('/')[0];
+              
+              console.log(`Attempting to check connectivity to ${domain}...`);
+              
+              // Log diagnostic information
+              console.log('Current protocol:', window.location.protocol);
+              console.log('Current hostname:', window.location.hostname);
+              
+              // Check if we're using HTTPS in production but HTTP for Supabase
+              if (window.location.protocol === 'https:' && supabaseUrl.startsWith('http:')) {
+                console.error('Protocol mismatch: Site is using HTTPS but Supabase URL is using HTTP. This may cause connection issues.');
+              }
+            }
+            
             // Return a structure that matches what getSession would return
             return { data: { session: null } };
           }).catch(error => {
@@ -56,12 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           })
         ]).catch(error => {
           console.error('Error checking session:', error);
+          
           // Check for specific network errors
-          if (error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
-            console.error('DNS resolution error - cannot resolve Supabase domain');
-          } else if (error.message?.includes('client closed')) {
-            console.error('Connection closed unexpectedly - possible network interruption');
+          const errorMessage = error.toString();
+          if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
+            console.error('DNS resolution error - cannot resolve Supabase domain. This may be due to:');
+            console.error('1. Network connectivity issues');
+            console.error('2. DNS server problems');
+            console.error('3. Supabase project being paused or deleted');
+            console.error('4. Firewall or security software blocking the connection');
+          } else if (errorMessage.includes('client closed')) {
+            console.error('Connection closed unexpectedly - possible network interruption or timeout');
+          } else if (errorMessage.includes('CORS')) {
+            console.error('CORS error - this may be due to misconfigured CORS settings in Supabase');
           }
+          
           return { data: { session: null } };
         });
         
@@ -165,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Login timed out after 15 seconds')), 15000)
+        setTimeout(() => reject(new Error('Login timed out after 30 seconds')), 30000)
       );
       
       // Race the login against the timeout
@@ -173,7 +201,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loginPromise,
         timeoutPromise.then(() => {
           console.error('Login timed out - this may indicate connectivity issues with Supabase');
-          return { data: null, error: { message: 'Login timed out after 15 seconds' } };
+          
+          // Try to diagnose the issue
+          if (typeof window !== 'undefined') {
+            // Check if we can ping the Supabase domain
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+            const domain = supabaseUrl.replace(/^https?:\/\//, '').split('/')[0];
+            
+            console.log(`Attempting to check connectivity to ${domain}...`);
+            
+            // Log diagnostic information
+            console.log('Current protocol:', window.location.protocol);
+            console.log('Current hostname:', window.location.hostname);
+          }
+          
+          return { 
+            data: null, 
+            error: { 
+              message: 'Login timed out after 30 seconds. This may be due to network issues or Supabase service availability.' 
+            } 
+          };
         })
       ]) as any;
       
@@ -181,6 +228,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error('Login error from Supabase:', error);
+        
+        // Provide more specific error messages based on the error
+        if (error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+          return { 
+            success: false, 
+            error: 'Cannot connect to authentication service. Please check your internet connection and try again.' 
+          };
+        } else if (error.message?.includes('Invalid login credentials')) {
+          return { 
+            success: false, 
+            error: 'Invalid email or password. Please try again.' 
+          };
+        } else if (error.message?.includes('Email not confirmed')) {
+          return { 
+            success: false, 
+            error: 'Your email has not been verified. Please check your inbox for a verification email.' 
+          };
+        }
+        
         return { success: false, error: error.message };
       }
       
@@ -240,7 +306,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'An unexpected error occurred' };
+      
+      // Provide more specific error messages based on the error
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      
+      if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
+        return { 
+          success: false, 
+          error: 'Cannot connect to authentication service. Please check your internet connection and try again.' 
+        };
+      } else if (errorMessage.includes('NetworkError')) {
+        return { 
+          success: false, 
+          error: 'Network error. Please check your internet connection and try again.' 
+        };
+      }
+      
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }

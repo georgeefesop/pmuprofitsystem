@@ -43,10 +43,7 @@
   
   Follow Next.js docs for Data Fetching, Rendering, and Routing.
   
-  Changelog Management
-  - Track all significant changes in referenceassets/.changelog
-  - For each set of related changes, create a new dated entry
-  - Organize changes into categories: Fixed Issues, New Features, Security Enhancements, Code Improvements
+  Enhancements, Code Improvements
   - Include brief descriptions of what changed and why
   - Note any known issues that still need to be addressed
   - Update the changelog before completing a major task or feature

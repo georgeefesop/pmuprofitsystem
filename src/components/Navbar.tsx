@@ -71,15 +71,28 @@ export default function Navbar() {
             {/* Authentication Links */}
             {user ? (
               <>
-                <Link href="/dashboard" className="text-sm text-white hover:text-purple-100 transition-colors">
-                  Dashboard
-                </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="bg-white text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-md transition-colors font-medium shadow-sm text-sm"
-                >
-                  Logout
-                </button>
+                <div className="relative group">
+                  <button className="flex items-center text-sm text-white hover:text-purple-100 transition-colors">
+                    <span className="mr-1">{user.email?.split('@')[0] || 'Account'}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
+                      Dashboard
+                    </Link>
+                    <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
+                      Profile
+                    </Link>
+                    <Link href="/diagnostics" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
+                      System Diagnostics
+                    </Link>
+                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
+                      Logout
+                    </button>
+                  </div>
+                </div>
               </>
             ) : (
               <>
@@ -142,6 +155,11 @@ export default function Navbar() {
                 {/* Dashboard Link */}
                 <Link href="/dashboard" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
                   Dashboard
+                </Link>
+                
+                {/* System Diagnostics Link */}
+                <Link href="/diagnostics" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+                  System Diagnostics
                 </Link>
                 
                 {/* Dashboard Navigation Items - Only visible when logged in */}
