@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Add a timeout to prevent hanging
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session check timed out after 10 seconds')), 10000)
+          setTimeout(() => reject(new Error('Session check timed out after 15 seconds')), 15000)
         );
         
         // Race the session check against the timeout
@@ -48,109 +48,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           timeoutPromise.then(() => {
             console.error('Session check timed out - this may indicate connectivity issues with Supabase');
             console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-            setSessionCheckFailed(true);
+            // Return a structure that matches what getSession would return
+            return { data: { session: null } };
+          }).catch(error => {
+            console.error('Timeout promise error:', error);
             return { data: { session: null } };
           })
-        ]) as any;
-        
-        console.log('Session check result:', session ? 'Session found' : 'No session');
-        
-        if (session) {
-          console.log('User from session:', session.user);
-          
-          // Get user profile data
-          try {
-            const { data, error } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-              
-            if (data) {
-              console.log('User profile data:', data);
-              setUser(data as User);
-            } else if (error) {
-              console.error('Error fetching user profile:', error);
-              
-              // If user exists in auth but not in users table, create a profile
-              if (error.code === 'PGRST116') { // No rows returned
-                console.log('Creating user profile for:', session.user.id);
-                const { data: newProfile, error: insertError } = await supabase
-                  .from('users')
-                  .insert({
-                    id: session.user.id,
-                    email: session.user.email,
-                    full_name: session.user.user_metadata?.full_name || '',
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  })
-                  .select()
-                  .single();
-                  
-                if (newProfile) {
-                  console.log('Created new profile:', newProfile);
-                  setUser(newProfile as User);
-                } else if (insertError) {
-                  console.error('Error creating user profile:', insertError);
-                }
-              }
-            }
-          } catch (profileError) {
-            console.error('Error handling user profile:', profileError);
+        ]).catch(error => {
+          console.error('Error checking session:', error);
+          // Check for specific network errors
+          if (error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+            console.error('DNS resolution error - cannot resolve Supabase domain');
+          } else if (error.message?.includes('client closed')) {
+            console.error('Connection closed unexpectedly - possible network interruption');
           }
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setSessionCheckFailed(true);
-      } finally {
-        // Always set loading to false, even if there was an error
-        setIsLoading(false);
-      }
-    };
-    
-    // Start the session check
-    checkSession();
-    
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+          return { data: { session: null } };
+        });
         
         if (session) {
-          // Get user profile data
-          const { data, error } = await supabase
+          // Session exists, get user data
+          const { data: userData, error: userError } = await supabase
             .from('users')
             .select('*')
             .eq('id', session.user.id)
             .single();
-            
-          if (data) {
-            console.log('User profile data from auth change:', data);
-            setUser(data as User);
-          } else if (error) {
-            console.error('Error fetching user profile from auth change:', error);
-            
-            // If user exists in auth but not in users table, create a profile
-            if (error.code === 'PGRST116') { // No rows returned
-              console.log('Creating user profile from auth change for:', session.user.id);
-              const { data: newProfile, error: insertError } = await supabase
+          
+          if (userError) {
+            console.error('Error fetching user data:', userError);
+            setUser(null);
+          } else if (userData) {
+            setUser(userData);
+          } else {
+            // User exists in auth but not in users table
+            console.log('User exists in auth but not in users table, creating profile...');
+            try {
+              // Create a basic profile
+              await supabase.from('users').insert({
+                id: session.user.id,
+                email: session.user.email,
+                full_name: session.user.user_metadata?.full_name || 'User',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+              
+              // Fetch the newly created profile
+              const { data: newUserData } = await supabase
                 .from('users')
-                .insert({
-                  id: session.user.id,
-                  email: session.user.email,
-                  full_name: session.user.user_metadata?.full_name || '',
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                })
-                .select()
+                .select('*')
+                .eq('id', session.user.id)
                 .single();
                 
-              if (newProfile) {
-                console.log('Created new profile from auth change:', newProfile);
-                setUser(newProfile as User);
-              } else if (insertError) {
-                console.error('Error creating user profile from auth change:', insertError);
+              if (newUserData) {
+                setUser(newUserData);
+              } else {
+                setUser(null);
               }
+            } catch (profileError) {
+              console.error('Error creating user profile:', profileError);
+              setUser(null);
             }
           }
         } else {
@@ -158,6 +113,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         setIsLoading(false);
+      } catch (error) {
+        console.error('Session check failed:', error);
+        setSessionCheckFailed(true);
+        setIsLoading(false);
+        setUser(null);
+      }
+    };
+    
+    checkSession();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event);
+        
+        if (session) {
+          // Get user data when session changes
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (!userError && userData) {
+            setUser(userData);
+          } else {
+            console.error('Error fetching user data on auth change:', userError);
+          }
+        } else {
+          setUser(null);
+        }
       }
     );
     

@@ -11,6 +11,21 @@ export const supabase = createBrowserClient(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+    },
+    global: {
+      fetch: (...args) => {
+        return fetch(...args).catch(err => {
+          console.error('Supabase fetch error:', err);
+          throw new Error('Failed to connect to Supabase. Please check your network connection.');
+        });
+      },
+      headers: {
+        'X-Client-Info': 'PMU Profit System',
+      }
+    },
+    // Increase request timeout
+    realtime: {
+      timeout: 30000
     }
   }
 );
@@ -25,6 +40,15 @@ export const getServiceSupabase = () => {
     auth: {
       autoRefreshToken: false,
       persistSession: false
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'PMU Profit System Server',
+      }
+    },
+    // Increase request timeout
+    realtime: {
+      timeout: 30000
     }
   });
 };
