@@ -50,13 +50,7 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Link href="/" className="flex items-center">
-            <img
-              className="h-12 w-auto"
-              src="/images/PMU Profit System - Frame 3.jpg"
-              alt="PMU Profit System"
-            />
-          </Link>
+          <h1 className="text-3xl font-bold text-indigo-600">PMU Profit System</h1>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account
