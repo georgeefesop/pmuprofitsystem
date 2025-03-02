@@ -71,192 +71,161 @@ function SuccessPageContent() {
     }
   };
 
-  useEffect(() => {
-    if (sessionId) {
-      verifyPurchase();
-    } else if (isPendingRegistration) {
-      // Handle pending registration case
-      const pendingEmail = localStorage.getItem('pendingPurchaseEmail');
-      if (pendingEmail) {
-        setEmail(pendingEmail);
-        
-        // Get pending purchases from localStorage
-        const pendingPurchasesJson = localStorage.getItem('pendingPurchases');
-        if (pendingPurchasesJson) {
-          try {
-            const pendingPurchases = JSON.parse(pendingPurchasesJson);
-            if (pendingPurchases.length > 0) {
-              // Determine which products were purchased
-              const hasMainProduct = pendingPurchases.some((p: any) => p.productId === 'pmu-profit-system');
-              const hasAdGenerator = pendingPurchases.some((p: any) => p.productId === 'pmu-ad-generator');
-              const hasBlueprint = pendingPurchases.some((p: any) => p.productId === 'consultation-success-blueprint');
-              
-              setPurchaseDetails({
-                email: pendingEmail,
-                productName: 'PMU Profit System',
-                includesAdGenerator: hasAdGenerator,
-                includesBlueprint: hasBlueprint
-              });
-            }
-          } catch (error) {
-            console.error('Error parsing pending purchases:', error);
-          }
-        }
-      }
-      setIsLoading(false);
-    } else {
-      setError('No session ID or pending registration found');
-      setIsLoading(false);
-    }
-  }, [sessionId, isPendingRegistration, addPurchase]);
-
-  async function verifyPurchase() {
-    try {
-      const response = await fetch(`/api/verify-purchase?session_id=${sessionId}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setEmail(data.customerEmail);
-        
-        // Determine which products were purchased
-        const hasMainProduct = data.lineItems.some((item: any) => 
-          item.description.toLowerCase().includes('pmu profit system'));
-        const hasAdGenerator = data.lineItems.some((item: any) => 
-          item.description.toLowerCase().includes('ad generator'));
-        const hasBlueprint = data.lineItems.some((item: any) => 
-          item.description.toLowerCase().includes('blueprint'));
-        
-        setPurchaseDetails({
-          email: data.customerEmail,
-          productName: 'PMU Profit System',
-          includesAdGenerator: hasAdGenerator,
-          includesBlueprint: hasBlueprint
-        });
-        
-        // Store the purchase details in localStorage for later claiming
-        const purchases = [];
-        
-        if (hasMainProduct) {
-          purchases.push({
-            productId: 'pmu-profit-system',
-            productName: 'PMU Profit System',
-            amount: 97 * 100 // Convert to cents
-          });
-          
-          // Add the purchase to the database if the user is logged in
-          await addPurchase('pmu-profit-system', 97 * 100);
-        }
-        
-        if (hasAdGenerator) {
-          purchases.push({
-            productId: 'pmu-ad-generator',
-            productName: 'PMU Ad Generator',
-            amount: 47 * 100 // Convert to cents
-          });
-          
-          // Add the purchase to the database if the user is logged in
-          await addPurchase('pmu-ad-generator', 47 * 100);
-        }
-        
-        if (hasBlueprint) {
-          purchases.push({
-            productId: 'consultation-success-blueprint',
-            productName: 'Consultation Success Blueprint',
-            amount: 33 * 100 // Convert to cents
-          });
-          
-          // Add the purchase to the database if the user is logged in
-          await addPurchase('consultation-success-blueprint', 33 * 100);
-        }
-        
-        // Store the purchases in localStorage for later claiming
-        localStorage.setItem('pendingPurchases', JSON.stringify(purchases));
-        localStorage.setItem('pendingPurchaseEmail', data.customerEmail);
-      } else {
-        setError(data.error || 'Failed to verify purchase');
-      }
-    } catch (err) {
-      console.error('Error verifying purchase:', err);
-      setError('An error occurred while verifying your purchase');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  const handleResendVerification = async () => {
-    if (!email) return;
+  // Function to handle resending verification email
+  const handleResendVerificationEmail = async () => {
+    if (isResendingEmail || !email) return;
     
     setIsResendingEmail(true);
     setResendStatus('loading');
-    setResendError('');
     
     try {
-      const { success, error } = await resendVerificationEmail(email);
-      
-      if (success) {
+      const result = await resendVerificationEmail(email);
+      if (result.success) {
         setResendStatus('success');
       } else {
         setResendStatus('error');
-        setResendError(error || 'Failed to resend verification email');
+        setResendError(result.error || 'Failed to resend verification email');
       }
-    } catch (err) {
-      console.error('Error resending verification email:', err);
+    } catch (error) {
       setResendStatus('error');
       setResendError('An unexpected error occurred');
+      console.error('Error resending verification email:', error);
     } finally {
       setIsResendingEmail(false);
     }
   };
 
-  const calculateTotalAmount = (details: any) => {
-    let total = 97; // Base price for PMU Profit System
-    
-    if (details.includesAdGenerator) {
-      total += 47;
-    }
-    
-    if (details.includesBlueprint) {
-      total += 33;
-    }
-    
-    return total;
-  };
-
+  // Function to get products list based on purchase details
   const getProductsList = () => {
     if (!purchaseDetails) return [];
     
     const products = [
       {
         name: 'PMU Profit System',
-        price: '€97',
-        icon: '🚀'
+        price: '€37.00',
+        icon: '📚'
       }
     ];
     
     if (purchaseDetails.includesAdGenerator) {
       products.push({
         name: 'PMU Ad Generator',
-        price: '€47',
-        icon: '📝'
+        price: '€27.00',
+        icon: '🚀'
       });
     }
     
     if (purchaseDetails.includesBlueprint) {
       products.push({
         name: 'Consultation Success Blueprint',
-        price: '€33',
-        icon: '📘'
+        price: '€33.00',
+        icon: '📋'
       });
     }
     
     return products;
   };
 
-  // Rest of the component remains the same
-  // ...
+  // Function to calculate total amount
+  const calculateTotalAmount = (details: typeof purchaseDetails) => {
+    if (!details) return '0.00';
+    
+    let total = 37; // Base price
+    
+    if (details.includesAdGenerator) {
+      total += 27;
+    }
+    
+    if (details.includesBlueprint) {
+      total += 33;
+    }
+    
+    return total.toFixed(2);
+  };
+
+  // Function to verify purchase
+  async function verifyPurchase() {
+    try {
+      console.log('Verifying purchase with session ID:', sessionId);
+      const response = await fetch(`/api/verify-purchase?session_id=${sessionId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Error verifying purchase: ${response.status} ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Verification response:', data);
+      
+      if (data.success) {
+        // Set email from session details
+        setEmail(data.sessionDetails.customer_email || '');
+        
+        // Determine which products were purchased based on the amount
+        const totalAmount = data.sessionDetails.amount_total || 0;
+        
+        // Basic logic to determine what was purchased based on price
+        // This is a simplified approach - ideally we would have line items
+        const includesAdGenerator = totalAmount >= 64; // Base + Ad Generator
+        const includesBlueprint = totalAmount >= 70; // Base + Blueprint
+        
+        setPurchaseDetails({
+          email: data.sessionDetails.customer_email || '',
+          productName: 'PMU Profit System',
+          includesAdGenerator,
+          includesBlueprint
+        });
+        
+        // Store the purchase in context if user is logged in
+        try {
+          await addPurchase('pmu-profit-system', 3700); // $37.00 in cents
+          
+          if (includesAdGenerator) {
+            await addPurchase('pmu-ad-generator', 2700); // $27.00 in cents
+          }
+          
+          if (includesBlueprint) {
+            await addPurchase('consultation-success-blueprint', 3300); // $33.00 in cents
+          }
+        } catch (purchaseError) {
+          console.error('Error adding purchase to context:', purchaseError);
+          // Continue anyway - this is not critical
+        }
+      } else {
+        throw new Error('Purchase verification failed');
+      }
+    } catch (error) {
+      console.error('Error verifying purchase:', error);
+      setError(error instanceof Error ? error.message : 'Failed to verify purchase');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Effect to verify purchase on component mount
+  useEffect(() => {
+    if (sessionId) {
+      verifyPurchase();
+    } else {
+      setIsLoading(false);
+      setError('No session ID provided');
+    }
+    
+    // If we have a pending registration, try to get the email from localStorage
+    if (isPendingRegistration) {
+      const storedEmail = localStorage.getItem('pendingPurchaseEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+      }
+    }
+  }, [sessionId, isPendingRegistration]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-900">Order Confirmation</h1>
+        <p className="mt-2 text-lg text-gray-600">Thank you for your purchase!</p>
+      </div>
+      
       {isLoading ? (
         <div className="flex flex-col items-center justify-center">
           <div className="w-16 h-16 border-t-4 border-b-4 border-indigo-500 rounded-full animate-spin"></div>
@@ -281,7 +250,7 @@ function SuccessPageContent() {
             </div>
           </div>
         </div>
-      ) : purchaseDetails ? (
+      ) :
         <motion.div
           className="max-w-md w-full"
           variants={containerVariants}
@@ -406,26 +375,38 @@ function SuccessPageContent() {
                     </div>
                   )}
                   
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    <p className="text-sm text-gray-800 font-medium">
-                      {isPendingRegistration ? '2. ' : '1. '}
-                      Log in to access your dashboard
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {isPendingRegistration ? 
-                        'After verifying your email, you can log in to access your dashboard and all purchased content.' : 
-                        'You can now log in to access your dashboard and all purchased content.'}
-                    </p>
+                  <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <div>
+                        <p className="text-sm text-green-800 font-medium">
+                          {isPendingRegistration ? '2. Access your course' : '1. Access your course'}
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">
+                          {isPendingRegistration 
+                            ? 'After verifying your email, you can log in to access your course materials.' 
+                            : 'Your purchase has been processed. You can now access your course materials.'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    <p className="text-sm text-gray-800 font-medium">
-                      {isPendingRegistration ? '3. ' : '2. '}
-                      Explore your new content
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Your dashboard contains all the resources you need to get started with the PMU Profit System.
-                    </p>
+                  <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-purple-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <div>
+                        <p className="text-sm text-purple-800 font-medium">
+                          {isPendingRegistration ? '3. Start learning' : '2. Start learning'}
+                        </p>
+                        <p className="text-xs text-purple-600 mt-1">
+                          Begin your journey to PMU business success with our comprehensive course materials.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -437,53 +418,27 @@ function SuccessPageContent() {
               >
                 {isPendingRegistration && (
                   <button
-                    onClick={handleResendVerification}
+                    onClick={handleResendVerificationEmail}
                     disabled={isResendingEmail}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isResendingEmail ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Sending...
                       </>
-                    ) : (
-                      <>
-                        <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Resend Verification Email
-                      </>
-                    )}
+                    ) : 'Resend Verification Email'}
                   </button>
                 )}
                 
-                <Link
-                  href="/login"
-                  className={`w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                    isPendingRegistration ? 'bg-gray-600 hover:bg-gray-700' : 'bg-indigo-600 hover:bg-indigo-700'
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
-                >
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  Go to Login
-                </Link>
-                
-                <Link
-                  href="/"
-                  className="w-full flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  Return to Home
+                <Link href={isPendingRegistration ? "/login" : "/dashboard"} className="w-full block text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  {isPendingRegistration ? 'Go to Login' : 'Go to Dashboard'}
                 </Link>
               </motion.div>
               
-              {/* Resend status messages */}
               {resendStatus === 'success' && (
                 <motion.div 
                   className="mt-4 p-3 bg-green-50 text-green-800 rounded-md"
@@ -515,7 +470,7 @@ function SuccessPageContent() {
             </div>
           </motion.div>
         </motion.div>
-      ) : null}
+      }
     </div>
   );
 }
