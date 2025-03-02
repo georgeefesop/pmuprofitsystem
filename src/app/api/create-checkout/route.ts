@@ -2,10 +2,53 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getServiceSupabase } from '@/lib/supabase';
 
-// Initialize Stripe
+// Initialize Stripe with improved configuration
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-11-15' as any,
+  timeout: 30000, // 30 seconds timeout
+  maxNetworkRetries: 3, // Automatically retry failed requests
+  httpAgent: undefined, // Let Stripe handle the HTTP agent
 });
+
+// Helper function to safely execute Stripe API calls with custom retry logic
+async function safeStripeOperation<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let lastError: any;
+  let retryCount = 0;
+  
+  while (retryCount < maxRetries) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      retryCount++;
+      
+      // Log the retry attempt
+      console.warn(`Stripe operation failed (attempt ${retryCount}/${maxRetries}):`, error.message);
+      
+      // Check if the error is retryable
+      if (
+        error.type === 'StripeConnectionError' || 
+        error.type === 'StripeAPIError' ||
+        error.type === 'StripeTimeoutError' ||
+        error.code === 'ECONNRESET' ||
+        error.code === 'ETIMEDOUT' ||
+        error.code === 'ENOTFOUND'
+      ) {
+        // Exponential backoff with jitter
+        const delay = Math.min(Math.pow(2, retryCount) * 100 + Math.random() * 100, 3000);
+        console.log(`Retrying after ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      
+      // Non-retryable error, throw immediately
+      throw error;
+    }
+  }
+  
+  // If we've exhausted all retries, throw the last error
+  throw lastError;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -127,16 +170,20 @@ export async function POST(req: NextRequest) {
       metadata.requiresVerification = 'true';
     }
     
-    // Create the Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${req.nextUrl.origin}/checkout/success${!userVerified ? '?registration=pending' : ''}`,
-      cancel_url: `${req.nextUrl.origin}/checkout?cancelled=true`,
-      customer_email: email,
-      metadata,
-    });
+    // Create the Stripe checkout session with retry logic
+    console.log('Creating Stripe checkout session...');
+    const session = await safeStripeOperation(() => 
+      stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: lineItems,
+        mode: 'payment',
+        success_url: `${req.nextUrl.origin}/checkout/success${!userVerified ? '?registration=pending' : ''}`,
+        cancel_url: `${req.nextUrl.origin}/checkout?cancelled=true`,
+        customer_email: email,
+        metadata,
+      })
+    );
+    console.log('Checkout session created:', session.id);
     
     // Store the pending purchase information in Supabase
     try {
@@ -164,8 +211,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);
+    
+    // Provide more detailed error information
+    let errorMessage = 'Failed to create checkout session';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      
+      // If it's a Stripe error, provide more details
+      if ('type' in error) {
+        const stripeError = error as any;
+        errorMessage = `Stripe error (${stripeError.type}): ${stripeError.message}`;
+        
+        // Add more context for connection errors
+        if (stripeError.type === 'StripeConnectionError') {
+          errorMessage += '. This may be due to network issues. Please check your internet connection and try again.';
+        }
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

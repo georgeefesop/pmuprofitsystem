@@ -31,17 +31,49 @@ export default function PaymentForm({
   const elements = useElements();
   const [cardError, setCardError] = useState<string | null>(null);
   const [isSecureContext, setIsSecureContext] = useState(true);
+  const [isOnline, setIsOnline] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const MAX_RETRIES = 3;
 
-  // Check if we're in a secure context (HTTPS)
+  // Check if we're in a secure context (HTTPS) and monitor online status
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Check secure context
       setIsSecureContext(window.isSecureContext);
       if (!window.isSecureContext) {
         console.warn('Not in a secure context. Payment forms require HTTPS.');
         setCardError('This payment form requires a secure connection (HTTPS). Please contact support.');
       }
+      
+      // Monitor online status
+      const handleOnline = () => {
+        setIsOnline(true);
+        console.log('Network connection restored');
+        if (cardError?.includes('network') || cardError?.includes('connection')) {
+          setCardError('Network connection restored. You can try again.');
+        }
+      };
+      
+      const handleOffline = () => {
+        setIsOnline(false);
+        console.log('Network connection lost');
+        setCardError('You appear to be offline. Please check your internet connection and try again.');
+      };
+      
+      // Set initial online status
+      setIsOnline(navigator.onLine);
+      
+      // Add event listeners
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
     }
-  }, []);
+  }, [cardError]);
 
   const cardElementOptions: StripeCardElementOptions = {
     style: {
@@ -63,6 +95,38 @@ export default function PaymentForm({
     disableLink: true,
   };
 
+  // Helper function to retry fetch with exponential backoff
+  const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3) => {
+    let currentRetry = 0;
+    
+    while (currentRetry < maxRetries) {
+      try {
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({ error: 'Failed to parse response' }));
+          throw new Error(data.error || `HTTP error ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        currentRetry++;
+        console.warn(`Fetch attempt ${currentRetry}/${maxRetries} failed:`, error);
+        
+        if (currentRetry >= maxRetries) {
+          throw error;
+        }
+        
+        // Exponential backoff with jitter
+        const delay = Math.min(Math.pow(2, currentRetry) * 300 + Math.random() * 100, 3000);
+        console.log(`Retrying after ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    throw new Error('Maximum retries exceeded');
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -76,13 +140,19 @@ export default function PaymentForm({
       setCardError('This payment form requires a secure connection (HTTPS). Please contact support.');
       return;
     }
+    
+    if (!isOnline) {
+      setCardError('You appear to be offline. Please check your internet connection and try again.');
+      return;
+    }
 
     setIsLoading(true);
     setCardError(null);
 
     try {
-      // Create a payment intent on the server
-      const response = await fetch('/api/create-payment-intent', {
+      // Create a payment intent on the server with retry logic
+      console.log('Creating payment intent...');
+      const data = await fetchWithRetry('/api/create-payment-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,13 +164,7 @@ export default function PaymentForm({
           includeAdGenerator,
           includeBlueprint
         }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment intent');
-      }
+      }, MAX_RETRIES);
 
       // Confirm the payment with the card element
       const cardElement = elements.getElement(CardElement);
@@ -108,6 +172,7 @@ export default function PaymentForm({
         throw new Error('Card element not found');
       }
 
+      console.log('Confirming card payment...');
       const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
           card: cardElement,
@@ -119,20 +184,63 @@ export default function PaymentForm({
       });
 
       if (error) {
+        // Check if it's a connection error that we should retry
+        if (
+          error.type === 'api_connection_error' || 
+          error.type === 'api_error' || 
+          (error as any).type === 'timeout_error'
+        ) {
+          if (retryCount < MAX_RETRIES) {
+            console.log(`Connection error, retrying (${retryCount + 1}/${MAX_RETRIES})...`);
+            setRetryCount(prev => prev + 1);
+            setIsRetrying(true);
+            
+            // Wait a bit before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setIsRetrying(false);
+            
+            // Retry the submission
+            handleSubmit(event);
+            return;
+          } else {
+            // We've exhausted our retries
+            throw new Error(`${error.message} (Request was retried ${MAX_RETRIES} times)`);
+          }
+        }
+        
         throw new Error(error.message || 'Payment failed');
       }
 
       if (paymentIntent.status === 'succeeded') {
+        // Reset retry count on success
+        setRetryCount(0);
         onSuccess(paymentIntent.id);
       } else {
         throw new Error(`Payment status: ${paymentIntent.status}`);
       }
     } catch (error) {
       console.error('Payment error:', error);
-      setCardError(error instanceof Error ? error.message : 'An unexpected error occurred');
-      onError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      
+      // Format error message for better user experience
+      let errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      
+      // Enhance error messages for common issues
+      if (errorMessage.includes('api_connection_error') || errorMessage.includes('network')) {
+        errorMessage = 'Connection error: Please check your internet connection and try again.';
+      } else if (errorMessage.includes('card_declined')) {
+        errorMessage = 'Your card was declined. Please try a different payment method.';
+      } else if (errorMessage.includes('insufficient_funds')) {
+        errorMessage = 'Your card has insufficient funds. Please try a different payment method.';
+      } else if (errorMessage.includes('expired_card')) {
+        errorMessage = 'Your card has expired. Please try a different payment method.';
+      }
+      
+      setCardError(errorMessage);
+      onError(errorMessage);
     } finally {
-      setIsLoading(false);
+      if (!isRetrying) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -152,6 +260,21 @@ export default function PaymentForm({
             </div>
           </div>
         )}
+        
+        {!isOnline && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-700 text-sm">
+            <div className="flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-500 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>
+                <strong>Network Warning:</strong> You appear to be offline. 
+                Please check your internet connection before attempting to make a payment.
+              </span>
+            </div>
+          </div>
+        )}
+        
         <div className="mb-4">
           <div 
             className="payment-form" 
@@ -171,7 +294,7 @@ export default function PaymentForm({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={!stripe || isLoading || !isSecureContext}
+          disabled={!stripe || isLoading || !isSecureContext || !isOnline}
           className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2.5 px-4 rounded-lg font-medium shadow-md hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoading ? (
@@ -180,7 +303,7 @@ export default function PaymentForm({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Processing Payment...
+              {isRetrying ? `Retrying (${retryCount}/${MAX_RETRIES})...` : 'Processing Payment...'}
             </div>
           ) : (
             `Checkout`
