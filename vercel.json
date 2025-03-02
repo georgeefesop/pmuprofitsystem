@@ -17,5 +17,40 @@
   },
   "github": {
     "silent": true
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_VERCEL_ENV": "production"
+    }
+  },
+  "functions": {
+    "src/app/api/test-auth-status/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "src/app/api/test-supabase-auth/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "src/app/api/test-email-verification/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "src/app/api/update-supabase-redirect/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "src/app/api/update-supabase-settings/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "src/app/api/check-verification-status/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    },
+    "src/app/auth/callback/route.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
   }
 } 

@@ -75,4 +75,21 @@ if (process.env.VERCEL) {
   };
 }
 
+// Configure server-side only routes
+nextConfig.serverRuntimeConfig = {
+  // Will only be available on the server side
+  testRoutes: true,
+};
+
+// Configure which routes should not be statically generated
+nextConfig.unstable_excludeFiles = [
+  'src/app/api/test-auth-status/route.ts',
+  'src/app/api/test-supabase-auth/route.ts',
+  'src/app/api/test-email-verification/route.ts',
+  'src/app/api/update-supabase-redirect/route.ts',
+  'src/app/api/update-supabase-settings/route.ts',
+  'src/app/api/check-verification-status/route.ts',
+  'src/app/auth/callback/route.ts'
+];
+
 module.exports = nextConfig; 
