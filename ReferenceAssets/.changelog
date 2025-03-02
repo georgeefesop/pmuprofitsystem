@@ -1,5 +1,27 @@
 # PMU Profit System Changelog
 
+## 2023-03-31: Fixed Delete Account Page Type Error
+
+### Fixed Issues
+- Fixed TypeScript error in delete account page by using the correct property name `full_name` instead of `name`
+- Resolved Vercel deployment build failure caused by incorrect property access
+- Ensured consistency with the User interface definition
+
+### Code Improvements
+- Updated email template in delete account page to use the correct property names
+- Enhanced type safety in account deletion flow
+- Aligned property usage with the defined User interface
+
+## 2023-03-30: Price Correction for Blueprint Purchase
+
+### Fixed Issues
+- Updated the Consultation Success Blueprint purchase price from €27 to the correct price of €33
+- Ensured price consistency between UI display and purchase function
+
+### Code Improvements
+- Aligned purchase function parameters with displayed prices in the UI
+- Enhanced data consistency across the purchase flow
+
 ## 2023-03-25: Success Page Styling Consistency
 
 ### User Experience Improvements

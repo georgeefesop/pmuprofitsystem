@@ -1,6 +1,5 @@
   You are an expert in TypeScript, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
 
-
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -51,4 +50,5 @@
   - Include brief descriptions of what changed and why
   - Note any known issues that still need to be addressed
   - Update the changelog before completing a major task or feature
+  - Provide the push to github commands with the commit summary
   

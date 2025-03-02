@@ -57,7 +57,7 @@ export default function DeleteAccountPage() {
               User Account Deletion:
               
               Email: ${user?.email}
-              Name: ${user?.name}
+              Name: ${user?.full_name}
               Reason for deletion: ${reason || 'No reason provided'}
               
               This account has been deleted from the PMU Profit System.
