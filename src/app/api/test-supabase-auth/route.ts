@@ -22,7 +22,8 @@ export async function GET() {
     
     // Test creating a user
     const testEmail = `test-${Date.now()}@example.com`;
-    const testPassword = 'password123';
+    // Generate a secure random password for testing
+    const testPassword = `Test_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString(36)}`;
     
     // Create a test user
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({

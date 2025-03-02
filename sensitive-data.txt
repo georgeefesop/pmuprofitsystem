@@ -1,0 +1,6 @@
+sk_test_[a-zA-Z0-9]{24}
+pk_test_[a-zA-Z0-9]{24}
+whsec_[a-zA-Z0-9]{24}
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+
+password123
+https://[a-zA-Z0-9-]+\.supabase\.co 

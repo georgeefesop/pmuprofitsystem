@@ -31,9 +31,9 @@ The integration includes handling webhooks for asynchronous payment events and p
 The following environment variables are required for Stripe integration:
 
 ```
-STRIPE_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_key_here
 ```
 
 In development, use Stripe test keys. In production, use live keys.

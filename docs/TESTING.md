@@ -16,7 +16,7 @@ This guide provides instructions for testing the PMU Profit System to ensure all
 2. Fill in the registration form with:
    - Full Name: `Test User`
    - Email: `test@example.com`
-   - Password: `password123`
+   - Password: `Test_Password_2024!`
 3. Select any upsell options if desired
 4. Complete the purchase
 5. Verify that:
@@ -30,7 +30,7 @@ This guide provides instructions for testing the PMU Profit System to ensure all
 1. Navigate to the login page (`/login`)
 2. Enter the credentials:
    - Email: `test@example.com`
-   - Password: `password123`
+   - Password: `Test_Password_2024!`
 3. Click "Log In"
 4. Verify that:
    - You are redirected to the dashboard
@@ -176,7 +176,7 @@ This guide provides instructions for testing the PMU Profit System to ensure all
 2. Fill in the registration form with:
    - Full Name: `Test User`
    - Email: `test@example.com` (an email that already exists)
-   - Password: `password123`
+   - Password: `Test_Password_2024!`
 3. Complete the purchase
 4. Verify that:
    - An error message is displayed

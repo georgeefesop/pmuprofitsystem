@@ -6,7 +6,7 @@ This guide provides instructions for deploying the PMU Profit System to producti
 
 - Node.js 16.x or higher
 - npm 7.x or higher
-- A Supabase project (already set up at https://duxqazuhozfejdocxiyl.supabase.co)
+- A Supabase project (create one at https://app.supabase.com)
 - A production server or hosting platform (e.g., Vercel, Netlify, or a custom server)
 
 ## 1. Environment Configuration
@@ -15,20 +15,20 @@ Create a `.env.production` file in the root of your project with the following e
 
 ```
 # Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://duxqazuhozfejdocxiyl.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1eHFhenVob3pmZWpkb2N4aXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3NTQ5ODYsImV4cCI6MjA1NjMzMDk4Nn0.8od4KIAC_jzSwgbqN-FszKuEZofmdk7xLtbfDaRr7BM
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1eHFhenVob3pmZWpkb2N4aXlsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MDc1NDk4NiwiZXhwIjoyMDU2MzMwOTg2fQ.OAIuklW_jZkkzU0ZmU8hQF7rB_2GBKveVngNH-BFDM4
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 
 # Other Configuration
 NEXT_PUBLIC_SITE_URL=https://your-production-domain.com
 ```
 
-Replace `https://your-production-domain.com` with your actual production domain.
+Replace the placeholder values with your actual Supabase project URL and keys, and set your production domain.
 
 ## 2. Supabase Configuration
 
 1. Log in to your Supabase dashboard at https://app.supabase.com
-2. Select your project "pmuprofit"
+2. Select your project
 3. Go to Authentication > Settings
 4. Update the Site URL to match your production domain
 5. Add your production domain to the Redirect URLs list

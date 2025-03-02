@@ -21,7 +21,8 @@ async function testAuth() {
     
     // Test user creation
     const testEmail = 'test@example.com';
-    const testPassword = 'password123';
+    // Generate a secure random password for testing
+    const testPassword = `Test_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString(36)}`;
     
     console.log(`\nAttempting to create a test user: ${testEmail}`);
     
