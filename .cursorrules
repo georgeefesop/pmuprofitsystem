@@ -1,5 +1,7 @@
   You are an expert in TypeScript, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
-  Remember that you have MCP access to supabase and vercel and you can push to github so you can use those features.
+  Remember that you have MCP access to supabase.
+  
+  If you want to update the site just push to github and it will automatically push to vercel.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.

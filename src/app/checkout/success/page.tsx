@@ -74,10 +74,10 @@ function SuccessPageContent() {
   // Function to handle resending verification email
   const handleResendVerificationEmail = async () => {
     if (isResendingEmail || !email) return;
-    
+
     setIsResendingEmail(true);
     setResendStatus('loading');
-    
+
     try {
       const result = await resendVerificationEmail(email);
       if (result.success) {
@@ -226,7 +226,7 @@ function SuccessPageContent() {
         <p className="mt-2 text-lg text-gray-600">Thank you for your purchase!</p>
       </div>
       
-      {isLoading ? (
+        {isLoading ? (
         <div className="flex flex-col items-center justify-center">
           <div className="w-16 h-16 border-t-4 border-b-4 border-indigo-500 rounded-full animate-spin"></div>
           <p className="mt-4 text-lg text-gray-700">Verifying your purchase...</p>
@@ -271,10 +271,10 @@ function SuccessPageContent() {
           </motion.div>
           
           {/* Success card */}
-          <motion.div 
+                <motion.div 
             className="bg-white rounded-xl shadow-lg overflow-hidden"
-            variants={itemVariants}
-          >
+                  variants={itemVariants}
+                >
             {/* Decorative wave */}
             <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
             
@@ -302,14 +302,14 @@ function SuccessPageContent() {
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   </motion.div>
-                </div>
-              </motion.div>
-              
+                  </div>
+                </motion.div>
+            
               {/* Success message */}
               <motion.h1 
                 className="mt-5 text-center text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent"
-                variants={itemVariants}
-              >
+                  variants={itemVariants}
+                >
                 Thank You for Your Purchase!
               </motion.h1>
               
@@ -343,8 +343,8 @@ function SuccessPageContent() {
                   <div className="pt-3 mt-3 border-t border-gray-200 flex items-center justify-between">
                     <span className="font-medium text-gray-900">Total</span>
                     <span className="font-bold text-lg text-indigo-600">€{calculateTotalAmount(purchaseDetails)}</span>
-                  </div>
-                </div>
+                        </div>
+                      </div>
               </motion.div>
               
               {/* What's next section */}
@@ -360,7 +360,7 @@ function SuccessPageContent() {
                       <div className="flex">
                         <svg className="h-5 w-5 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                          </svg>
                         <div>
                           <p className="text-sm text-blue-800 font-medium">1. Verify your email address</p>
                           <p className="text-xs text-blue-600 mt-1">
@@ -372,15 +372,15 @@ function SuccessPageContent() {
                           </p>
                         </div>
                       </div>
-                    </div>
+                </div>
                   )}
                   
                   <div className="bg-green-50 border border-green-100 rounded-lg p-4">
                     <div className="flex">
                       <svg className="h-5 w-5 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <div>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          <div>
                         <p className="text-sm text-green-800 font-medium">
                           {isPendingRegistration ? '2. Access your course' : '1. Access your course'}
                         </p>
@@ -388,16 +388,16 @@ function SuccessPageContent() {
                           {isPendingRegistration 
                             ? 'After verifying your email, you can log in to access your course materials.' 
                             : 'Your purchase has been processed. You can now access your course materials.'}
-                        </p>
-                      </div>
-                    </div>
+                    </p>
+                          </div>
+                        </div>
                   </div>
                   
                   <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
                     <div className="flex">
                       <svg className="h-5 w-5 text-purple-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                            </svg>
                       <div>
                         <p className="text-sm text-purple-800 font-medium">
                           {isPendingRegistration ? '3. Start learning' : '2. Start learning'}
@@ -406,8 +406,8 @@ function SuccessPageContent() {
                           Begin your journey to PMU business success with our comprehensive course materials.
                         </p>
                       </div>
-                    </div>
-                  </div>
+                              </div>
+                            </div>
                 </div>
               </motion.div>
               
@@ -417,26 +417,26 @@ function SuccessPageContent() {
                 variants={itemVariants}
               >
                 {isPendingRegistration && (
-                  <button
+                      <button
                     onClick={handleResendVerificationEmail}
-                    disabled={isResendingEmail}
+                        disabled={isResendingEmail}
                     className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isResendingEmail ? (
-                      <>
+                      >
+                        {isResendingEmail ? (
+                          <>
                         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Sending...
-                      </>
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Sending...
+                          </>
                     ) : 'Resend Verification Email'}
                   </button>
                 )}
                 
                 <Link href={isPendingRegistration ? "/login" : "/dashboard"} className="w-full block text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   {isPendingRegistration ? 'Go to Login' : 'Go to Dashboard'}
-                </Link>
+              </Link>
               </motion.div>
               
               {resendStatus === 'success' && (
@@ -456,8 +456,8 @@ function SuccessPageContent() {
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <p className="text-sm">{resendError || 'Failed to send verification email. Please try again.'}</p>
-                </motion.div>
-              )}
+                  </motion.div>
+                )}
               
               {/* Test card info */}
               <motion.div 
@@ -469,7 +469,7 @@ function SuccessPageContent() {
               </motion.div>
             </div>
           </motion.div>
-        </motion.div>
+      </motion.div>
       }
     </div>
   );
