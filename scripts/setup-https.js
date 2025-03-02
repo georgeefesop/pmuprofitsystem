@@ -3,10 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// Paths
-const rootDir = path.join(__dirname, '..');
-const certDir = path.join(rootDir, 'certificates');
-
 // Check if mkcert is installed
 function checkMkcert() {
   try {
@@ -57,109 +53,92 @@ function installMkcert() {
 
 // Setup mkcert and generate certificates
 function setupMkcert() {
-  console.log('Setting up mkcert and generating certificates...');
-  
-  // Create certificates directory if it doesn't exist
-  if (!fs.existsSync(certDir)) {
-    fs.mkdirSync(certDir, { recursive: true });
-  }
-  
   try {
-    // Install the local CA
+    console.log('Setting up mkcert...');
     execSync('mkcert -install', { stdio: 'inherit' });
     
-    // Generate certificates for localhost
-    execSync(`mkcert -key-file "${path.join(certDir, 'localhost-key.pem')}" -cert-file "${path.join(certDir, 'localhost.pem')}" localhost 127.0.0.1 ::1`, { stdio: 'inherit' });
+    console.log('Generating certificates for localhost...');
+    execSync('mkcert localhost', { stdio: 'inherit' });
     
-    console.log('\nCertificates generated successfully!');
-    console.log(`Certificates saved to: ${certDir}`);
-    return true;
+    // Check if certificates were created
+    const rootDir = process.cwd();
+    const keyPath = path.join(rootDir, 'localhost-key.pem');
+    const certPath = path.join(rootDir, 'localhost.pem');
+    
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+      console.log('Certificates generated successfully!');
+      console.log(`Key: ${keyPath}`);
+      console.log(`Certificate: ${certPath}`);
+      return true;
+    } else {
+      console.error('Certificates were not generated properly.');
+      return false;
+    }
   } catch (error) {
     console.error('Failed to setup mkcert:', error.message);
     return false;
   }
 }
 
-// Update .env.local file to use HTTPS
+// Update .env.local to use HTTPS
 function updateEnvFile() {
-  const envPath = path.join(rootDir, '.env.local');
-  
-  console.log('Updating .env.local file to use HTTPS...');
-  
   try {
+    const envPath = path.join(process.cwd(), '.env.local');
+    
     if (fs.existsSync(envPath)) {
       let envContent = fs.readFileSync(envPath, 'utf8');
       
       // Update NEXT_PUBLIC_SITE_URL to use HTTPS
-      if (envContent.includes('NEXT_PUBLIC_SITE_URL=http://localhost:3000')) {
-        envContent = envContent.replace(
-          'NEXT_PUBLIC_SITE_URL=http://localhost:3000',
-          'NEXT_PUBLIC_SITE_URL=https://localhost:3000'
-        );
-        fs.writeFileSync(envPath, envContent);
-        console.log('Updated NEXT_PUBLIC_SITE_URL to use HTTPS in .env.local');
-      } else if (!envContent.includes('NEXT_PUBLIC_SITE_URL=https://localhost:3000')) {
-        // Add the variable if it doesn't exist
-        envContent += '\nNEXT_PUBLIC_SITE_URL=https://localhost:3000\n';
-        fs.writeFileSync(envPath, envContent);
-        console.log('Added NEXT_PUBLIC_SITE_URL with HTTPS to .env.local');
-      } else {
-        console.log('NEXT_PUBLIC_SITE_URL already using HTTPS in .env.local');
-      }
+      envContent = envContent.replace(
+        /NEXT_PUBLIC_SITE_URL=http:\/\/localhost:3000/g,
+        'NEXT_PUBLIC_SITE_URL=https://localhost:3000'
+      );
+      
+      fs.writeFileSync(envPath, envContent);
+      console.log('Updated .env.local to use HTTPS.');
     } else {
-      // Create .env.local if it doesn't exist
-      fs.writeFileSync(envPath, 'NEXT_PUBLIC_SITE_URL=https://localhost:3000\n');
-      console.log('Created .env.local with HTTPS configuration');
+      console.log('.env.local file not found. Please make sure it exists and contains NEXT_PUBLIC_SITE_URL.');
     }
-    
-    return true;
   } catch (error) {
     console.error('Failed to update .env.local:', error.message);
-    return false;
   }
 }
 
 // Main function
 async function main() {
-  console.log('Setting up HTTPS for local development...\n');
+  console.log('Setting up HTTPS for local development...');
   
   // Check if mkcert is installed
   let mkcertInstalled = checkMkcert();
   
-  // Install mkcert if not installed
   if (!mkcertInstalled) {
     console.log('mkcert is not installed. Attempting to install...');
     mkcertInstalled = installMkcert();
     
     if (!mkcertInstalled) {
-      console.error('\nFailed to install mkcert. Please install it manually and run this script again.');
+      console.error('Failed to install mkcert. Please install it manually.');
       process.exit(1);
     }
-  } else {
-    console.log('mkcert is already installed.');
   }
   
   // Setup mkcert and generate certificates
-  const certificatesGenerated = setupMkcert();
+  const setupSuccess = setupMkcert();
   
-  if (!certificatesGenerated) {
-    console.error('\nFailed to generate certificates. Please check the error and try again.');
+  if (!setupSuccess) {
+    console.error('Failed to setup mkcert. Please try again or generate certificates manually.');
     process.exit(1);
   }
   
-  // Update .env.local file
-  const envUpdated = updateEnvFile();
+  // Update .env.local
+  updateEnvFile();
   
-  if (!envUpdated) {
-    console.error('\nFailed to update .env.local file. Please update it manually to use HTTPS.');
-  }
-  
-  console.log('\nHTTPS setup completed successfully!');
-  console.log('You can now run your Next.js app with HTTPS using: npm run dev:https');
+  console.log('\nSetup complete! You can now run the application with HTTPS:');
+  console.log('npm run dev:https');
+  console.log('\nOr use the start-https.js script directly:');
+  console.log('node start-https.js');
 }
 
-// Run the main function
 main().catch(error => {
-  console.error('An unexpected error occurred:', error);
+  console.error('An error occurred:', error);
   process.exit(1);
 }); 

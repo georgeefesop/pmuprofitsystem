@@ -5,8 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 export const getSecureSupabaseUrl = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   
-  // Convert all HTTP URLs to HTTPS, including localhost
-  if (supabaseUrl.startsWith('http://')) {
+  // Only convert to HTTPS if it's not localhost and currently using HTTP
+  if (supabaseUrl.startsWith('http://') && !supabaseUrl.includes('localhost')) {
     console.log('Converting Supabase URL from HTTP to HTTPS for security');
     return supabaseUrl.replace('http://', 'https://');
   }
@@ -128,23 +128,23 @@ export const getServiceSupabase = () => {
 export const getSecureSiteUrl = () => {
   // Use the environment variable if available
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    // Ensure HTTPS for all URLs, including localhost
+    // Ensure HTTPS for production URLs
     const url = process.env.NEXT_PUBLIC_SITE_URL;
-    if (url.startsWith('http://')) {
+    if (url.startsWith('http://') && !url.includes('localhost')) {
       return url.replace('http://', 'https://');
     }
     return url;
   }
   
-  // Otherwise use the current origin, ensuring HTTPS for all URLs
+  // Otherwise use the current origin, ensuring HTTPS for production
   if (typeof window !== 'undefined') {
     const origin = window.location.origin;
-    if (origin.startsWith('http://')) {
+    if (origin.startsWith('http://') && !origin.includes('localhost')) {
       return origin.replace('http://', 'https://');
     }
     return origin;
   }
   
-  // Fallback for server-side - use HTTPS for localhost as well
-  return 'https://localhost:3000';
+  // Fallback for server-side
+  return 'http://localhost:3000';
 }; 

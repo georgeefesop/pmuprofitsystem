@@ -63,9 +63,6 @@ CREATE POLICY "Only authenticated users can view email logs"
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Set search_path to public to prevent search_path injection
-  SET search_path = 'public';
-  
   INSERT INTO public.users (id, email, full_name)
   VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name');
   RETURN new;

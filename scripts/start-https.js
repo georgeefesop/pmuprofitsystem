@@ -8,24 +8,14 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-// Path to certificates directory
-const certDir = path.join(__dirname, '..', 'certificates');
-
-// Check if certificates exist
-if (!fs.existsSync(path.join(certDir, 'localhost-key.pem')) || 
-    !fs.existsSync(path.join(certDir, 'localhost.pem'))) {
-  console.error('Error: SSL certificates not found in the certificates directory.');
-  console.error('Please run "npm run setup:https" first to generate the certificates.');
-  process.exit(1);
-}
-
 // Self-signed certificate options
+// Note: In production, you should use a proper SSL certificate
 const httpsOptions = {
-  key: fs.readFileSync(path.join(certDir, 'localhost-key.pem')),
-  cert: fs.readFileSync(path.join(certDir, 'localhost.pem')),
+  key: fs.readFileSync(path.join(__dirname, 'localhost-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'localhost.pem')),
 };
 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 app.prepare().then(() => {
   createServer(httpsOptions, (req, res) => {
@@ -35,12 +25,6 @@ app.prepare().then(() => {
     if (err) throw err;
     console.log(`> Ready on https://localhost:${port}`);
     console.log('> Note: You may need to accept the self-signed certificate in your browser');
-    
-    // Log additional information
-    console.log('\nEnvironment:');
-    console.log(`- NODE_ENV: ${process.env.NODE_ENV}`);
-    console.log(`- NEXT_PUBLIC_SITE_URL: ${process.env.NEXT_PUBLIC_SITE_URL}`);
-    console.log(`- NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
   });
 });
 
