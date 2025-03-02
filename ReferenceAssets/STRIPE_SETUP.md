@@ -8,9 +8,9 @@ Add the following environment variables to your `.env.local` file:
 
 ```
 # Stripe Configuration (Test Mode)
-STRIPE_SECRET_KEY=sk_test_51OvCVnJXXXXXXXXXXXXXXXXXX
-STRIPE_PUBLISHABLE_KEY=pk_test_51OvCVnJXXXXXXXXXXXXXXXXXX
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51OvCVnJXXXXXXXXXXXXXXXXXX
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
 ```
 
 Replace the placeholder values with your actual Stripe test API keys from your Stripe dashboard.
@@ -33,7 +33,7 @@ For local testing with webhooks:
 2. Run `stripe listen --forward-to localhost:3000/api/webhooks`
 3. Add the webhook signing secret to your `.env.local`:
 ```
-STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_key_here
 ```
 
 ## 4. Testing the Checkout Flow
