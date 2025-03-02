@@ -12,6 +12,7 @@ This document provides solutions for common issues you might encounter when work
 6. [UI/UX Issues](#uiux-issues)
 7. [Performance Problems](#performance-problems)
 8. [Development Environment Setup](#development-environment-setup)
+9. [HTTPS Connection Issues](#https-connection-issues)
 
 ## Authentication Issues
 
@@ -242,6 +243,85 @@ This document provides solutions for common issues you might encounter when work
 2. Generate local SSL certificates if needed
 3. Trust the local certificates in your browser
 4. Update environment variables to use HTTPS URLs
+
+## HTTPS Connection Issues
+
+### Problem: Certificate Not Trusted
+
+**Symptoms:**
+- Browser shows "Your connection is not private" or similar warning
+- Certificate errors in the browser console
+
+**Solutions:**
+1. Ensure you've run the HTTPS setup script:
+   ```bash
+   npm run setup:https
+   ```
+
+2. Try reinstalling the local certificate authority:
+   ```bash
+   mkcert -install
+   ```
+   Note: You may need to run this with administrator privileges.
+
+3. For Chrome, you can enable the flag to allow invalid certificates for localhost:
+   - Visit `chrome://flags/#allow-insecure-localhost`
+   - Enable "Allow invalid certificates for resources loaded from localhost"
+   - Restart Chrome
+
+### Problem: HTTPS Works But Supabase Authentication Fails
+
+**Symptoms:**
+- Local HTTPS server runs correctly
+- Authentication attempts fail with network errors
+- Console shows CORS or connection errors
+
+**Solutions:**
+1. Ensure your Supabase project settings include the HTTPS localhost URL:
+   - Go to Authentication > URL Configuration in the Supabase dashboard
+   - Add `https://localhost:3000` to the Site URL
+   - Add `https://localhost:3000/auth/callback` to the Redirect URLs
+
+2. Check your environment variables:
+   - Ensure `NEXT_PUBLIC_SITE_URL` is set to `https://localhost:3000`
+   - Verify that `NEXT_PUBLIC_SUPABASE_URL` is correct
+
+3. Clear browser cookies and local storage:
+   - Open Developer Tools (F12)
+   - Go to Application > Storage
+   - Clear site data and cookies
+
+4. If using a custom domain for Supabase, ensure DNS resolution is working:
+   ```bash
+   nslookup your-project.supabase.co
+   ```
+
+### Problem: "Connection Refused" When Starting HTTPS Server
+
+**Symptoms:**
+- Error message indicating the connection was refused
+- Server fails to start or is inaccessible
+
+**Solutions:**
+1. Check if another process is using port 3000:
+   ```bash
+   # Windows
+   netstat -ano | findstr :3000
+   
+   # macOS/Linux
+   lsof -i :3000
+   ```
+
+2. Try changing the port in `scripts/start-https.js`:
+   ```javascript
+   const port = 3001; // Change from 3000 to another port
+   ```
+
+3. Ensure your firewall isn't blocking the connection:
+   - Check Windows Defender Firewall settings
+   - Check any antivirus software that might be blocking Node.js
+
+For more detailed information about HTTPS setup, refer to [HTTPS-SETUP.md](./HTTPS-SETUP.md).
 
 ---
 

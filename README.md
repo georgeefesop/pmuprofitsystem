@@ -120,6 +120,39 @@ For testing payments, use the following test card numbers:
 
 Use any future expiration date, any 3-digit CVC, and any postal code.
 
+## HTTPS Setup for Local Development
+
+To enable HTTPS for local development, follow these steps:
+
+1. **Install Required Tools**
+
+   Run the setup script to install and configure mkcert (a tool for creating locally-trusted certificates):
+
+   ```bash
+   npm run setup:https
+   ```
+
+   This script will:
+   - Install mkcert if not already installed
+   - Generate self-signed certificates for localhost
+   - Update your .env.local file to use HTTPS
+
+2. **Start the Development Server with HTTPS**
+
+   ```bash
+   npm run dev:https
+   ```
+
+   This will start your Next.js application with HTTPS enabled on https://localhost:3000.
+
+   Note: You may need to accept the self-signed certificate in your browser the first time you access the site.
+
+3. **Troubleshooting**
+
+   - If you encounter certificate issues, try running `npm run setup:https` again
+   - Make sure your Supabase project is configured to accept requests from https://localhost:3000
+   - Check that your .env.local file has NEXT_PUBLIC_SITE_URL set to https://localhost:3000
+
 ## Scripts
 
 - `npm run dev` - Start the development server
