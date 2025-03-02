@@ -560,4 +560,26 @@
 - Updated the send-email API route to use a proper email service
 - Enhanced the resendVerificationEmail function to return preview URLs
 - Added TypeScript types for better code completion and error checking
-- Improved error handling throughout the email delivery process 
+- Improved error handling throughout the email delivery process
+
+## 2023-03-29: Fixed Purchase Function Calls
+
+### Fixed Issues
+- Fixed TypeScript error in ad-generator and blueprint purchase pages
+- Updated addPurchase function calls to include the required amount parameter
+- Resolved Vercel deployment build failure caused by missing parameters
+
+### Code Improvements
+- Ensured consistent parameter usage across all purchase function calls
+- Added proper price values to purchase function calls
+- Enhanced type safety in purchase handling functions
+
+## 2023-03-30: Price Correction for Blueprint Purchase
+
+### Fixed Issues
+- Updated the Consultation Success Blueprint purchase price from €27 to the correct price of €33
+- Ensured price consistency between UI display and purchase function
+
+### Code Improvements
+- Aligned purchase function parameters with displayed prices in the UI
+- Enhanced data consistency across the purchase flow 

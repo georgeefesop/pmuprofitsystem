@@ -19,7 +19,7 @@ export default function PMUAdGeneratorPurchase() {
     // Simulate payment processing
     setTimeout(() => {
       // Add the purchase to the user's account
-      addPurchase('pmu-ad-generator');
+      addPurchase('pmu-ad-generator', 27);
       
       // Redirect to the ad generator page
       router.push('/dashboard/ad-generator');

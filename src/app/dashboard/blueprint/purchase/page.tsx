@@ -19,7 +19,7 @@ export default function ConsultationSuccessPurchase() {
     // Simulate payment processing
     setTimeout(() => {
       // Add the purchase to the user's account
-      addPurchase('consultation-success-blueprint');
+      addPurchase('consultation-success-blueprint', 33);
       
       // Redirect to the blueprint page
       router.push('/dashboard/blueprint');
