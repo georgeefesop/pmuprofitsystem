@@ -1,54 +1,6 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { stripe, safeStripeOperation } from '@/lib/stripe';
 import { supabase } from '@/lib/supabase';
-
-// Initialize Stripe with the secret key and improved configuration
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2022-11-15' as any, // Use the same version as before but with improved config
-  timeout: 30000, // 30 seconds timeout
-  maxNetworkRetries: 3, // Automatically retry failed requests
-  httpAgent: undefined, // Let Stripe handle the HTTP agent
-});
-
-// Helper function to safely execute Stripe API calls with custom retry logic
-async function safeStripeOperation<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
-  let lastError: any;
-  let retryCount = 0;
-  
-  while (retryCount < maxRetries) {
-    try {
-      return await operation();
-    } catch (error: any) {
-      lastError = error;
-      retryCount++;
-      
-      // Log the retry attempt
-      console.warn(`Stripe operation failed (attempt ${retryCount}/${maxRetries}):`, error.message);
-      
-      // Check if the error is retryable
-      if (
-        error.type === 'StripeConnectionError' || 
-        error.type === 'StripeAPIError' ||
-        error.type === 'StripeTimeoutError' ||
-        error.code === 'ECONNRESET' ||
-        error.code === 'ETIMEDOUT' ||
-        error.code === 'ENOTFOUND'
-      ) {
-        // Exponential backoff with jitter
-        const delay = Math.min(Math.pow(2, retryCount) * 100 + Math.random() * 100, 3000);
-        console.log(`Retrying after ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        continue;
-      }
-      
-      // Non-retryable error, throw immediately
-      throw error;
-    }
-  }
-  
-  // If we've exhausted all retries, throw the last error
-  throw lastError;
-}
 
 export async function POST(request: Request) {
   try {
@@ -59,6 +11,7 @@ export async function POST(request: Request) {
     console.log('Stripe key present:', !!stripeKey);
     if (stripeKey) {
       console.log('Stripe key starts with:', stripeKey.substring(0, 3) + '...');
+      console.log('Stripe key length:', stripeKey.length);
     }
     
     const body = await request.json();
