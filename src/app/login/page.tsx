@@ -275,7 +275,7 @@ function LoginForm() {
           <Link href="/" className="flex items-center">
             <img
               className="h-12 w-auto"
-              src="/logo.png"
+              src="/images/PMU Profit System - Frame 3.jpg"
               alt="PMU Profit System"
             />
           </Link>
