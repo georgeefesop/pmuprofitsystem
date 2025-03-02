@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { checkSupabaseConnection, logSupabaseDiagnostics } from '@/lib/supabase-utils';
 import { AlertCircle, CheckCircle, RefreshCw, ExternalLink, Info, Loader2 } from 'lucide-react';
 
-export function ConnectionStatus() {
+interface ConnectionStatusProps {
+  showDetails?: boolean;
+}
+
+export function ConnectionStatus({ showDetails = false }: ConnectionStatusProps) {
   const [status, setStatus] = useState<'loading' | 'connected' | 'error'>('loading');
   const [message, setMessage] = useState<string>('Checking connection...');
   const [details, setDetails] = useState<Record<string, any> | undefined>(undefined);
@@ -137,7 +141,7 @@ export function ConnectionStatus() {
         </div>
       )}
       
-      {status === 'error' && details && (
+      {(status === 'error' || showDetails) && details && (
         <div className="mt-4">
           <h4 className="font-medium mb-2">Troubleshooting Information</h4>
           

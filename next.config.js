@@ -25,6 +25,15 @@ const nextConfig = {
   images: {
     domains: ['randomuser.me', 'images.pexels.com', 'images.unsplash.com', 'drive.google.com', 'ui-avatars.com'],
   },
+  // Exclude development-only pages from production builds
+  experimental: {
+    // Only include the diagnostics page in development builds
+    outputFileTracingExcludes: process.env.NODE_ENV === 'production' 
+      ? { 
+          '*': ['**/diagnostics/**'] 
+        } 
+      : {},
+  },
 };
 
 module.exports = nextConfig; 
