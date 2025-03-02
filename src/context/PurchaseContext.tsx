@@ -26,6 +26,7 @@ interface PurchaseContextType {
   refreshPurchases: () => Promise<void>;
   getPendingPurchases: () => { productId: ProductId; amount: number }[];
   claimPendingPurchases: () => Promise<void>;
+  resetPurchasesExceptSystem: () => Promise<void>;
 }
 
 // Create the context with a default value
@@ -36,6 +37,7 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingPurchases, setPendingPurchases] = useState<{ productId: ProductId; amount: number }[]>([]);
 
   // Fetch purchases from Supabase when the component mounts or user changes
   const fetchPurchases = async () => {
@@ -166,6 +168,32 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Reset purchases except for the PMU Profit System
+  const resetPurchasesExceptSystem = async (): Promise<void> => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      // Delete all purchases except for the PMU Profit System
+      const { error } = await supabase
+        .from('purchases')
+        .delete()
+        .eq('user_id', user.id)
+        .neq('product_id', 'pmu-profit-system');
+      
+      if (error) {
+        console.error('Error resetting purchases:', error);
+      } else {
+        // Refresh purchases
+        await fetchPurchases();
+      }
+    } catch (error) {
+      console.error('Error resetting purchases:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Refresh purchases from the database
   const refreshPurchases = async () => {
     await fetchPurchases();
@@ -179,7 +207,8 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
       addPurchase,
       refreshPurchases,
       getPendingPurchases,
-      claimPendingPurchases
+      claimPendingPurchases,
+      resetPurchasesExceptSystem
     }}>
       {children}
     </PurchaseContext.Provider>

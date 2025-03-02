@@ -11,7 +11,7 @@ export default function ProfilePage() {
   
   // User profile state
   const [userData, setUserData] = useState({
-    fullName: user?.name || '',
+    fullName: user?.full_name || '',
     email: user?.email || '',
     businessName: 'Your PMU Studio',
     location: 'City, Country',

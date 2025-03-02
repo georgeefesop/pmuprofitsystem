@@ -32,17 +32,17 @@ export default function ResetPurchasesPage() {
           <div className="bg-gray-50 p-4 rounded-lg mb-6">
             <ul className="space-y-2">
               {purchases.map((purchase) => (
-                <li key={purchase.productId} className="flex items-center">
+                <li key={purchase.product_id} className="flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>
-                    {purchase.productId === 'pmu-profit-system' && 'PMU Profit System'}
-                    {purchase.productId === 'consultation-success-blueprint' && 'Consultation Success Blueprint'}
-                    {purchase.productId === 'pmu-ad-generator' && 'PMU Ad Generator'}
+                    {purchase.product_id === 'pmu-profit-system' && 'PMU Profit System'}
+                    {purchase.product_id === 'consultation-success-blueprint' && 'Consultation Success Blueprint'}
+                    {purchase.product_id === 'pmu-ad-generator' && 'PMU Ad Generator'}
                   </span>
                   <span className="text-xs text-gray-500 ml-2">
-                    (Purchased on {new Date(purchase.purchaseDate).toLocaleDateString()})
+                    (Purchased on {new Date(purchase.created_at).toLocaleDateString()})
                   </span>
                 </li>
               ))}

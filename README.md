@@ -48,40 +48,15 @@ Stripe requires a secure connection (HTTPS) for payment forms to work properly. 
 
 3. Generate certificates for localhost:
    ```bash
-   mkcert localhost
+   npm run setup:https
    ```
 
 4. Run the HTTPS server:
    ```bash
-   node start-https.js
+   npm run dev:https
    ```
 
 5. Open [https://localhost:3000](https://localhost:3000) in your browser.
-
-### Option 2: Using next-https
-
-1. Install next-https:
-   ```bash
-   npm install --save-dev next-https
-   # or
-   yarn add --dev next-https
-   ```
-
-2. Add the following script to your package.json:
-   ```json
-   "scripts": {
-     "dev:https": "next-https"
-   }
-   ```
-
-3. Run the HTTPS server:
-   ```bash
-   npm run dev:https
-   # or
-   yarn dev:https
-   ```
-
-4. Open [https://localhost:3000](https://localhost:3000) in your browser.
 
 ## Environment Variables
 
@@ -112,6 +87,29 @@ STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 - Email verification system
 - Mobile-responsive design
 
+## Documentation
+
+Comprehensive documentation is available in the `docs` directory:
+
+### System Overview
+- [Database Schema](docs/DATABASE-SCHEMA.md) - Comprehensive overview of the database structure
+- [Supabase Authentication](docs/SUPABASE-AUTHENTICATION.md) - Guide to the authentication system
+- [Code Structure](docs/CODE-STRUCTURE.md) - Overview of the codebase structure
+
+### API Documentation
+- [API Routes](docs/API-ROUTES.md) - Documentation for the API routes
+- [Stripe Integration](docs/STRIPE-INTEGRATION.md) - Guide to the Stripe payment integration
+
+### Development Guides
+- [Development Workflow](docs/DEVELOPMENT-WORKFLOW.md) - Guide to the development workflow
+- [Supabase Setup](docs/supabase-setup-instructions.md) - Instructions for setting up Supabase
+- [Deployment Guide](docs/DEPLOYMENT.md) - Guide for deploying the application
+- [Testing Guide](docs/TESTING.md) - Instructions for testing the application
+- [Error Handling](docs/ERROR_HANDLING.md) - Overview of the error handling system
+
+### Troubleshooting
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md) - Solutions for common issues
+
 ## Testing Stripe Payments
 
 For testing payments, use the following test card numbers:
@@ -122,8 +120,68 @@ For testing payments, use the following test card numbers:
 
 Use any future expiration date, any 3-digit CVC, and any postal code.
 
+## Scripts
+
+- `npm run dev` - Start the development server
+- `npm run dev:direct` - Start the development server directly (bypass launcher)
+- `npm run dev:alt` - Start the development server on an alternative port
+- `npm run dev:https` - Start the development server with HTTPS
+- `npm run setup:https` - Set up HTTPS for local development
+- `npm run prebuild` - Check for image domains before building
+- `npm run build` - Build the application for production
+- `npm run start` - Start the production server
+- `npm run lint` - Lint the codebase
+- `npm run check-errors` - Check for common build errors
+- `npm run setup-db` - Set up the database
+- `npm run verify-db` - Verify the database setup
+
+## Project Structure
+
+```
+pmuprofitsystem/
+├── database/                    # Database setup files
+│   └── supabase-setup.sql       # SQL setup script
+├── docs/                        # Documentation
+│   ├── API-ROUTES.md            # API routes documentation
+│   ├── CODE-STRUCTURE.md        # Codebase structure overview
+│   ├── DATABASE-SCHEMA.md       # Database schema documentation
+│   ├── DEPLOYMENT.md            # Deployment guide
+│   ├── DEVELOPMENT-WORKFLOW.md  # Development workflow guide
+│   ├── ERROR_HANDLING.md        # Error handling documentation
+│   ├── README.md                # Documentation overview
+│   ├── STRIPE-INTEGRATION.md    # Stripe integration documentation
+│   ├── SUPABASE-AUTHENTICATION.md # Authentication system documentation
+│   ├── supabase-setup-instructions.md # Supabase setup instructions
+│   ├── TESTING.md               # Testing guide
+│   └── TROUBLESHOOTING.md       # Troubleshooting guide
+├── public/                      # Static assets
+│   ├── images/                  # Image assets
+│   └── favicon/                 # Favicon assets
+├── ReferenceAssets/             # Reference assets and changelog
+├── scripts/                     # Development and build scripts
+│   ├── setup-https.js           # HTTPS setup script
+│   ├── start-https.js           # HTTPS server script
+│   └── ...                      # Other scripts
+├── src/                         # Source code
+│   ├── app/                     # Next.js App Router pages
+│   │   ├── api/                 # API routes
+│   │   ├── dashboard/           # Dashboard pages
+│   │   ├── auth/                # Authentication pages
+│   │   ├── checkout/            # Checkout pages
+│   │   └── ...                  # Other pages
+│   ├── components/              # React components
+│   │   ├── ui/                  # UI components
+│   │   └── sections/            # Page sections
+│   ├── contexts/                # React contexts
+│   ├── lib/                     # Utility libraries
+│   ├── utils/                   # Utility functions
+│   │   └── supabase/            # Supabase utilities
+│   └── middleware.ts            # Next.js middleware
+└── ...                          # Configuration files
+```
+
 ## Deployment
 
 The easiest way to deploy this app is to use the [Vercel Platform](https://vercel.com/new).
 
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Check out the [Deployment Guide](docs/DEPLOYMENT.md) for more details on deployment options.
