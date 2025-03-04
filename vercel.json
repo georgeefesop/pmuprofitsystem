@@ -28,14 +28,6 @@
       "memory": 1024,
       "maxDuration": 10
     },
-    "src/app/api/test-supabase-auth/route.ts": {
-      "memory": 1024,
-      "maxDuration": 10
-    },
-    "src/app/api/test-email-verification/route.ts": {
-      "memory": 1024,
-      "maxDuration": 10
-    },
     "src/app/api/update-supabase-redirect/route.ts": {
       "memory": 1024,
       "maxDuration": 10

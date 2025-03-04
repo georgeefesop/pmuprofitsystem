@@ -1,36 +1,20 @@
-# PMU Profit System Database Schema
+# Database Schema
 
-This document provides a comprehensive overview of the database schema used in the PMU Profit System.
+This document outlines the database schema for the PMU Profit System.
 
-## Table of Contents
+## Tables Overview
 
-1. [Overview](#overview)
-2. [Tables](#tables)
-   - [Users](#users)
-   - [Purchases](#purchases)
-   - [Email Logs](#email-logs)
-3. [Relationships](#relationships)
-4. [Row Level Security](#row-level-security)
-5. [Triggers](#triggers)
-6. [Indexes](#indexes)
-7. [Schema Diagram](#schema-diagram)
-8. [Common Queries](#common-queries)
+The PMU Profit System uses the following tables:
 
-## Overview
+1. **users** - Stores user profile information, linked to Supabase Auth users
+2. **purchases** - Records product purchases made by users
+3. **email_logs** - Logs email notifications sent by the system
 
-The PMU Profit System uses Supabase (PostgreSQL) as its database. The schema is designed to support:
+## Schema Details
 
-- User authentication and profiles
-- Purchase tracking
-- Email logging
+### Users Table
 
-The database is structured to ensure data integrity, security, and performance. Row Level Security (RLS) policies are implemented to protect user data.
-
-## Tables
-
-### Users
-
-The `users` table stores user profile information. It is linked to Supabase Auth's `auth.users` table.
+The `users` table stores user profile information and is linked to Supabase Auth users.
 
 ```sql
 CREATE TABLE IF NOT EXISTS public.users (
@@ -42,21 +26,14 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 ```
 
-**Fields:**
-- `id`: UUID, primary key, references auth.users(id)
-- `email`: TEXT, unique, not null
-- `full_name`: TEXT, user's full name
-- `created_at`: TIMESTAMP WITH TIME ZONE, default NOW()
-- `updated_at`: TIMESTAMP WITH TIME ZONE, default NOW()
+#### Row Level Security (RLS) Policies
 
-**Purpose:**
-- Stores user profile information
-- Links to Supabase Auth for authentication
-- Used for displaying user information in the UI
+- **Users can view their own data** - Users can only view their own profile information
+- **Users can update their own data** - Users can only update their own profile information
 
-### Purchases
+### Purchases Table
 
-The `purchases` table tracks user purchases of products.
+The `purchases` table records product purchases made by users.
 
 ```sql
 CREATE TABLE IF NOT EXISTS public.purchases (
@@ -70,28 +47,14 @@ CREATE TABLE IF NOT EXISTS public.purchases (
 );
 ```
 
-**Fields:**
-- `id`: UUID, primary key, auto-generated
-- `user_id`: UUID, references users(id), not null
-- `product_id`: TEXT, not null, identifies the product purchased
-- `amount`: DECIMAL(10, 2), not null, purchase amount
-- `status`: TEXT, not null, default 'completed'
-- `created_at`: TIMESTAMP WITH TIME ZONE, default NOW()
-- `updated_at`: TIMESTAMP WITH TIME ZONE, default NOW()
+#### Row Level Security (RLS) Policies
 
-**Purpose:**
-- Tracks user purchases
-- Used to determine user access to products
-- Supports financial reporting
+- **Users can view their own purchases** - Users can only view their own purchases
+- **Only authenticated users can insert purchases** - Only authenticated users can create purchases
 
-**Product IDs:**
-- `pmu-profit-system`: Main course
-- `pmu-ad-generator`: Ad generator tool
-- `consultation-success-blueprint`: Consultation blueprint
+### Email Logs Table
 
-### Email Logs
-
-The `email_logs` table stores records of emails sent by the system.
+The `email_logs` table logs email notifications sent by the system.
 
 ```sql
 CREATE TABLE IF NOT EXISTS public.email_logs (
@@ -103,79 +66,15 @@ CREATE TABLE IF NOT EXISTS public.email_logs (
 );
 ```
 
-**Fields:**
-- `id`: UUID, primary key, auto-generated
-- `recipient`: TEXT, not null, email recipient
-- `subject`: TEXT, not null, email subject
-- `content`: TEXT, not null, email content
-- `sent_at`: TIMESTAMP WITH TIME ZONE, default NOW()
+#### Row Level Security (RLS) Policies
 
-**Purpose:**
-- Logs all emails sent by the system
-- Useful for debugging email issues
-- Provides an audit trail for communications
-
-## Relationships
-
-The database has the following relationships:
-
-1. **Users to Auth.Users**: One-to-one relationship
-   - `users.id` references `auth.users.id`
-   - Ensures that each user profile corresponds to an authenticated user
-
-2. **Purchases to Users**: Many-to-one relationship
-   - `purchases.user_id` references `users.id`
-   - A user can have multiple purchases
-   - When a user is deleted, their purchases are also deleted (CASCADE)
-
-## Row Level Security
-
-Row Level Security (RLS) policies are implemented to protect user data:
-
-### Users Table
-
-```sql
--- Users can view their own data
-CREATE POLICY "Users can view their own data" 
-  ON public.users FOR SELECT 
-  USING (auth.uid() = id);
-
--- Users can update their own data
-CREATE POLICY "Users can update their own data" 
-  ON public.users FOR UPDATE 
-  USING (auth.uid() = id);
-```
-
-### Purchases Table
-
-```sql
--- Users can view their own purchases
-CREATE POLICY "Users can view their own purchases" 
-  ON public.purchases FOR SELECT 
-  USING (auth.uid() = user_id);
-
--- Only authenticated users can insert purchases
-CREATE POLICY "Only authenticated users can insert purchases" 
-  ON public.purchases FOR INSERT 
-  WITH CHECK (auth.role() = 'authenticated');
-```
-
-### Email Logs Table
-
-```sql
--- Only authenticated users can view email logs
-CREATE POLICY "Only authenticated users can view email logs" 
-  ON public.email_logs FOR SELECT 
-  USING (auth.role() = 'authenticated');
-```
+- **Only authenticated users can view email logs** - Only authenticated users can view email logs
 
 ## Triggers
 
-The database uses triggers to automate certain actions:
-
 ### New User Trigger
 
-This trigger automatically creates a user profile when a new user is authenticated:
+This trigger automatically adds new users to the `users` table when they sign up through Supabase Auth.
 
 ```sql
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
@@ -192,86 +91,44 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 ```
 
-## Indexes
+## Setting Up the Database
 
-The database uses the following indexes to improve query performance:
+To set up the database schema for the PMU Profit System, you can use the automated setup scripts:
 
-1. Primary key indexes (automatically created)
-2. Foreign key indexes (automatically created)
-3. Email index on users table (for faster lookups by email)
-
-## Schema Diagram
-
-```
-┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│    auth.users   │       │  public.users   │       │ public.purchases │
-├─────────────────┤       ├─────────────────┤       ├─────────────────┤
-│ id (PK)         │───┐   │ id (PK)         │◄──┐   │ id (PK)         │
-│ email           │   └──►│ email           │   │   │ user_id (FK)     │
-│ encrypted_pass  │       │ full_name       │   │   │ product_id       │
-│ ...             │       │ created_at      │   │   │ amount           │
-└─────────────────┘       │ updated_at      │   │   │ status           │
-                          └─────────────────┘   │   │ created_at       │
-                                                └───│ updated_at       │
-                                                    └─────────────────┘
-                          ┌─────────────────┐
-                          │public.email_logs│
-                          ├─────────────────┤
-                          │ id (PK)         │
-                          │ recipient       │
-                          │ subject         │
-                          │ content         │
-                          │ sent_at         │
-                          └─────────────────┘
+```bash
+npm run setup-db
 ```
 
-## Common Queries
+This script will create the necessary tables, set up Row Level Security (RLS) policies, and create triggers.
 
-### Get User Profile
+## Verifying the Database Setup
 
-```sql
-SELECT * FROM public.users WHERE id = 'user-uuid';
+To verify that the database schema is set up correctly:
+
+```bash
+npm run verify-db
 ```
 
-### Get User Purchases
+This script will check that all tables, columns, and constraints are correctly set up.
 
-```sql
-SELECT * FROM public.purchases WHERE user_id = 'user-uuid';
-```
+## Database Relationships
 
-### Check if User Has Access to a Product
+The database has the following relationships:
 
-```sql
-SELECT EXISTS (
-  SELECT 1 FROM public.purchases 
-  WHERE user_id = 'user-uuid' 
-  AND product_id = 'product-id'
-  AND status = 'completed'
-);
-```
+1. **users.id** → **auth.users.id** (one-to-one)
+   - Each user in the `users` table corresponds to a user in Supabase Auth.
 
-### Get Recent Email Logs
+2. **purchases.user_id** → **users.id** (many-to-one)
+   - Each purchase is associated with a user.
 
-```sql
-SELECT * FROM public.email_logs 
-ORDER BY sent_at DESC 
-LIMIT 10;
-```
+## Data Flow
 
-### Get User with Purchases
+1. When a user signs up, a record is automatically created in the `users` table via the trigger.
+2. When a user makes a purchase, a record is created in the `purchases` table.
+3. When the system sends an email, a record is created in the `email_logs` table.
 
-```sql
-SELECT 
-  u.id, 
-  u.email, 
-  u.full_name,
-  json_agg(p.*) as purchases
-FROM 
-  public.users u
-LEFT JOIN 
-  public.purchases p ON u.id = p.user_id
-WHERE 
-  u.id = 'user-uuid'
-GROUP BY 
-  u.id;
-``` 
+## Security Considerations
+
+- All tables have Row Level Security (RLS) policies to ensure data security.
+- Users can only access their own data.
+- The trigger function uses `SECURITY DEFINER` to ensure it runs with the necessary permissions. 

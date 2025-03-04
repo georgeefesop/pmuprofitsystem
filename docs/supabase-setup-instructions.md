@@ -1,139 +1,120 @@
-# Supabase Database Setup Instructions
+# Supabase Local Development Setup
 
-To set up the database schema for the PMU Profit System, follow these steps:
+This guide explains how to set up Supabase for local development with the PMU Profit System.
 
-## 1. Access the SQL Editor
+## Prerequisites
 
-1. Log in to your Supabase dashboard at https://app.supabase.com
-2. Select your project "pmuprofit"
-3. Go to the SQL Editor (in the left sidebar)
-4. Create a new query
+Before setting up Supabase locally, ensure you have the following installed:
 
-## 2. Create the Database Schema
+1. **Docker Desktop** - Required to run Supabase locally
+   - [Download Docker Desktop](https://www.docker.com/products/docker-desktop/)
+   - Make sure Docker is running before proceeding
 
-Copy and paste the following SQL code into the SQL Editor:
+2. **Node.js** - Required to run the setup scripts
+   - Recommended version: 16.x or higher
 
-```sql
--- Users Table
-CREATE TABLE IF NOT EXISTS public.users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+## Automated Setup
 
--- Set up Row Level Security (RLS)
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+The PMU Profit System includes automated scripts to set up Supabase locally:
 
--- Create policies
-CREATE POLICY "Users can view their own data" 
-  ON public.users FOR SELECT 
-  USING (auth.uid() = id);
+### Option 1: Complete Setup (Recommended)
 
-CREATE POLICY "Users can update their own data" 
-  ON public.users FOR UPDATE 
-  USING (auth.uid() = id);
+Run the complete setup script, which will guide you through setting up Supabase and the development environment:
 
--- Purchases Table
-CREATE TABLE IF NOT EXISTS public.purchases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
-  product_id TEXT NOT NULL,
-  amount DECIMAL(10, 2) NOT NULL,
-  status TEXT NOT NULL DEFAULT 'completed',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Set up Row Level Security
-ALTER TABLE public.purchases ENABLE ROW LEVEL SECURITY;
-
--- Create policies
-CREATE POLICY "Users can view their own purchases" 
-  ON public.purchases FOR SELECT 
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Only authenticated users can insert purchases" 
-  ON public.purchases FOR INSERT 
-  WITH CHECK (auth.role() = 'authenticated');
-
--- Email Logs Table
-CREATE TABLE IF NOT EXISTS public.email_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  recipient TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  content TEXT NOT NULL,
-  sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Set up Row Level Security
-ALTER TABLE public.email_logs ENABLE ROW LEVEL SECURITY;
-
--- Create policies
-CREATE POLICY "Only authenticated users can view email logs" 
-  ON public.email_logs FOR SELECT 
-  USING (auth.role() = 'authenticated');
-
--- Create a trigger function to automatically add new users to the users table
-CREATE OR REPLACE FUNCTION public.handle_new_user() 
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO public.users (id, email, full_name)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'full_name');
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Create the trigger
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+```bash
+npm run setup
 ```
 
-5. Click "Run" to execute the SQL code
+This script will:
+1. Check if Docker is installed and running
+2. Set up Supabase locally
+3. Configure your environment variables
+4. Set up and verify the database
+5. Start the development server (optional)
 
-## 3. Verify the Database Setup
+### Option 2: Supabase Setup Only
 
-1. Go to the "Table Editor" in the left sidebar
-2. You should see the following tables:
-   - `users` - Stores user profile information
-   - `purchases` - Records product purchases
-   - `email_logs` - Logs email notifications
+If you only want to set up Supabase without the complete environment setup:
 
-3. Click on each table to verify the columns and constraints
+```bash
+npm run setup:supabase
+```
 
-## 4. Configure Authentication Settings
+This script will:
+1. Check if Docker is installed and running
+2. Install Supabase CLI if not already installed
+3. Initialize a Supabase project
+4. Start Supabase local development
+5. Guide you through setting up environment variables
 
-1. Go to Authentication > Settings in the left sidebar
-2. Under "Site URL", enter your production URL (use http://localhost:3000 for development)
-3. Under "Redirect URLs", add any additional URLs that users should be redirected to after authentication
-4. Enable "Email confirmations" if you want users to verify their email addresses
-5. Save the changes
+## Manual Setup
 
-## 5. Test the Authentication Flow
+If you prefer to set up Supabase manually, follow these steps:
 
-1. Go to Authentication > Users in the left sidebar
-2. Click "Create user" to create a test user
-3. Verify that a corresponding record is created in the `users` table (check the Table Editor)
+1. **Install Supabase CLI**:
+   ```bash
+   # macOS
+   brew install supabase/tap/supabase
 
-## Explanation of the Schema
+   # Windows/Linux
+   npm install -g supabase
+   ```
 
-This SQL script creates the following tables:
+2. **Initialize Supabase project**:
+   ```bash
+   supabase init
+   ```
 
-1. **users** - Stores user profile information, linked to Supabase Auth users
-2. **purchases** - Records product purchases made by users
-3. **email_logs** - Logs email notifications sent by the system
+3. **Start Supabase local development**:
+   ```bash
+   supabase start
+   ```
 
-It also sets up Row Level Security (RLS) policies to ensure data security and creates a trigger to automatically add new users to the users table when they sign up through Supabase Auth.
+4. **Configure environment variables**:
+   Create or update your `.env.local` file with the Supabase credentials provided in the output of the `supabase start` command:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   ```
 
-## Row Level Security (RLS) Policies
+## Database Setup
 
-The following RLS policies are created:
+After setting up Supabase, you need to set up the database schema:
 
-1. **Users can view their own data** - Users can only view their own profile information
-2. **Users can update their own data** - Users can only update their own profile information
-3. **Users can view their own purchases** - Users can only view their own purchases
-4. **Only authenticated users can insert purchases** - Only authenticated users can create purchases
-5. **Only authenticated users can view email logs** - Only authenticated users can view email logs 
+```bash
+npm run setup-db
+```
+
+This script will create the necessary tables and seed data in your local Supabase instance.
+
+## Verify Setup
+
+To verify that Supabase and the database are set up correctly:
+
+```bash
+npm run verify-db
+```
+
+## Troubleshooting
+
+### Docker Issues
+
+- **Docker not running**: Ensure Docker Desktop is running before executing the setup scripts
+- **Port conflicts**: If Supabase fails to start due to port conflicts, check if any services are using ports 54321 or 54322
+
+### Supabase CLI Issues
+
+- **CLI not found**: If the Supabase CLI is not found, install it manually using the commands in the Manual Setup section
+- **Permission errors**: On Unix-based systems, you might need to use `sudo` for installation
+
+### Database Issues
+
+- **Connection errors**: Ensure Supabase is running and the environment variables are correctly set
+- **Schema errors**: If the database schema setup fails, check the error messages and run `npm run setup-db` again
+
+## Additional Resources
+
+- [Supabase Documentation](https://supabase.io/docs)
+- [Supabase CLI Documentation](https://supabase.io/docs/reference/cli)
+- [Docker Documentation](https://docs.docker.com/) 

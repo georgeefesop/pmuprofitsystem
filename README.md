@@ -14,7 +14,20 @@ yarn install
 pnpm install
 ```
 
-Then, run the development server:
+Then, run the setup script to configure your local development environment:
+
+```bash
+npm run setup
+```
+
+This setup script will:
+1. Check if Docker is installed (required for Supabase local development)
+2. Set up Supabase locally if needed
+3. Configure your environment variables
+4. Set up and verify the database
+5. Start the development server with browser preview
+
+Alternatively, you can run the development server directly:
 
 ```bash
 npm run dev
@@ -122,7 +135,10 @@ Use any future expiration date, any 3-digit CVC, and any postal code.
 
 ## Scripts
 
+- `npm run setup` - Complete setup for local development environment
+- `npm run setup:supabase` - Set up Supabase for local development
 - `npm run dev` - Start the development server
+- `npm run dev:preview` - Start the development server and open browser preview
 - `npm run dev:direct` - Start the development server directly (bypass launcher)
 - `npm run dev:alt` - Start the development server on an alternative port
 - `npm run dev:https` - Start the development server with HTTPS

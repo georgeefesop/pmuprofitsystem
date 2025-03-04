@@ -112,14 +112,6 @@ Sends an email directly without using the email service (for testing).
   - Request body: `{ to, subject, html }`
   - Response: `{ success, error }`
 
-### `/api/test-email-verification`
-
-Tests the email verification flow.
-
-- `POST /api/test-email-verification`
-  - Request body: `{ email }`
-  - Response: `{ success, previewUrl, error }`
-
 ## Supabase API
 
 ### `/api/check-supabase-settings`
@@ -146,20 +138,6 @@ Updates the Supabase redirect URL for authentication.
   - Response: `{ success, error }`
 
 ## Testing API
-
-### `/api/test-supabase`
-
-Tests the Supabase connection.
-
-- `GET /api/test-supabase`
-  - Response: `{ success, error }`
-
-### `/api/test-supabase-auth`
-
-Tests the Supabase authentication.
-
-- `GET /api/test-supabase-auth`
-  - Response: `{ success, error }`
 
 ### `/api/test-auth-status`
 
