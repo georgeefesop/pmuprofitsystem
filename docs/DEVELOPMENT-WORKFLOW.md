@@ -9,8 +9,7 @@ This document outlines the development workflow for the PMU Profit System, inclu
 3. [Git Workflow](#git-workflow)
 4. [Testing](#testing)
 5. [Deployment](#deployment)
-6. [Changelog Management](#changelog-management)
-7. [Troubleshooting](#troubleshooting)
+6. [Troubleshooting](#troubleshooting)
 
 ## Development Environment Setup
 
@@ -168,7 +167,6 @@ src/
    - Implement the feature or fix the bug.
    - Write tests for the feature or bug fix.
    - Update documentation as needed.
-   - Update the changelog.
    - Submit a pull request.
 
 2. **Code Review**:
@@ -246,17 +244,6 @@ For testing Stripe payments, use the following test card numbers:
 
 Use any future expiration date, any 3-digit CVC, and any postal code.
 
-### Testing Email Verification
-
-To test email verification locally:
-
-1. Use the test email verification API:
-   ```bash
-   curl -X POST http://localhost:3000/api/test-email-verification -H "Content-Type: application/json" -d '{"email":"test@example.com"}'
-   ```
-
-2. Check the response for a preview URL to view the verification email.
-
 ## Deployment
 
 ### Building for Production
@@ -270,34 +257,6 @@ npm run build
 ### Deployment Options
 
 See the [Deployment Guide](../DEPLOYMENT.md) for detailed deployment instructions.
-
-## Changelog Management
-
-The PMU Profit System uses a changelog to track all significant changes. The changelog is located at `ReferenceAssets/.changelog`.
-
-### Updating the Changelog
-
-When making significant changes, update the changelog with the following format:
-
-```
-## YYYY-MM-DD: Brief Description of Changes
-
-### Fixed Issues
-- Description of fixed issue 1
-- Description of fixed issue 2
-
-### New Features
-- Description of new feature 1
-- Description of new feature 2
-
-### Security Enhancements
-- Description of security enhancement 1
-- Description of security enhancement 2
-
-### Code Improvements
-- Description of code improvement 1
-- Description of code improvement 2
-```
 
 ## Troubleshooting
 

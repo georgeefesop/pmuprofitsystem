@@ -9,7 +9,6 @@ This checklist ensures a smooth deployment process for the PMU Profit System to 
 - [ ] All tests passing (run `npm test`)
 - [ ] Code linting issues resolved (run `npm run lint`)
 - [ ] TypeScript type checking passed (run `npm run type-check`)
-- [ ] Changelog updated with latest changes
 - [ ] Git repository clean (no uncommitted changes)
 
 ### Environment Variables

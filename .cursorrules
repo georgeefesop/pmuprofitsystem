@@ -1,7 +1,7 @@
-  You are an expert in TypeScript, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+  You are an expert in TypeScript, Supabase, Vercel, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
   Remember that you have MCP access to supabase.
 
-  Before creating scripts, check the scripts folder (readme) to see if there is already a script that can do what you need.
+  Before creating scripts, check the scripts folder (readme file within the scripts folder) to see if there is already a script that can do what you need.
   If you make a script to do something, add it to the readme so that others can use it.
   
   If you want to update the site just push to github and it will automatically push to vercel.
@@ -58,6 +58,5 @@
   Enhancements, Code Improvements
   - Include brief descriptions of what changed and why
   - Note any known issues that still need to be addressed
-  - Update the changelog before completing a major task or feature
   - Provide the commands for me push to github myself and give it to me with the commit summary
   

@@ -3,11 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { usePurchases } from '@/context/PurchaseContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { hasPurchased } = usePurchases();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
+  // Check if user has purchased the main product
+  const hasAccessToDashboard = user && hasPurchased('pmu-profit-system');
 
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -79,15 +84,22 @@ export default function Navbar() {
                     </svg>
                   </button>
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
-                      Dashboard
-                    </Link>
+                    {hasAccessToDashboard && (
+                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
+                        Dashboard
+                      </Link>
+                    )}
                     <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
                       Profile
                     </Link>
                     <Link href="/diagnostics" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
                       System Diagnostics
                     </Link>
+                    {!hasAccessToDashboard && (
+                      <Link href="/checkout" className="block px-4 py-2 text-sm text-indigo-600 font-medium hover:bg-purple-50">
+                        Complete Purchase
+                      </Link>
+                    )}
                     <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
                       Logout
                     </button>
@@ -158,72 +170,83 @@ export default function Navbar() {
             {/* Authentication Links */}
             {user ? (
               <>
-                {/* Dashboard Link */}
-                <Link href="/dashboard" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                  Dashboard
-                </Link>
+                {/* Dashboard Link - Only show if user has purchased */}
+                {hasAccessToDashboard && (
+                  <Link href="/dashboard" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
+                    Dashboard
+                  </Link>
+                )}
                 
                 {/* System Diagnostics Link */}
                 <Link href="/diagnostics" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
                   System Diagnostics
                 </Link>
                 
-                {/* Dashboard Navigation Items - Only visible when logged in */}
-                <div className="mt-4 pt-4 border-t border-purple-700">
-                  <h3 className="text-white text-sm font-medium uppercase tracking-wider mb-3 px-2 opacity-70">Dashboard Menu</h3>
-                  <div className="space-y-2">
-                    <Link 
-                      href="/dashboard/courses" 
-                      onClick={handleLinkClick}
-                      className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                      All Modules
-                    </Link>
-                    <Link 
-                      href="/dashboard/blueprint" 
-                      onClick={handleLinkClick}
-                      className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Consultation Success
-                    </Link>
-                    <Link 
-                      href="/dashboard/handbook" 
-                      onClick={handleLinkClick}
-                      className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                      PMU Handbook
-                    </Link>
-                    <Link 
-                      href="/dashboard/ad-generator" 
-                      onClick={handleLinkClick}
-                      className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      Ad Generator
-                    </Link>
-                    <Link 
-                      href="/dashboard/profile" 
-                      onClick={handleLinkClick}
-                      className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Profile
-                    </Link>
+                {/* Complete Purchase Link - Only show if user hasn't purchased */}
+                {!hasAccessToDashboard && (
+                  <Link href="/checkout" onClick={handleLinkClick} className="block text-white bg-indigo-600 hover:bg-indigo-700 transition-colors p-2 rounded">
+                    Complete Purchase
+                  </Link>
+                )}
+                
+                {/* Dashboard Navigation Items - Only visible when logged in and has purchased */}
+                {hasAccessToDashboard && (
+                  <div className="mt-4 pt-4 border-t border-purple-700">
+                    <h3 className="text-white text-sm font-medium uppercase tracking-wider mb-3 px-2 opacity-70">Dashboard Menu</h3>
+                    <div className="space-y-2">
+                      <Link 
+                        href="/dashboard/courses" 
+                        onClick={handleLinkClick}
+                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        All Modules
+                      </Link>
+                      <Link 
+                        href="/dashboard/blueprint" 
+                        onClick={handleLinkClick}
+                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Consultation Success
+                      </Link>
+                      <Link 
+                        href="/dashboard/handbook" 
+                        onClick={handleLinkClick}
+                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        PMU Handbook
+                      </Link>
+                      <Link 
+                        href="/dashboard/ad-generator" 
+                        onClick={handleLinkClick}
+                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Ad Generator
+                      </Link>
+                      <Link 
+                        href="/dashboard/profile" 
+                        onClick={handleLinkClick}
+                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Profile
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 {/* Logout Button */}
                 <button 
@@ -248,7 +271,7 @@ export default function Navbar() {
                 <Link 
                   href="/signup" 
                   onClick={handleLinkClick}
-                  className="block w-full text-left bg-purple-100 text-purple-800 hover:bg-purple-200 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-2"
+                  className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
                 >
                   Sign Up
                 </Link>

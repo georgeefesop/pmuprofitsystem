@@ -43,7 +43,6 @@ When adding or updating documentation, please follow these guidelines:
 3. Use code blocks with syntax highlighting for code examples
 4. Keep the documentation up to date with code changes
 5. Add links to related documentation where appropriate
-6. Update the changelog in ReferenceAssets/.changelog when making significant changes
 
 ## Documentation Structure
 
@@ -65,7 +64,7 @@ docs/
 ../                              # Root directory
 ├── database/                    # Database setup files
 │   └── supabase-setup.sql       # SQL setup script
-├── ReferenceAssets/             # Reference assets and changelog
+├── ReferenceAssets/             # Reference assets
 ├── scripts/                     # Development and build scripts
 └── src/                         # Source code
 ```

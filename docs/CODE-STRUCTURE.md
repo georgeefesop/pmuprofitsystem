@@ -27,7 +27,7 @@ pmuprofitsystem/
 ├── public/                      # Static assets
 │   ├── images/                  # Image assets
 │   └── favicon/                 # Favicon assets
-├── ReferenceAssets/             # Reference assets and changelog
+├── ReferenceAssets/             # Reference assets
 ├── scripts/                     # Development and build scripts
 ├── src/                         # Source code
 │   ├── app/                     # Next.js App Router pages

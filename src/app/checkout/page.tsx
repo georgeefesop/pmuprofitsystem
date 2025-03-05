@@ -6,15 +6,12 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
-import { supabase } from '@/lib/supabase';
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import PaymentForm from "@/components/PaymentForm";
-import { Icons } from '@/components/icons';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { motion } from "framer-motion";
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 // Initialize Stripe with publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -40,20 +37,217 @@ const elementsOptions = {
   disableLink: true,
 };
 
+// Card element options
+const cardElementOptions = {
+  style: {
+    base: {
+      fontSize: '16px',
+      color: '#32325d',
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      '::placeholder': {
+        color: '#aab7c4',
+      },
+    },
+    invalid: {
+      color: '#fa755a',
+      iconColor: '#fa755a',
+    },
+  },
+  hidePostalCode: true,
+};
+
+function CheckoutForm({ user, calculateTotal, formData }: { 
+  user: any, 
+  calculateTotal: () => number,
+  formData: {
+    includeAdGenerator: boolean;
+    includeBlueprint: boolean;
+  }
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements) {
+      setError('Stripe is still loading. Please try again in a moment.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      // Get user metadata for full name
+      const userMetadata = (user as any).user_metadata || {};
+      const fullName = userMetadata.full_name || "";
+      
+      // Create payment intent
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: calculateTotal(),
+          email: user.email,
+          name: fullName,
+          includeAdGenerator: formData.includeAdGenerator,
+          includeBlueprint: formData.includeBlueprint,
+          userId: user.id
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment intent');
+      }
+      
+      // Confirm the payment with the card element
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error('Card element not found');
+      }
+      
+      const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: fullName,
+            email: user.email,
+          },
+        },
+      });
+      
+      if (paymentError) {
+        throw new Error(paymentError.message || 'Payment failed');
+      }
+      
+      if (paymentIntent.status === 'succeeded') {
+        setSuccess('Payment successful! Redirecting to success page...');
+        
+        // Redirect to success page
+        setTimeout(() => {
+          router.push(`/checkout/success?session_id=${paymentIntent.id}`);
+        }, 1500);
+      } else {
+        throw new Error(`Payment status: ${paymentIntent.status}`);
+      }
+    } catch (err) {
+      console.error('Payment error:', err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-sm" 
+          role="alert"
+        >
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm">{error}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+      
+      {success && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm" 
+          role="alert"
+        >
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm">{success}</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+      
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+        <div className="mb-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Card Information</h3>
+          <div className="border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+            <CardElement options={cardElementOptions} />
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            Test Card: 4242 4242 4242 4242 | Exp: Any future date | CVC: Any 3 digits
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2 mt-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span className="text-sm text-gray-500">Your payment is secure and encrypted</span>
+        </div>
+      </div>
+      
+      <Button
+        type="submit"
+        disabled={isSubmitting || !stripe}
+        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-md shadow-sm transition-all duration-200 transform hover:scale-[1.02]"
+      >
+        {isSubmitting ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            Processing Payment...
+          </div>
+        ) : (
+          `Pay €${calculateTotal()}`
+        )}
+      </Button>
+      
+      <div className="text-center text-sm text-gray-500 mt-4">
+        <p>
+          By completing this purchase, you agree to our{" "}
+          <a href="#" className="text-indigo-600 hover:text-indigo-500">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-indigo-600 hover:text-indigo-500">
+            Privacy Policy
+          </a>
+        </p>
+      </div>
+    </form>
+  );
+}
+
 export default function Checkout() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   
   // Use a single formData object for all form fields
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
     includeAdGenerator: false,
     includeBlueprint: false
   });
@@ -70,21 +264,6 @@ export default function Checkout() {
       router.push(redirectUrl);
     }
   }, [user, isLoading, router, searchParams]);
-
-  // Pre-fill form with user data when available
-  useEffect(() => {
-    if (user && user.email) {
-      // Get user metadata for full name
-      const userMetadata = (user as any).user_metadata || {};
-      const fullName = userMetadata.full_name || "";
-      
-      setFormData(prev => ({
-        ...prev,
-        email: user.email || "",
-        fullName: fullName
-      }));
-    }
-  }, [user]);
 
   // Parse product selection from URL
   useEffect(() => {
@@ -112,10 +291,10 @@ export default function Checkout() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: checked
     }));
   };
 
@@ -124,59 +303,6 @@ export default function Checkout() {
     if (formData.includeAdGenerator) total += 27;
     if (formData.includeBlueprint) total += 33;
     return total;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    setSuccess(null);
-    
-    try {
-      // Validate form data
-      if (!formData.email || !formData.fullName) {
-        throw new Error('Please fill in all required fields');
-      }
-      
-      if (formData.password.length < 8) {
-        throw new Error('Password must be at least 8 characters long');
-      }
-      
-      // Create checkout session with authenticated user
-      const response = await fetch('/api/create-checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          fullName: formData.fullName,
-          includeAdGenerator: formData.includeAdGenerator,
-          includeBlueprint: formData.includeBlueprint,
-          totalPrice: calculateTotal(),
-          password: formData.password,
-          userId: user?.id // Include the authenticated user's ID
-        }),
-      });
-      
-      const responseData = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(responseData.error || 'Failed to create checkout session');
-      }
-      
-      // Redirect to Stripe Checkout
-      if (responseData.url) {
-        router.push(responseData.url);
-      } else {
-        throw new Error('No checkout URL returned');
-      }
-    } catch (err) {
-      console.error('Checkout error:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -249,20 +375,24 @@ export default function Checkout() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-white" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p className="text-sm text-white">30-Day Satisfaction Guarantee</p>
+                  <span className="text-white text-sm">30-Day Satisfaction Guarantee</span>
                 </div>
               </div>
               
+              {/* User Info */}
               <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-white">Your account will be created automatically and you can log in immediately after purchase.</p>
-                  </div>
+                <h3 className="text-sm font-medium mb-2 text-white/80">Your Information</h3>
+                <div className="flex items-center mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="text-sm text-white/90">{(user as any).user_metadata?.full_name || 'Account Holder'}</span>
+                </div>
+                <div className="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm text-white/90">{user.email}</span>
                 </div>
               </div>
             </div>
@@ -270,174 +400,121 @@ export default function Checkout() {
             {/* Checkout Form */}
             <div className="md:w-3/5 p-6">
               <div className="md:hidden mb-6">
-                <h1 className="text-2xl font-bold mb-3 tracking-tight">Secure Checkout</h1>
-                <p className="text-gray-600 mb-5 text-sm">You're just one step away from transforming your PMU business!</p>
+                <h1 className="text-2xl font-bold mb-2 tracking-tight text-gray-900">Secure Checkout</h1>
+                <p className="text-gray-600 mb-4 text-sm">You're just one step away from transforming your PMU business!</p>
                 
                 {/* Mobile Test Mode Banner */}
-                <div className="bg-indigo-100 p-2 rounded-lg mb-5 flex items-center text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0 text-indigo-700" viewBox="0 0 20 20" fill="currentColor">
+                <div className="bg-indigo-50 p-2 rounded-lg mb-4 flex items-center text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   <span className="text-indigo-700 text-xs">Test Mode - No actual payment will be processed</span>
                 </div>
+                
+                {/* Mobile User Info */}
+                <div className="bg-gray-50 p-3 rounded-lg mb-6 border border-gray-200">
+                  <h3 className="text-sm font-medium mb-2 text-gray-700">Your Information</h3>
+                  <div className="flex items-center mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="text-sm text-gray-700">{(user as any).user_metadata?.full_name || 'Account Holder'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm text-gray-700">{user.email}</span>
+                  </div>
+                </div>
               </div>
               
-              {error && (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+              <h2 className="text-xl font-semibold mb-6 text-gray-900">Payment Details</h2>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    placeholder="John Doe"
-                    autoComplete="name"
-                    required
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="name@example.com"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                    className="w-full"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="text-xs text-indigo-600 hover:text-indigo-800"
-                    >
-                      {showPassword ? 'Hide' : 'Show'}
-                    </button>
-                  </div>
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    autoComplete="new-password"
-                    required
-                    minLength={8}
-                    value={formData.password}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Password must be at least 8 characters long
-                  </p>
-                </div>
-                
-                <div className="pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-medium mb-3">Add-ons (Optional)</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-start">
-                      <div className="flex items-center h-5">
-                        <Input
-                          id="includeAdGenerator"
-                          name="includeAdGenerator"
-                          type="checkbox"
-                          checked={formData.includeAdGenerator}
-                          onChange={handleChange}
-                          disabled={isSubmitting}
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <Label htmlFor="includeAdGenerator" className="font-medium text-gray-700">
-                          PMU Ad Generator Tool (+€27)
-                        </Label>
-                        <p className="text-gray-500">AI-powered tool to create high-converting ad copy</p>
-                      </div>
+              {/* Add-ons Selection */}
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-3 text-gray-900">Add-ons (Optional)</h3>
+                <div className="space-y-3">
+                  <div className="flex items-start">
+                    <input
+                      type="checkbox"
+                      id="includeAdGenerator"
+                      name="includeAdGenerator"
+                      checked={formData.includeAdGenerator}
+                      onChange={handleChange}
+                      className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mt-1"
+                    />
+                    <div className="ml-3">
+                      <label htmlFor="includeAdGenerator" className="text-base font-medium text-gray-900 flex items-center">
+                        PMU Ad Generator Tool
+                        <span className="ml-2 text-sm font-semibold text-indigo-600">€27</span>
+                        <span className="ml-1 text-xs text-gray-500 line-through">€47</span>
+                      </label>
+                      <p className="text-sm text-gray-500">AI-powered tool to create high-converting ad copy</p>
                     </div>
-                    
-                    <div className="flex items-start">
-                      <div className="flex items-center h-5">
-                        <Input
-                          id="includeBlueprint"
-                          name="includeBlueprint"
-                          type="checkbox"
-                          checked={formData.includeBlueprint}
-                          onChange={handleChange}
-                          disabled={isSubmitting}
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <Label htmlFor="includeBlueprint" className="font-medium text-gray-700">
-                          Consultation Success Blueprint (+€33)
-                        </Label>
-                        <p className="text-gray-500">Our proven consultation framework that converts more prospects into paying clients</p>
-                      </div>
+                  </div>
+                  
+                  <div className="flex items-start">
+                    <input
+                      type="checkbox"
+                      id="includeBlueprint"
+                      name="includeBlueprint"
+                      checked={formData.includeBlueprint}
+                      onChange={handleChange}
+                      className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 mt-1"
+                    />
+                    <div className="ml-3">
+                      <label htmlFor="includeBlueprint" className="text-base font-medium text-gray-900 flex items-center">
+                        Consultation Success Blueprint
+                        <span className="ml-2 text-sm font-semibold text-indigo-600">€33</span>
+                        <span className="ml-1 text-xs text-gray-500 line-through">€59</span>
+                      </label>
+                      <p className="text-sm text-gray-500">Our proven consultation framework that converts more prospects into paying clients</p>
                     </div>
                   </div>
                 </div>
-                
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex justify-between mb-2">
-                    <span className="font-medium">Total:</span>
-                    <span className="font-bold text-lg">€{calculateTotal()}</span>
+              </div>
+              
+              {/* Order Summary - Mobile Only */}
+              <div className="md:hidden mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-medium mb-3 text-gray-900">Order Summary</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">PMU Profit System</span>
+                    <span className="font-medium">€37</span>
                   </div>
                   
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      'Checkout'
-                    )}
-                  </Button>
+                  {formData.includeAdGenerator && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">PMU Ad Generator Tool</span>
+                      <span className="font-medium">€27</span>
+                    </div>
+                  )}
                   
-                  <p className="text-xs text-gray-500 mt-2 text-center">
-                    By clicking Checkout, you agree to our{' '}
-                    <Link href="/terms" className="text-indigo-600 hover:text-indigo-800">
-                      Terms of Service
-                    </Link>{' '}
-                    and{' '}
-                    <Link href="/privacy" className="text-indigo-600 hover:text-indigo-800">
-                      Privacy Policy
-                    </Link>
-                  </p>
-                </div>
-                
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-center space-x-2">
-                    <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-sm text-gray-500">Secure checkout powered by Stripe</span>
+                  {formData.includeBlueprint && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Consultation Success Blueprint</span>
+                      <span className="font-medium">€33</span>
+                    </div>
+                  )}
+                  
+                  <div className="border-t border-gray-200 pt-2 mt-2">
+                    <div className="flex justify-between font-semibold">
+                      <span>Total</span>
+                      <span>€{calculateTotal()}</span>
+                    </div>
                   </div>
                 </div>
-              </form>
+              </div>
+              
+              {/* Stripe Elements */}
+              <Elements stripe={stripePromise} options={elementsOptions}>
+                <CheckoutForm 
+                  user={user} 
+                  calculateTotal={calculateTotal} 
+                  formData={formData} 
+                />
+              </Elements>
             </div>
           </div>
         </div>
