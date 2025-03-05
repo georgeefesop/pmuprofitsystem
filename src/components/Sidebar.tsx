@@ -36,24 +36,13 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
 
   if (collapsed) {
     return (
-      <aside id="dashboard-sidebar-collapsed" className="w-full max-w-[60px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
-        <div className="p-3 flex-grow">
+      <aside id="dashboard-sidebar-collapsed" className="w-full h-full bg-gradient-to-b from-purple-800 to-purple-900 text-white flex flex-col shadow-xl">
+        <div className="p-3 flex-grow flex flex-col">
           <div className="flex justify-center items-center mb-8">
-            {onToggleCollapse ? (
-              <button 
-                id="sidebar-expand-button"
-                onClick={onToggleCollapse}
-                className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
-                title="Expand sidebar"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-              </button>
-            ) : null}
+            {/* Logo or brand icon could go here */}
           </div>
           
-          <nav id="sidebar-nav-collapsed" className="space-y-4 flex flex-col items-center">
+          <nav id="sidebar-nav-collapsed" className="space-y-4 flex flex-col items-center flex-grow">
             <Link 
               id="sidebar-collapsed-dashboard-link"
               href="/dashboard" 
@@ -138,29 +127,42 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </Link>
+            
+            <div className="mt-auto">
+              <button 
+                onClick={handleLogout}
+                className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
+                title="Sign Out"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+              
+              {onToggleCollapse && (
+                <button 
+                  id="sidebar-expand-button"
+                  onClick={onToggleCollapse}
+                  className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mt-2"
+                  title="Expand sidebar"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </nav>
-        </div>
-        
-        <div className="p-3 border-t border-purple-700/50 mt-auto flex justify-center">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
-            title="Logout"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
         </div>
       </aside>
     );
   }
 
   return (
-    <aside id="dashboard-sidebar" className="w-full max-w-[280px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
-      <div className="p-6 flex-grow">
+    <aside id="dashboard-sidebar" className="w-full h-full bg-gradient-to-b from-purple-800 to-purple-900 text-white flex flex-col shadow-xl">
+      <div className="p-6 flex-grow flex flex-col">
         <div className="flex justify-end items-center mb-8">
-          {onClose ? (
+          {onClose && (
             <button 
               id="sidebar-close-button"
               className="text-white focus:outline-none hover:text-purple-200 transition-colors"
@@ -170,21 +172,10 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          ) : onToggleCollapse && (
-            <button 
-              id="sidebar-collapse-button"
-              className="text-white focus:outline-none hover:text-purple-200 transition-colors"
-              onClick={onToggleCollapse}
-              title="Collapse sidebar"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-            </button>
           )}
         </div>
         
-        <nav id="sidebar-nav" className="space-y-1.5">
+        <nav id="sidebar-nav" className="space-y-1.5 flex-grow overflow-y-auto pr-2">
           <Link 
             id="sidebar-dashboard-link"
             href="/dashboard" 
@@ -291,19 +282,32 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
             </svg>
             <span className="whitespace-nowrap">My Profile</span>
           </Link>
+          
+          <div className="mt-auto pt-4">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="whitespace-nowrap">Sign Out</span>
+            </button>
+            
+            {onToggleCollapse && (
+              <button 
+                onClick={onToggleCollapse}
+                className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left mt-1"
+                title="Collapse sidebar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+                <span className="whitespace-nowrap">Collapse Menu</span>
+              </button>
+            )}
+          </div>
         </nav>
-      </div>
-      
-      <div className="p-6 border-t border-purple-700/50 mt-auto">
-        <button 
-          onClick={handleLogout}
-          className="flex items-center text-sm text-purple-200 hover:text-white transition-colors group w-full text-left"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          <span className="whitespace-nowrap">Logout</span>
-        </button>
       </div>
     </aside>
   );
