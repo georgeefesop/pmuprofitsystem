@@ -151,6 +151,16 @@ Use any future expiration date, any 3-digit CVC, and any postal code.
 - `npm run setup-db` - Set up the database
 - `npm run verify-db` - Verify the database setup
 
+### Diagnostic and Testing Scripts
+
+These scripts help diagnose and test various aspects of the application:
+
+- `node scripts/check-site-url.js` - Check site URL configuration and test connections to Supabase and Stripe
+- `node scripts/test-complete-checkout.js` - Test the complete checkout flow, including user creation and purchase records
+- `node scripts/test-webhook-handler.js` - Test the webhook handler functionality
+- `node scripts/remove-all-users.js` - Remove all test users from Supabase (preserves admin accounts)
+- `node scripts/update-supabase-redirect-urls.js` - Update Supabase redirect URLs for authentication
+
 ## Project Structure
 
 ```

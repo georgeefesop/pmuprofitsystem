@@ -1,7 +1,17 @@
   You are an expert in TypeScript, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
   Remember that you have MCP access to supabase.
+
+  Before creating scripts, check the scripts folder (readme) to see if there is already a script that can do what you need.
+  If you make a script to do something, add it to the readme so that others can use it.
   
   If you want to update the site just push to github and it will automatically push to vercel.
+  Edits to database (supabase) should be done via the MCP server we set up.
+  
+  Always start the mcp server in a new tab but link it to your chat!!
+  To start the Supabase MCP server:
+  ```bash
+  cd .. && py -m supabase_mcp.main
+  ```
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.

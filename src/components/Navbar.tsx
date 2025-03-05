@@ -100,10 +100,16 @@ export default function Navbar() {
                   Login
                 </Link>
                 <Link 
-                  href="/checkout" 
+                  href="/pre-checkout" 
                   className="bg-white text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-md transition-colors font-medium shadow-sm text-sm"
                 >
-                  Register
+                  Buy Now
+                </Link>
+                <Link
+                  href="/signup"
+                  className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                >
+                  Sign Up
                 </Link>
               </>
             )}
@@ -233,11 +239,18 @@ export default function Navbar() {
                   Login
                 </Link>
                 <Link 
-                  href="/checkout" 
+                  href="/pre-checkout" 
                   onClick={handleLinkClick}
                   className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm"
                 >
-                  Register
+                  Buy Now
+                </Link>
+                <Link 
+                  href="/signup" 
+                  onClick={handleLinkClick}
+                  className="block w-full text-left bg-purple-100 text-purple-800 hover:bg-purple-200 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-2"
+                >
+                  Sign Up
                 </Link>
               </>
             )}

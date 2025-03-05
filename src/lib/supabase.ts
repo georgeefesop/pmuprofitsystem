@@ -30,22 +30,52 @@ export const supabase = createBrowserClient(
         // Enhanced fetch with retry logic for DNS resolution issues
         return new Promise((resolve, reject) => {
           const attemptFetch = (retryCount = 0, maxRetries = 3) => {
-            console.log(`Attempting Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            if (retryCount === 0) {
+              console.log(`Attempting Supabase fetch...`);
+            } else {
+              console.log(`Retrying Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            }
             
             fetch(...args)
-              .then(resolve)
+              .then(response => {
+                // Check if the response is ok (status in the range 200-299)
+                if (!response.ok && response.status >= 400) {
+                  console.warn(`Supabase fetch returned status ${response.status}`);
+                  
+                  // For 401/403 errors, don't retry as they're auth issues
+                  if (response.status === 401 || response.status === 403) {
+                    resolve(response);
+                    return;
+                  }
+                  
+                  // For 5xx errors, retry
+                  if (response.status >= 500 && retryCount < maxRetries) {
+                    console.log(`Server error, retrying in ${(retryCount + 1) * 1000}ms...`);
+                    setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
+                    return;
+                  }
+                }
+                
+                resolve(response);
+              })
               .catch(err => {
-                console.error(`Supabase fetch error (attempt ${retryCount + 1}):`, err);
+                console.error(`Supabase fetch error:`, err);
                 
                 // Check for specific error types
                 const errorMessage = err.toString();
-                if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
-                  console.error('DNS resolution error detected. This may be due to network issues or Supabase service availability.');
+                if (
+                  errorMessage.includes('ERR_NAME_NOT_RESOLVED') || 
+                  errorMessage.includes('NetworkError') ||
+                  errorMessage.includes('Failed to fetch') ||
+                  errorMessage.includes('Network request failed')
+                ) {
+                  console.error('Network error detected. This may be due to network issues or Supabase service availability.');
                   
                   // If we haven't reached max retries, try again
                   if (retryCount < maxRetries) {
-                    console.log(`Retrying in ${(retryCount + 1) * 1000}ms...`);
-                    setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
+                    const delay = Math.min((retryCount + 1) * 1000, 5000);
+                    console.log(`Retrying in ${delay}ms...`);
+                    setTimeout(() => attemptFetch(retryCount + 1, maxRetries), delay);
                     return;
                   }
                 }
@@ -93,17 +123,31 @@ export const getServiceSupabase = () => {
         // Enhanced fetch with retry logic for server-side operations
         return new Promise((resolve, reject) => {
           const attemptFetch = (retryCount = 0, maxRetries = 3) => {
-            console.log(`Server: Attempting Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            if (retryCount === 0) {
+              console.log(`Server: Attempting Supabase fetch...`);
+            } else {
+              console.log(`Server: Retrying Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+            }
             
             fetch(...args)
-              .then(resolve)
+              .then(response => {
+                // Check if the response is ok (status in the range 200-299)
+                if (!response.ok && response.status >= 500 && retryCount < maxRetries) {
+                  console.log(`Server: Server error, retrying in ${(retryCount + 1) * 1000}ms...`);
+                  setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
+                  return;
+                }
+                
+                resolve(response);
+              })
               .catch(err => {
-                console.error(`Server: Supabase fetch error (attempt ${retryCount + 1}):`, err);
+                console.error(`Server: Supabase fetch error:`, err);
                 
                 // If we haven't reached max retries, try again
                 if (retryCount < maxRetries) {
-                  console.log(`Server: Retrying in ${(retryCount + 1) * 1000}ms...`);
-                  setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
+                  const delay = Math.min((retryCount + 1) * 1000, 5000);
+                  console.log(`Server: Retrying in ${delay}ms...`);
+                  setTimeout(() => attemptFetch(retryCount + 1, maxRetries), delay);
                   return;
                 }
                 
@@ -128,7 +172,12 @@ export const getServiceSupabase = () => {
 export const getSecureSiteUrl = () => {
   // Use the environment variable if available
   if (process.env.NEXT_PUBLIC_SITE_URL) {
-    // Ensure HTTPS for production URLs
+    // For local development, use the URL as is (likely http://localhost:3000)
+    if (process.env.NEXT_PUBLIC_SITE_URL.includes('localhost')) {
+      return process.env.NEXT_PUBLIC_SITE_URL;
+    }
+    
+    // For production, ensure HTTPS
     const url = process.env.NEXT_PUBLIC_SITE_URL;
     if (url.startsWith('http://') && !url.includes('localhost')) {
       return url.replace('http://', 'https://');
@@ -145,6 +194,6 @@ export const getSecureSiteUrl = () => {
     return origin;
   }
   
-  // Fallback for server-side
+  // Fallback for server-side when no environment variable is set
   return 'http://localhost:3000';
 }; 

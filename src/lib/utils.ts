@@ -6,6 +6,34 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Gets a secure site URL that ensures the protocol is correctly handled
+ * This is important for Supabase authentication and Stripe redirects
+ */
+export function getSecureSiteUrl(): string {
+  // Get the site URL from environment variable
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  
+  // For production, ensure we use HTTPS
+  if (siteUrl.includes('pmuprofitsystem.com') && !siteUrl.startsWith('https://')) {
+    return siteUrl.replace('http://', 'https://');
+  }
+  
+  // For localhost, we can use HTTP
+  return siteUrl;
+}
+
+/**
+ * Formats a price in cents to a string with currency symbol
+ */
+export function formatPrice(price: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+  }).format(price / 100);
+}
+
+/**
  * Utility function to handle external images
  * If the image is from an allowed domain, it returns the original URL
  * Otherwise, it returns a placeholder image URL

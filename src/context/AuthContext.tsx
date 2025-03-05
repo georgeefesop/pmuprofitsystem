@@ -39,25 +39,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Add a timeout to prevent hanging
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session check timed out after 30 seconds')), 30000)
+          setTimeout(() => reject(new Error('Session check timed out after 15 seconds')), 15000)
         );
         
         // Race the session check against the timeout
         const { data: { session } } = await Promise.race([
           sessionPromise,
           timeoutPromise.then(() => {
-            console.error('Session check timed out - this may indicate connectivity issues with Supabase');
-            console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+            console.warn('Session check timed out - attempting to recover');
             
-            // Try to diagnose the issue
+            // Try to recover by checking local storage directly
+            let recoveredSession = null;
+            try {
+              if (typeof window !== 'undefined') {
+                const storedSession = localStorage.getItem('supabase.auth.token');
+                if (storedSession) {
+                  console.log('Found stored session in local storage');
+                  // We found a stored session, but we won't parse it here
+                  // Just indicate that we might have a session
+                  recoveredSession = true;
+                }
+              }
+            } catch (storageError) {
+              console.error('Error accessing local storage:', storageError);
+            }
+            
+            // If we found a stored session, try one more time with a longer timeout
+            if (recoveredSession) {
+              console.log('Attempting to recover session...');
+              return supabase.auth.getSession()
+                .catch(error => {
+                  console.error('Recovery attempt failed:', error);
+                  return { data: { session: null } };
+                });
+            }
+            
+            // Log diagnostic information
             if (typeof window !== 'undefined') {
-              // Check if we can ping the Supabase domain
               const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-              const domain = supabaseUrl.replace(/^https?:\/\//, '').split('/')[0];
-              
-              console.log(`Attempting to check connectivity to ${domain}...`);
-              
-              // Log diagnostic information
+              console.log('Supabase URL:', supabaseUrl);
               console.log('Current protocol:', window.location.protocol);
               console.log('Current hostname:', window.location.hostname);
               
@@ -75,105 +95,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           })
         ]).catch(error => {
           console.error('Error checking session:', error);
-          
-          // Check for specific network errors
-          const errorMessage = error.toString();
-          if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
-            console.error('DNS resolution error - cannot resolve Supabase domain. This may be due to:');
-            console.error('1. Network connectivity issues');
-            console.error('2. DNS server problems');
-            console.error('3. Supabase project being paused or deleted');
-            console.error('4. Firewall or security software blocking the connection');
-          } else if (errorMessage.includes('client closed')) {
-            console.error('Connection closed unexpectedly - possible network interruption or timeout');
-          } else if (errorMessage.includes('CORS')) {
-            console.error('CORS error - this may be due to misconfigured CORS settings in Supabase');
-          }
-          
+          setSessionCheckFailed(true);
           return { data: { session: null } };
         });
         
         if (session) {
-          // Session exists, get user data
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+          // We have a session, set the user
+          const { user } = session;
           
-          if (userError) {
-            console.error('Error fetching user data:', userError);
-            setUser(null);
-          } else if (userData) {
-            setUser(userData);
-          } else {
-            // User exists in auth but not in users table
-            console.log('User exists in auth but not in users table, creating profile...');
-            try {
-              // Create a basic profile
-              await supabase.from('users').insert({
-                id: session.user.id,
-                email: session.user.email,
-                full_name: session.user.user_metadata?.full_name || 'User',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              });
-              
-              // Fetch the newly created profile
-              const { data: newUserData } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-                
-              if (newUserData) {
-                setUser(newUserData);
-              } else {
-                setUser(null);
-              }
-            } catch (profileError) {
-              console.error('Error creating user profile:', profileError);
-              setUser(null);
-            }
+          if (user) {
+            setUser({
+              id: user.id,
+              email: user.email || '',
+              full_name: user.user_metadata?.full_name || ''
+            });
           }
         } else {
+          // No session, clear the user
           setUser(null);
         }
-        
-        setIsLoading(false);
       } catch (error) {
-        console.error('Session check failed:', error);
+        console.error('Session check error:', error);
         setSessionCheckFailed(true);
+      } finally {
         setIsLoading(false);
-        setUser(null);
       }
     };
     
     checkSession();
     
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event);
-        
-        if (session) {
-          // Get user data when session changes
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-            
-          if (!userError && userData) {
-            setUser(userData);
-          } else {
-            console.error('Error fetching user data on auth change:', userError);
-          }
-        } else {
-          setUser(null);
-        }
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event);
+      
+      if (session) {
+        const { user } = session;
+        setUser({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || ''
+        });
+      } else {
+        setUser(null);
       }
-    );
+      
+      setIsLoading(false);
+    });
     
     return () => {
       subscription.unsubscribe();
@@ -193,44 +160,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Login timed out after 30 seconds')), 30000)
+        setTimeout(() => reject(new Error('Login timed out after 15 seconds')), 15000)
       );
       
       // Race the login against the timeout
       const { data, error } = await Promise.race([
         loginPromise,
         timeoutPromise.then(() => {
-          console.error('Login timed out - this may indicate connectivity issues with Supabase');
+          console.warn('Login timed out - attempting to recover');
           
-          // Try to diagnose the issue
-          if (typeof window !== 'undefined') {
-            // Check if we can ping the Supabase domain
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-            const domain = supabaseUrl.replace(/^https?:\/\//, '').split('/')[0];
-            
-            console.log(`Attempting to check connectivity to ${domain}...`);
-            
-            // Log diagnostic information
-            console.log('Current protocol:', window.location.protocol);
-            console.log('Current hostname:', window.location.hostname);
-          }
-          
-          return { 
-            data: null, 
-            error: { 
-              message: 'Login timed out after 30 seconds. This may be due to network issues or Supabase service availability.' 
-            } 
-          };
+          // Try one more time with a longer timeout
+          return supabase.auth.signInWithPassword({
+            email,
+            password,
+          }).catch(retryError => {
+            console.error('Login retry failed:', retryError);
+            return { 
+              data: null, 
+              error: { 
+                message: 'Login timed out after retry. Please check your network connection and try again.' 
+              } 
+            };
+          });
         })
       ]) as any;
-      
-      console.log('Login response:', data ? 'Success' : 'Failed', error);
       
       if (error) {
         console.error('Login error from Supabase:', error);
         
         // Provide more specific error messages based on the error
-        if (error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
+        if (error.message?.includes('ERR_NAME_NOT_RESOLVED') || 
+            error.message?.includes('NetworkError') || 
+            error.message?.includes('Failed to fetch')) {
           return { 
             success: false, 
             error: 'Cannot connect to authentication service. Please check your internet connection and try again.' 
@@ -238,91 +199,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (error.message?.includes('Invalid login credentials')) {
           return { 
             success: false, 
-            error: 'Invalid email or password. Please try again.' 
+            error: 'Invalid email or password. Please check your credentials and try again.' 
           };
         } else if (error.message?.includes('Email not confirmed')) {
           return { 
             success: false, 
-            error: 'Your email has not been verified. Please check your inbox for a verification email.' 
+            error: 'Your email has not been verified. Please check your inbox for a verification email or request a new one.' 
+          };
+        } else {
+          return { 
+            success: false, 
+            error: `Login failed: ${error.message || 'Unknown error'}` 
           };
         }
-        
-        return { success: false, error: error.message };
       }
       
-      if (!data?.user || !data?.session) {
-        console.error('Login succeeded but no user or session returned');
-        return { success: false, error: 'Authentication succeeded but session creation failed' };
-      }
-      
-      console.log('Login successful, user:', data.user.id);
-      
-      // Explicitly check for user profile and create if needed
-      try {
-        const { data: profile, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-          
-        if (profileError) {
-          console.log('Profile fetch error:', profileError.code, profileError.message);
-          
-          if (profileError.code === 'PGRST116') {
-            // Create profile if it doesn't exist
-            console.log('Creating user profile after login for:', data.user.id);
-            const { data: newProfile, error: insertError } = await supabase
-              .from('users')
-              .insert({
-                id: data.user.id,
-                email: data.user.email,
-                full_name: data.user.user_metadata?.full_name || '',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              })
-              .select()
-              .single();
-              
-            if (newProfile) {
-              console.log('Created new profile after login:', newProfile);
-              setUser(newProfile as User);
-            } else if (insertError) {
-              console.error('Error creating user profile after login:', insertError);
-              // Continue anyway, as auth was successful
-            }
-          } else {
-            console.error('Unexpected error fetching profile:', profileError);
-          }
-        } else if (profile) {
-          // Set the user state directly
-          console.log('Setting user from profile after login:', profile);
-          setUser(profile as User);
-        }
-      } catch (profileError) {
-        console.error('Exception during profile handling:', profileError);
-        // Continue anyway, as auth was successful
-      }
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Login error:', error);
-      
-      // Provide more specific error messages based on the error
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      
-      if (errorMessage.includes('ERR_NAME_NOT_RESOLVED')) {
+      if (data?.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          full_name: data.user.user_metadata?.full_name || ''
+        });
+        return { success: true };
+      } else {
         return { 
           success: false, 
-          error: 'Cannot connect to authentication service. Please check your internet connection and try again.' 
-        };
-      } else if (errorMessage.includes('NetworkError')) {
-        return { 
-          success: false, 
-          error: 'Network error. Please check your internet connection and try again.' 
+          error: 'Login failed: No user data returned' 
         };
       }
-      
-      return { success: false, error: errorMessage };
+    } catch (error: any) {
+      console.error('Unexpected login error:', error);
+      return { 
+        success: false, 
+        error: `Login failed: ${error.message || 'Unexpected error'}` 
+      };
     } finally {
       setIsLoading(false);
     }

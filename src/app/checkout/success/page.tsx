@@ -38,7 +38,6 @@ function SuccessPageContent() {
   const [resendError, setResendError] = useState('');
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const isPendingRegistration = searchParams.get('registration') === 'pending';
   const { resendVerificationEmail } = useAuth();
   const { addPurchase } = usePurchases();
   const [isLoading, setIsLoading] = useState(true);
@@ -209,15 +208,7 @@ function SuccessPageContent() {
       setIsLoading(false);
       setError('No session ID provided');
     }
-    
-    // If we have a pending registration, try to get the email from localStorage
-    if (isPendingRegistration) {
-      const storedEmail = localStorage.getItem('pendingPurchaseEmail');
-      if (storedEmail) {
-        setEmail(storedEmail);
-      }
-    }
-  }, [sessionId, isPendingRegistration]);
+  }, [sessionId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
@@ -317,10 +308,39 @@ function SuccessPageContent() {
                 className="mt-2 text-center text-gray-600"
                 variants={itemVariants}
               >
-                {isPendingRegistration ? 
-                  `Please check ${email} for a verification email to complete your registration.` : 
-                  'Your order has been successfully processed.'}
+                Your order has been successfully processed.
               </motion.p>
+              
+              {/* Account Information */}
+              <motion.div 
+                className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-lg font-medium text-gray-900">Your Account is Ready</h3>
+                    <p className="mt-1 text-sm text-gray-600">
+                      You can now log in immediately using the email and password you provided during checkout.
+                      No email verification is required.
+                    </p>
+                    <div className="mt-3">
+                      <Link 
+                        href="/login" 
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Log In Now
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
               
               {/* Order summary */}
               <motion.div 
@@ -355,88 +375,82 @@ function SuccessPageContent() {
                 <h2 className="text-lg font-medium text-gray-900 mb-4">What's Next?</h2>
                 
                 <div className="space-y-4">
-                  {isPendingRegistration && (
-                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                      <div className="flex">
-                        <svg className="h-5 w-5 text-blue-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        <div>
-                          <p className="text-sm text-blue-800 font-medium">1. Verify your email address</p>
-                          <p className="text-xs text-blue-600 mt-1">
-                            We've sent a verification email to <span className="font-medium">{email}</span>. 
-                            Click the link in the email to verify your account.
-                          </p>
-                          <p className="text-xs text-blue-600 mt-1">
-                            <strong>Can't find the email?</strong> Check your spam folder or click the button below to resend.
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-blue-800">Account Information</h3>
+                        <div className="mt-2 text-sm text-blue-700">
+                          <p>
+                            Your account is ready to use. You can log in with the email and password you provided during checkout.
                           </p>
                         </div>
                       </div>
-                </div>
-                  )}
+                    </div>
+                  </div>
                   
                   <div className="bg-green-50 border border-green-100 rounded-lg p-4">
                     <div className="flex">
-                      <svg className="h-5 w-5 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-green-800">Next Steps</h3>
+                        <div className="mt-2 text-sm text-green-700 space-y-3">
                           <div>
-                        <p className="text-sm text-green-800 font-medium">
-                          {isPendingRegistration ? '2. Access your course' : '1. Access your course'}
-                        </p>
-                        <p className="text-xs text-green-600 mt-1">
-                          {isPendingRegistration 
-                            ? 'After verifying your email, you can log in to access your course materials.' 
-                            : 'Your purchase has been processed. You can now access your course materials.'}
-                    </p>
+                            <p className="text-sm text-green-800 font-medium">
+                              1. Access your course
+                            </p>
+                            <p className="text-xs text-green-600 mt-1">
+                              Your purchase has been processed. You can now access your course materials.
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-sm text-purple-800 font-medium">
+                              2. Start learning
+                            </p>
+                            <p className="text-xs text-purple-600 mt-1">
+                              Dive into the content and start implementing what you learn right away.
+                            </p>
                           </div>
                         </div>
-                  </div>
-                  
-                  <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
-                    <div className="flex">
-                      <svg className="h-5 w-5 text-purple-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                      <div>
-                        <p className="text-sm text-purple-800 font-medium">
-                          {isPendingRegistration ? '3. Start learning' : '2. Start learning'}
-                        </p>
-                        <p className="text-xs text-purple-600 mt-1">
-                          Begin your journey to PMU business success with our comprehensive course materials.
-                        </p>
                       </div>
-                              </div>
-                            </div>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
               
-              {/* Action buttons */}
+              {/* Action Buttons */}
               <motion.div 
-                className="mt-8 space-y-3"
+                className="mt-8 space-y-4"
                 variants={itemVariants}
               >
-                {isPendingRegistration && (
-                      <button
-                    onClick={handleResendVerificationEmail}
-                        disabled={isResendingEmail}
-                    className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isResendingEmail ? (
-                          <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Sending...
-                          </>
-                    ) : 'Resend Verification Email'}
-                  </button>
-                )}
+                <button
+                  onClick={handleResendVerificationEmail}
+                  disabled={isResendingEmail}
+                  className="w-full block text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  {isResendingEmail ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </span>
+                  ) : 'Resend Verification Email'}
+                </button>
                 
-                <Link href={isPendingRegistration ? "/login" : "/dashboard"} className="w-full block text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  {isPendingRegistration ? 'Go to Login' : 'Go to Dashboard'}
-              </Link>
+                <Link href="/dashboard" className="w-full block text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  Go to Dashboard
+                </Link>
               </motion.div>
               
               {resendStatus === 'success' && (
