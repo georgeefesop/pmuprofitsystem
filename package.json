@@ -13,6 +13,7 @@
     "setup": "node scripts/setup-local-dev.js",
     "setup:https": "node scripts/setup-https.js",
     "setup:supabase": "node scripts/setup-supabase.js",
+    "setup:error-logger": "node scripts/browser-error-logger.js",
     "prebuild": "node scripts/check-image-domains.js",
     "build": "next build",
     "build:vercel": "node scripts/vercel-build.js",

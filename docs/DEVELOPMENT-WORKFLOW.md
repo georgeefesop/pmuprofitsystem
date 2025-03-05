@@ -74,7 +74,25 @@ This command runs the development server with automatic error detection and fixi
 1. Check for common build errors and fix them automatically
 2. Run TypeScript type checking
 3. Run ESLint to check for code quality issues
-4. Start the Next.js development server
+4. Set up browser console error logging to your terminal
+5. Start the Next.js development server
+
+### Browser Error Logging
+
+The development server automatically captures and logs browser console errors to your terminal. This helps you identify and fix client-side issues without having to keep the browser console open.
+
+To set up browser error logging separately:
+
+```bash
+npm run setup:error-logger
+```
+
+This will:
+- Create an API endpoint to receive error logs from the browser
+- Modify the middleware to inject error logging code into HTML responses
+- Capture console errors, warnings, unhandled errors, and promise rejections
+
+After setting up, restart your development server to see browser errors in your terminal.
 
 ### Alternative Development Server Options
 

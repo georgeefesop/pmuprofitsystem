@@ -5,6 +5,7 @@ This directory contains utility scripts for development, testing, and deployment
 ## Development Scripts
 
 - `auto-fix-dev.js` - Runs the development server with automatic error detection and fixing
+- `browser-error-logger.js` - Sets up browser console error logging to the terminal
 - `launcher.js` - Launches the development server in the background
 - `start-dev.js` - Starts the development server directly
 - `auto-open-dev.js` - Starts the development server and opens the browser
@@ -53,5 +54,6 @@ npm run dev:preview   # Runs auto-open-dev.js
 npm run dev:https     # Runs start-https.js
 npm run setup         # Runs setup-local-dev.js
 npm run setup:https   # Runs setup-https.js
+npm run setup:error-logger # Sets up browser error logging
 npm run check-errors  # Runs check-build-errors.js
 ``` 

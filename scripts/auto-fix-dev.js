@@ -1,6 +1,7 @@
 const { spawn, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const { injectErrorLogger } = require('./browser-error-logger');
 
 // Colors for console output
 const colors = {
@@ -60,7 +61,11 @@ async function runDevWithAutoFix() {
       colorLog(colors.yellow, 'ESLint found some issues. Continuing with development server anyway.\n');
     }
     
-    // Step 4: Start the development server
+    // Step 4: Set up browser error logging
+    colorLog(colors.blue, 'Setting up browser error logging...');
+    injectErrorLogger();
+    
+    // Step 5: Start the development server
     colorLog(colors.magenta, 'Starting Next.js development server...\n');
     
     // Use the existing start-dev.js script to start the server

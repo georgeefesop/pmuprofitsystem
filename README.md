@@ -144,6 +144,7 @@ Use any future expiration date, any 3-digit CVC, and any postal code.
 - `npm run dev:alt` - Start the development server on an alternative port
 - `npm run dev:https` - Start the development server with HTTPS
 - `npm run setup:https` - Set up HTTPS for local development
+- `npm run setup:error-logger` - Set up browser console error logging to terminal
 - `npm run prebuild` - Check for image domains before building
 - `npm run build` - Build the application for production
 - `npm run start` - Start the production server
