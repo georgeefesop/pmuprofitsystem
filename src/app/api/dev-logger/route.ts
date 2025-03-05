@@ -9,6 +9,8 @@ const colors = {
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
   cyan: '\x1b[36m',
+  green: '\x1b[32m',
+  gray: '\x1b[90m',
 };
 
 export async function POST(req: NextRequest) {
@@ -26,14 +28,45 @@ export async function POST(req: NextRequest) {
                      data.type === 'warning' ? colors.yellow : 
                      data.type === 'unhandled' ? colors.magenta : 
                      data.type === 'unhandledrejection' ? colors.magenta : 
+                     data.type === 'react' ? colors.cyan :
                      colors.blue;
     
-    console.log(`${colorCode}[BROWSER ${data.type.toUpperCase()}] [${timestamp}]${colors.reset}`);
+    // Print header with timestamp, type, component, and URL
+    console.log(`${colorCode}[BROWSER ${data.type.toUpperCase()}]${colors.reset} [${timestamp}] in ${colors.cyan}${data.component || 'Unknown'}${colors.reset} at ${colors.blue}${data.url || 'Unknown URL'}${colors.reset}`);
     
     // Log each message part
     data.message.forEach((msg: string) => {
-      console.log(`  ${msg}`);
+      if (typeof msg === 'object') {
+        try {
+          const parsed = JSON.parse(msg);
+          console.log(`  ${JSON.stringify(parsed, null, 2)}`);
+        } catch (e) {
+          console.log(`  ${msg}`);
+        }
+      } else {
+        console.log(`  ${msg}`);
+      }
     });
+    
+    // Log stack trace if available
+    if (data.stack) {
+      console.log(`${colors.gray}  Stack trace:${colors.reset}`);
+      data.stack.split('\n').forEach((line: string) => {
+        console.log(`  ${colors.gray}${line}${colors.reset}`);
+      });
+    }
+    
+    // Log additional information if available
+    if (data.filename && data.lineno) {
+      console.log(`${colors.gray}  Location: ${data.filename}:${data.lineno}:${data.colno || 0}${colors.reset}`);
+    }
+    
+    if (data.componentStack) {
+      console.log(`${colors.gray}  Component stack:${colors.reset}`);
+      data.componentStack.split('\n').forEach((line: string) => {
+        console.log(`  ${colors.gray}${line.trim()}${colors.reset}`);
+      });
+    }
     
     // Add a separator for readability
     console.log('');
