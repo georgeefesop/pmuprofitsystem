@@ -13,8 +13,11 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  
+  // Check if we're on a dashboard page
+  const isDashboardPage = pathname.startsWith('/dashboard');
 
-  // Get user's name from email
+  // Get user's name from email - keeping this for potential future use
   const userName = user?.email ? user.email.split('@')[0] : 'User';
 
   useEffect(() => {
@@ -55,52 +58,58 @@ export function Navbar() {
 
   return (
     <header
+      id="main-navbar"
       className={cn(
         'sticky top-0 z-50 w-full border-b bg-gradient-to-r from-purple-800 to-purple-700 text-white shadow-md border-purple-500/30',
         scrolled ? 'shadow-sm' : ''
       )}
     >
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6 md:gap-10">
-          <Link href="/" className="flex items-center space-x-2">
+      <div id="navbar-container" className="container flex h-16 items-center justify-between">
+        <div id="navbar-left" className="flex items-center gap-2 md:gap-6">
+          <Link id="navbar-logo" href="/" className="flex items-center pl-6">
             <span className="text-xl font-bold text-white">PMU Profit System</span>
           </Link>
-          <nav className="hidden gap-6 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-purple-100',
-                  pathname === link.href
-                    ? 'text-white'
-                    : 'text-white/80'
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-            {user && loggedInLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-purple-100',
-                  pathname === link.href
-                    ? 'text-white'
-                    : 'text-white/80'
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+          {/* Only show nav links if not on dashboard page */}
+          {!isDashboardPage && (
+            <nav id="desktop-nav" className="hidden gap-4 md:flex">
+              {navLinks.map((link) => (
+                <Link
+                  id={`nav-link-${link.name.toLowerCase()}`}
+                  key={link.name}
+                  href={link.href}
+                  className={cn(
+                    'text-sm font-medium transition-colors hover:text-purple-100',
+                    pathname === link.href
+                      ? 'text-white'
+                      : 'text-white/80'
+                  )}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              {user && loggedInLinks.map((link) => (
+                <Link
+                  id={`nav-link-${link.name.toLowerCase()}`}
+                  key={link.name}
+                  href={link.href}
+                  className={cn(
+                    'text-sm font-medium transition-colors hover:text-purple-100',
+                    pathname === link.href
+                      ? 'text-white'
+                      : 'text-white/80'
+                  )}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
-        <div className="flex items-center gap-4">
+        <div id="navbar-right" className="flex items-center gap-4">
           {!user && (
-            <div className="hidden md:flex md:gap-4">
+            <div id="auth-buttons" className="hidden md:flex md:gap-4">
               {nonLoggedInLinks.map((link) => (
-                <Link key={link.name} href={link.href}>
+                <Link id={`auth-button-${link.name.toLowerCase()}`} key={link.name} href={link.href}>
                   <Button
                     variant="outline"
                     size="sm"
@@ -110,7 +119,7 @@ export function Navbar() {
                   </Button>
                 </Link>
               ))}
-              <Link href="/pre-checkout">
+              <Link id="buy-now-button" href="/pre-checkout">
                 <Button
                   variant="default"
                   size="sm"
@@ -123,12 +132,10 @@ export function Navbar() {
           )}
 
           {user && (
-            <div className="flex items-center gap-2">
-              <div className="hidden md:block">
-                <span className="text-sm font-medium text-white">{userName}</span>
-              </div>
-              <div className="flex flex-col">
+            <div id="user-menu" className="flex items-center gap-2">
+              <div id="user-actions" className="flex items-center gap-2">
                 <Button
+                  id="logout-button"
                   variant="ghost"
                   size="sm"
                   onClick={() => logout()}
@@ -136,20 +143,25 @@ export function Navbar() {
                 >
                   Log out
                 </Button>
-                <Link href="/dashboard" className="hidden md:inline-flex">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="bg-white text-purple-700 hover:bg-purple-50 border-none"
-                  >
-                    Dashboard
-                  </Button>
-                </Link>
+                {/* Only show dashboard button if not on dashboard page */}
+                {!isDashboardPage && (
+                  <Link id="dashboard-button-link" href="/dashboard" className="hidden md:inline-flex">
+                    <Button 
+                      id="dashboard-button"
+                      variant="outline" 
+                      size="sm"
+                      className="bg-white text-purple-700 hover:bg-purple-50 border-none whitespace-nowrap"
+                    >
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           )}
 
           <Button
+            id="mobile-menu-toggle"
             variant="ghost"
             size="icon"
             className="md:hidden text-white hover:bg-purple-800/50"
@@ -160,11 +172,12 @@ export function Navbar() {
           </Button>
           
           {mobileMenuOpen && (
-            <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
-              <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xs rounded-l-xl bg-purple-900/80 p-6 shadow-lg">
-                <div className="flex items-center justify-between">
+            <div id="mobile-menu-overlay" className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
+              <div id="mobile-menu" className="fixed inset-y-0 right-0 z-50 w-full max-w-xs rounded-l-xl bg-purple-900/80 p-6 shadow-lg">
+                <div id="mobile-menu-header" className="flex items-center justify-between">
                   <span className="text-lg font-semibold text-white">PMU Profit System</span>
                   <Button
+                    id="mobile-menu-close"
                     variant="ghost"
                     size="icon"
                     onClick={() => setMobileMenuOpen(false)}
@@ -188,63 +201,75 @@ export function Navbar() {
                     </svg>
                   </Button>
                 </div>
-                <nav className="mt-6 flex flex-col gap-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      className={cn(
-                        'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
-                        pathname === link.href
-                          ? 'text-white'
-                          : 'text-white/80'
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                  {user && loggedInLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      className={cn(
-                        'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
-                        pathname === link.href
-                          ? 'text-white'
-                          : 'text-white/80'
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                  {!user && nonLoggedInLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      className={cn(
-                        'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
-                        pathname === link.href
-                          ? 'text-white'
-                          : 'text-white/80'
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
+                <nav id="mobile-nav" className="mt-6 flex flex-col gap-4">
+                  {/* Only show nav links if not on dashboard page */}
+                  {!isDashboardPage && (
+                    <>
+                      {navLinks.map((link) => (
+                        <Link
+                          id={`mobile-nav-link-${link.name.toLowerCase()}`}
+                          key={link.name}
+                          href={link.href}
+                          className={cn(
+                            'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
+                            pathname === link.href
+                              ? 'text-white'
+                              : 'text-white/80'
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                      {user && loggedInLinks.map((link) => (
+                        <Link
+                          id={`mobile-nav-link-${link.name.toLowerCase()}`}
+                          key={link.name}
+                          href={link.href}
+                          className={cn(
+                            'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
+                            pathname === link.href
+                              ? 'text-white'
+                              : 'text-white/80'
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    </>
+                  )}
                   {!user && (
-                    <Link
-                      href="/pre-checkout"
-                      className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Buy Now
-                    </Link>
+                    <>
+                      {nonLoggedInLinks.map((link) => (
+                        <Link
+                          id={`mobile-nav-link-${link.name.toLowerCase()}`}
+                          key={link.name}
+                          href={link.href}
+                          className={cn(
+                            'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
+                            pathname === link.href
+                              ? 'text-white'
+                              : 'text-white/80'
+                          )}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                      <Link
+                        id="mobile-buy-now-button"
+                        href="/pre-checkout"
+                        className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Buy Now
+                      </Link>
+                    </>
                   )}
                   {user && (
                     <Button
+                      id="mobile-logout-button"
                       variant="outline"
                       className="mt-4 w-full justify-start bg-white text-purple-700 hover:bg-purple-50"
                       onClick={() => {
