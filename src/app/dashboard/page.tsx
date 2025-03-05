@@ -25,21 +25,14 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout title="Dashboard" actionButton={actionButton}>
+      {/* Start Learning Card */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Welcome to the PMU Profit System</h2>
-        <p className="text-gray-600 mb-4">
-          You're on your way to transforming your PMU business. Explore the modules below to get started.
-        </p>
-      </div>
-      
-      <div className="mb-8">
-        {/* Start Learning Card */}
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold mb-4">Start Learning</h3>
           <p className="text-gray-600 mb-4">
             Begin your journey to transform your PMU business.
           </p>
-          <Link href="/dashboard/courses" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+          <Link href="/dashboard/modules" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
             View Modules
           </Link>
         </div>

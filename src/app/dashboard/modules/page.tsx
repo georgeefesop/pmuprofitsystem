@@ -289,7 +289,7 @@ export default function ModulesPage() {
                 {getModuleIcon(module.id)}
                 
                 {/* Title with text shadow for better readability */}
-                <h3 className="text-xl font-bold text-white drop-shadow-lg relative z-10 font-sans">
+                <h3 className="text-xl font-bold text-white drop-shadow-lg relative z-10 font-sans tracking-wide leading-tight">
                   {module.title}
                 </h3>
               </div>
@@ -313,13 +313,13 @@ export default function ModulesPage() {
                     {/* Module icon */}
                     {getModuleIcon(module.id)}
                     
-                    <h3 className="text-sm font-bold text-white text-center drop-shadow-lg line-clamp-2 relative z-10 font-sans">
+                    <h3 className="text-sm font-bold text-white text-center drop-shadow-lg line-clamp-2 relative z-10 font-sans tracking-wide leading-tight">
                       {module.title}
                     </h3>
                   </div>
                   <div className="p-4 flex-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="font-semibold text-lg mb-2 group-hover:text-purple-700 transition-colors duration-300 font-sans">{module.title}</h3>
+                      <h3 className="font-semibold text-lg mb-2 group-hover:text-purple-700 transition-colors duration-300 font-sans tracking-wide leading-tight">{module.title}</h3>
                     </div>
                     <p className="text-gray-600 text-sm">{module.description}</p>
                   </div>
