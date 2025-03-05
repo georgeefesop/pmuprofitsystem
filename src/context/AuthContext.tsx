@@ -243,11 +243,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       console.log('Logging out...');
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      // Clear any potential auth cookies
+      if (typeof window !== 'undefined') {
+        // Clear localStorage items related to Supabase auth
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('supabase.auth.expires_at');
+        localStorage.removeItem('supabase.auth.refresh_token');
+        
+        // Clear cookies
+        Object.keys(Cookies.get()).forEach(cookieName => {
+          if (cookieName.includes('supabase') || cookieName.includes('sb-')) {
+            Cookies.remove(cookieName, { path: '/' });
+          }
+        });
+      }
+      
+      // Ensure user state is cleared
       setUser(null);
-      router.push('/');
+      
+      // Add a small delay before redirecting to ensure everything is cleared
+      setTimeout(() => {
+        router.push('/');
+        // Force a hard refresh to clear any remaining state
+        if (typeof window !== 'undefined') {
+          window.location.href = '/';
+        }
+      }, 100);
     } catch (error) {
       console.error('Logout error:', error);
+      // Even if there's an error, try to clear everything
+      setUser(null);
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } finally {
       setIsLoading(false);
     }

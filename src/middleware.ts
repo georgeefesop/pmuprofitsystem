@@ -23,6 +23,29 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
   
+  // If the user is authenticated and trying to access the dashboard,
+  // check if they have purchased the main product
+  if (isProtectedRoute && session) {
+    try {
+      // Check if the user has purchased the main product
+      const { data: purchases } = await supabase
+        .from('purchases')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('product_id', 'pmu-profit-system')
+        .eq('status', 'completed');
+      
+      // If the user hasn't purchased the main product, redirect to checkout
+      if (!purchases || purchases.length === 0) {
+        console.log('User has not purchased the main product, redirecting to checkout');
+        return NextResponse.redirect(new URL('/checkout', request.url));
+      }
+    } catch (error) {
+      console.error('Error checking purchases:', error);
+      // If there's an error, allow access to avoid blocking legitimate users
+    }
+  }
+  
   // Continue with the request if authenticated or not a protected route
   return response;
 }

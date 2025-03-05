@@ -137,7 +137,8 @@ Use any future expiration date, any 3-digit CVC, and any postal code.
 
 - `npm run setup` - Complete setup for local development environment
 - `npm run setup:supabase` - Set up Supabase for local development
-- `npm run dev` - Start the development server
+- `npm run dev` - Start the development server with automatic error detection and fixing
+- `npm run dev:launcher` - Start the development server using the background launcher
 - `npm run dev:preview` - Start the development server and open browser preview
 - `npm run dev:direct` - Start the development server directly (bypass launcher)
 - `npm run dev:alt` - Start the development server on an alternative port

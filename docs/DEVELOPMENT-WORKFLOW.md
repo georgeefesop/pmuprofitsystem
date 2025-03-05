@@ -60,29 +60,29 @@ This document outlines the development workflow for the PMU Profit System, inclu
    npm run verify-db
    ```
 
-### Running the Development Server
+## Development Server
 
 There are several ways to run the development server:
 
-1. Standard development server:
-   ```bash
-   npm run dev
-   ```
+### Standard Development Server (Recommended)
 
-2. Direct development server (bypasses the launcher):
-   ```bash
-   npm run dev:direct
-   ```
+```bash
+npm run dev
+```
 
-3. Alternative port development server:
-   ```bash
-   npm run dev:alt
-   ```
+This command runs the development server with automatic error detection and fixing. It will:
+1. Check for common build errors and fix them automatically
+2. Run TypeScript type checking
+3. Run ESLint to check for code quality issues
+4. Start the Next.js development server
 
-4. HTTPS development server (required for Stripe):
-   ```bash
-   npm run dev:https
-   ```
+### Alternative Development Server Options
+
+- `npm run dev:launcher` - Start the development server using the background launcher
+- `npm run dev:direct` - Start the development server directly (bypass launcher)
+- `npm run dev:preview` - Start the development server and open browser preview
+- `npm run dev:alt` - Start the development server on an alternative port (3001)
+- `npm run dev:https` - Start the development server with HTTPS (required for Stripe)
 
 ### Setting Up HTTPS for Local Development
 
