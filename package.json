@@ -25,7 +25,8 @@
     "mcp-server": "node scripts/start-mcp-server.js",
     "fix:all": "node scripts/fix-all-errors.js",
     "fix:viewport": "node scripts/fix-viewport-metadata.js",
-    "fix:supabase": "node scripts/fix-supabase-config.js"
+    "fix:supabase": "node scripts/fix-supabase-config.js",
+    "delete-users": "node scripts/delete-test-users.js"
   },
   "dependencies": {
     "@modelcontextprotocol/server-postgres": "^0.6.2",

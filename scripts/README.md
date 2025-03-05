@@ -25,6 +25,7 @@ This directory contains utility scripts for development, testing, and deployment
 
 - `setup-database.js` - Sets up the database
 - `verify-database.js` - Verifies the database setup
+- `delete-test-users.js` - Deletes test users from the database while preserving admin accounts
 
 ## Testing Scripts
 
@@ -65,4 +66,5 @@ npm run check-errors  # Runs check-build-errors.js
 npm run fix:all       # Runs fix-all-errors.js
 npm run fix:viewport  # Runs fix-viewport-metadata.js
 npm run fix:supabase  # Runs fix-supabase-config.js
+npm run delete-users  # Deletes test users from the database
 ``` 

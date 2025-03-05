@@ -318,7 +318,7 @@ function CheckoutContent() {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-medium text-gray-900">PMU Profit System</h3>
-                    <p className="text-xs text-gray-500">The complete system to help you reach €5,000/month as a PMU artist</p>
+                    <p className="text-xs text-gray-500">The complete video training system to help you reach €5,000/month as a PMU artist</p>
                   </div>
                   <span className="font-semibold text-gray-900">€37</span>
                 </div>
@@ -379,9 +379,8 @@ function CheckoutContent() {
               
               {/* Order Total */}
               <div className="mt-3 p-3 bg-purple-100 rounded-lg border border-purple-200">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-900">Total</span>
-                  <span className="text-xl font-bold text-purple-700">€{calculateTotal()}</span>
+                <div className="flex justify-end items-center">
+                  <span className="text-xl font-bold text-purple-700">Total: €{calculateTotal()}</span>
                 </div>
               </div>
             </div>
