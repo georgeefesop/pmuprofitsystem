@@ -55,7 +55,8 @@ export function SafeImage({
   };
 
   // If fill is true and sizes is not provided, add a default sizes value
-  const imageSizes = fill && !sizes ? '100vw' : sizes;
+  // Use a more appropriate sizes value for common use cases instead of 100vw
+  const imageSizes = fill && !sizes ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw' : sizes;
 
   return (
     <NextImage

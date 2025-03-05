@@ -99,7 +99,20 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
     try {
       // Get user metadata for full name
       const userMetadata = (user as any).user_metadata || {};
-      const fullName = userMetadata.full_name || "";
+      
+      // Ensure we have a valid name - use full_name from metadata, or extract from email, or use a default
+      let fullName = userMetadata.full_name;
+      
+      // If no full name is available, extract a name from the email or use a default
+      if (!fullName || fullName.trim() === '') {
+        // Extract name from email (part before @)
+        const emailName = user.email.split('@')[0];
+        // Capitalize first letter and replace dots/underscores with spaces
+        fullName = emailName
+          .split(/[._-]/)
+          .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(' ');
+      }
       
       // Create payment intent
       const response = await fetch('/api/create-payment-intent', {
