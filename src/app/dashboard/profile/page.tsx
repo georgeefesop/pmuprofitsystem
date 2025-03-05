@@ -319,6 +319,9 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-6">Account Security</h2>
+            <p className="text-gray-600 mb-6">
+              Use the form below to change your password. For security reasons, you'll need to enter your current password.
+            </p>
             
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
               <div>
@@ -473,7 +476,7 @@ export default function ProfilePage() {
               <PurchaseItem 
                 title="Consultation Success Blueprint"
                 description="Framework for Converting Consultations into Bookings"
-                productId="consultation-blueprint"
+                productId="consultation-success-blueprint"
                 accessType="Lifetime"
                 viewLink="/dashboard/blueprint"
                 viewText="View Blueprint"
@@ -484,7 +487,7 @@ export default function ProfilePage() {
               <PurchaseItem 
                 title="PMU Ad Generator"
                 description="AI-Powered Ad Creation Tool for PMU Artists"
-                productId="ad-generator"
+                productId="pmu-ad-generator"
                 accessType="Lifetime"
                 viewLink="/dashboard/ad-generator"
                 viewText="Use Ad Generator"
@@ -616,6 +619,17 @@ function PurchaseItem({
           <p className="text-sm text-gray-600">
             Purchase this add-on to enhance your PMU business growth.
           </p>
+          <div className="mt-4">
+            <Link 
+              href={purchaseLink}
+              className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700 transition-colors"
+            >
+              Learn More
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
         </div>
       )}
     </div>
