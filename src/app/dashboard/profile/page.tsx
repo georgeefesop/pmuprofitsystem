@@ -434,6 +434,8 @@ export default function ProfilePage() {
                     <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
                       {usePurchases().purchases
                         .filter(purchase => purchase.product_id === 'pmu-profit-system')
+                        // Take only the first purchase record to avoid duplicates
+                        .slice(0, 1)
                         .map(purchase => (
                           <React.Fragment key={purchase.id}>
                             <div>
@@ -451,7 +453,7 @@ export default function ProfilePage() {
                             <div>
                               <dt className="text-gray-500">Amount</dt>
                               <dd className="font-medium text-gray-900">
-                                €{purchase.amount.toFixed(2)}
+                                €{(purchase.amount / 100).toFixed(2)}
                               </dd>
                             </div>
                             <div>
@@ -475,6 +477,7 @@ export default function ProfilePage() {
                 accessType="Lifetime"
                 viewLink="/dashboard/blueprint"
                 viewText="View Blueprint"
+                purchaseLink="/dashboard/blueprint/purchase"
               />
               
               {/* PMU Ad Generator */}
@@ -485,6 +488,7 @@ export default function ProfilePage() {
                 accessType="Lifetime"
                 viewLink="/dashboard/ad-generator"
                 viewText="Use Ad Generator"
+                purchaseLink="/dashboard/ad-generator/purchase"
               />
             </div>
           </div>
@@ -521,7 +525,8 @@ function PurchaseItem({
   productId,
   accessType,
   viewLink,
-  viewText
+  viewText,
+  purchaseLink
 }: { 
   title: string; 
   description: string; 
@@ -529,6 +534,7 @@ function PurchaseItem({
   accessType: string;
   viewLink: string;
   viewText: string;
+  purchaseLink: string;
 }) {
   const { hasPurchased, purchases } = usePurchases();
   const isPurchased = hasPurchased(productId as any);
@@ -547,7 +553,7 @@ function PurchaseItem({
             </span>
           ) : (
             <Link 
-              href={`/checkout?product=${productId}`}
+              href={purchaseLink}
               className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
             >
               Purchase Now
@@ -561,6 +567,8 @@ function PurchaseItem({
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
             {purchases
               .filter(purchase => purchase.product_id === productId)
+              // Take only the first purchase record to avoid duplicates
+              .slice(0, 1)
               .map(purchase => (
                 <React.Fragment key={purchase.id}>
                   <div>
@@ -578,7 +586,7 @@ function PurchaseItem({
                   <div>
                     <dt className="text-gray-500">Amount</dt>
                     <dd className="font-medium text-gray-900">
-                      €{purchase.amount.toFixed(2)}
+                      €{(purchase.amount / 100).toFixed(2)}
                     </dd>
                   </div>
                   <div>
@@ -608,17 +616,6 @@ function PurchaseItem({
           <p className="text-sm text-gray-600">
             Purchase this add-on to enhance your PMU business growth.
           </p>
-          <div className="mt-2">
-            <Link 
-              href={`/checkout?product=${productId}`}
-              className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700 transition-colors"
-            >
-              Learn More
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
         </div>
       )}
     </div>
