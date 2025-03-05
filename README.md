@@ -108,6 +108,9 @@ Comprehensive documentation is available in the `docs` directory:
 - [Database Schema](docs/DATABASE-SCHEMA.md) - Comprehensive overview of the database structure
 - [Supabase Authentication](docs/SUPABASE-AUTHENTICATION.md) - Guide to the authentication system
 - [Code Structure](docs/CODE-STRUCTURE.md) - Overview of the codebase structure
+- [Codebase Analysis](docs/CODEBASE-ANALYSIS.md) - Detailed analysis of the codebase, including unused and redundant files
+- [File Dependencies](docs/FILE-DEPENDENCIES.md) - Mapping of dependencies between files
+- [Test Plan](docs/TEST-PLAN.md) - Plan for testing changes to the codebase
 
 ### API Documentation
 - [API Routes](docs/API-ROUTES.md) - Documentation for the API routes
