@@ -21,25 +21,91 @@ colorLog(colors.cyan, '=== PMU Profit System Image Domain Checker ===\n');
 
 // Read the next.config.js file
 const nextConfigPath = path.join(process.cwd(), 'next.config.js');
-let nextConfigContent = fs.readFileSync(nextConfigPath, 'utf8');
+let nextConfigContent;
 
-// Extract the current domains array
-const domainsMatch = nextConfigContent.match(/domains:\s*\[(.*?)\]/s);
-if (!domainsMatch) {
-  colorLog(colors.red, 'Error: Could not find domains array in next.config.js');
-  process.exit(1);
+try {
+  nextConfigContent = fs.readFileSync(nextConfigPath, 'utf8');
+} catch (error) {
+  colorLog(colors.red, `Error reading next.config.js: ${error.message}`);
+  // Create a basic next.config.js file if it doesn't exist
+  nextConfigContent = `/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    domains: [],
+    remotePatterns: [],
+  },
+};
+
+module.exports = nextConfig;
+`;
+  fs.writeFileSync(nextConfigPath, nextConfigContent, 'utf8');
+  colorLog(colors.green, 'Created a new next.config.js file with empty image domains configuration');
 }
 
-const currentDomainsString = domainsMatch[1];
-const currentDomains = currentDomainsString
-  .split(',')
-  .map(domain => domain.trim().replace(/['"]/g, ''))
-  .filter(Boolean);
+// Extract the current domains configuration
+let currentDomains = [];
+let hasDomainsArray = false;
+let hasRemotePatterns = false;
 
-colorLog(colors.blue, 'Current allowed image domains:');
-currentDomains.forEach(domain => {
-  colorLog(colors.green, `✓ ${domain}`);
-});
+// Check for domains array
+const domainsMatch = nextConfigContent.match(/domains:\s*\[(.*?)\]/s);
+if (domainsMatch) {
+  hasDomainsArray = true;
+  const currentDomainsString = domainsMatch[1];
+  currentDomains = currentDomainsString
+    .split(',')
+    .map(domain => domain.trim().replace(/['"]/g, ''))
+    .filter(Boolean);
+}
+
+// Check for remotePatterns array
+const remotePatternsMatch = nextConfigContent.match(/remotePatterns:\s*\[(.*?)\]/s);
+if (remotePatternsMatch) {
+  hasRemotePatterns = true;
+  // Extract hostnames from remotePatterns
+  const remotePatterns = remotePatternsMatch[1];
+  const hostnameMatches = remotePatterns.match(/hostname:\s*['"]([^'"]+)['"]/g);
+  if (hostnameMatches) {
+    hostnameMatches.forEach(match => {
+      const hostname = match.match(/hostname:\s*['"]([^'"]+)['"]/)[1];
+      if (!currentDomains.includes(hostname)) {
+        currentDomains.push(hostname);
+      }
+    });
+  }
+}
+
+if (!hasDomainsArray && !hasRemotePatterns) {
+  colorLog(colors.yellow, 'Warning: Could not find domains or remotePatterns in next.config.js');
+  colorLog(colors.yellow, 'Creating a new images configuration...');
+  
+  // Add images configuration to next.config.js
+  if (nextConfigContent.includes('const nextConfig = {')) {
+    nextConfigContent = nextConfigContent.replace(
+      'const nextConfig = {',
+      `const nextConfig = {
+  images: {
+    domains: [],
+    remotePatterns: [],
+  },`
+    );
+    fs.writeFileSync(nextConfigPath, nextConfigContent, 'utf8');
+    colorLog(colors.green, 'Added images configuration to next.config.js');
+  } else {
+    colorLog(colors.red, 'Error: Could not find nextConfig object in next.config.js');
+    process.exit(1);
+  }
+} else {
+  colorLog(colors.blue, 'Current allowed image domains:');
+  if (currentDomains.length === 0) {
+    colorLog(colors.yellow, 'No domains configured yet');
+  } else {
+    currentDomains.forEach(domain => {
+      colorLog(colors.green, `✓ ${domain}`);
+    });
+  }
+}
 
 // Find all image URLs in the codebase using a cross-platform approach
 colorLog(colors.blue, '\nSearching for image URLs in the codebase...');
@@ -119,12 +185,53 @@ if (missingDomains.length === 0) {
   const newDomains = [...currentDomains, ...missingDomains];
   const newDomainsString = newDomains.map(domain => `'${domain}'`).join(', ');
   
-  const updatedContent = nextConfigContent.replace(
-    /domains:\s*\[(.*?)\]/s,
-    `domains: [${newDomainsString}]`
-  );
+  // Create new remotePatterns entries
+  const newRemotePatterns = missingDomains.map(domain => {
+    return `{
+        protocol: 'https',
+        hostname: '${domain}',
+      }`;
+  }).join(',\n      ');
   
-  fs.writeFileSync(nextConfigPath, updatedContent, 'utf8');
+  // Update domains array if it exists
+  if (hasDomainsArray) {
+    nextConfigContent = nextConfigContent.replace(
+      /domains:\s*\[(.*?)\]/s,
+      `domains: [${newDomainsString}]`
+    );
+  } else if (nextConfigContent.includes('images: {')) {
+    // Add domains array if images config exists but no domains array
+    nextConfigContent = nextConfigContent.replace(
+      /images:\s*{/,
+      `images: {\n    domains: [${newDomainsString}],`
+    );
+  }
+  
+  // Update remotePatterns if it exists
+  if (hasRemotePatterns) {
+    // Add new patterns to existing remotePatterns
+    const existingPatterns = remotePatternsMatch[1];
+    const lastBracketIndex = existingPatterns.lastIndexOf('}');
+    
+    if (lastBracketIndex !== -1) {
+      const updatedPatterns = existingPatterns.substring(0, lastBracketIndex + 1) + 
+        (existingPatterns.trim().endsWith('}') ? ',\n      ' : '') + 
+        newRemotePatterns;
+      
+      nextConfigContent = nextConfigContent.replace(
+        /remotePatterns:\s*\[(.*?)\]/s,
+        `remotePatterns: [${updatedPatterns}]`
+      );
+    }
+  } else if (nextConfigContent.includes('images: {')) {
+    // Add remotePatterns if images config exists but no remotePatterns
+    nextConfigContent = nextConfigContent.replace(
+      /images:\s*{/,
+      `images: {\n    remotePatterns: [\n      ${newRemotePatterns}\n    ],`
+    );
+  }
+  
+  fs.writeFileSync(nextConfigPath, nextConfigContent, 'utf8');
   
   colorLog(colors.green, 'Successfully updated next.config.js with new image domains:');
   newDomains.forEach(domain => {
