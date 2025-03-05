@@ -17,7 +17,7 @@ function colorLog(color, message) {
   console.log(`${color}${message}${colors.reset}`);
 }
 
-// Create the error logging script content
+// Update the error logging script content to include more detailed error information
 const errorLoggerScript = `
 // Error logger for development
 (function() {
@@ -25,12 +25,46 @@ const errorLoggerScript = `
   const originalConsoleWarn = console.warn;
   const originalConsoleLog = console.log;
   
-  // Function to send errors to the server
-  function sendErrorToServer(type, args) {
+  // Function to get stack trace
+  function getStackTrace() {
     try {
+      throw new Error('');
+    } catch (error) {
+      return error.stack || '';
+    }
+  }
+  
+  // Function to get component name from stack trace
+  function getComponentName(stack) {
+    try {
+      // Try to extract component name from stack trace
+      const stackLines = stack.split('\\n');
+      for (let i = 0; i < stackLines.length; i++) {
+        const line = stackLines[i];
+        // Look for React component names (capitalized)
+        const componentMatch = line.match(/at ([A-Z][a-zA-Z0-9]+)/);
+        if (componentMatch && componentMatch[1]) {
+          return componentMatch[1];
+        }
+      }
+      return 'Unknown Component';
+    } catch (e) {
+      return 'Unknown Component';
+    }
+  }
+  
+  // Function to send errors to the server
+  function sendErrorToServer(type, args, extraInfo = {}) {
+    try {
+      const stack = getStackTrace();
+      const componentName = getComponentName(stack);
+      
       const errorData = {
         type,
         timestamp: new Date().toISOString(),
+        component: componentName,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
         message: Array.from(args).map(arg => {
           try {
             if (arg instanceof Error) {
@@ -44,7 +78,9 @@ const errorLoggerScript = `
           } catch (e) {
             return 'Unstringifiable object';
           }
-        })
+        }),
+        stack: stack.split('\\n').slice(1, 6).join('\\n'), // First 5 lines of stack
+        ...extraInfo
       };
       
       fetch('/api/dev-logger', {
@@ -81,7 +117,11 @@ const errorLoggerScript = `
       lineno: event.lineno,
       colno: event.colno,
       error: event.error
-    }]);
+    }], {
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno
+    });
   });
   
   // Capture unhandled promise rejections
@@ -89,8 +129,105 @@ const errorLoggerScript = `
     sendErrorToServer('unhandledrejection', [event.reason]);
   });
   
+  // Capture React errors
+  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    const originalOnErrorHandler = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning;
+    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning = function(fiber, type, error, componentStack) {
+      if (type === 'error') {
+        sendErrorToServer('react', [error], {
+          componentStack
+        });
+      }
+      if (originalOnErrorHandler) {
+        originalOnErrorHandler.call(this, fiber, type, error, componentStack);
+      }
+    };
+  }
+  
   console.log('%c🔍 Browser error logging enabled', 'color: purple; font-weight: bold');
 })();
+`;
+
+// Update the API route content to display more detailed error information
+const apiRouteContent = `
+import { NextRequest, NextResponse } from 'next/server';
+
+// Colors for console output
+const colors = {
+  reset: '\\x1b[0m',
+  red: '\\x1b[31m',
+  yellow: '\\x1b[33m',
+  blue: '\\x1b[34m',
+  magenta: '\\x1b[35m',
+  cyan: '\\x1b[36m',
+  green: '\\x1b[32m',
+  gray: '\\x1b[90m',
+};
+
+export async function POST(req: NextRequest) {
+  // Only process in development
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ success: false, message: 'Only available in development' });
+  }
+  
+  try {
+    const data = await req.json();
+    
+    // Format the error message
+    const timestamp = new Date(data.timestamp).toLocaleTimeString();
+    const colorCode = data.type === 'error' ? colors.red : 
+                     data.type === 'warning' ? colors.yellow : 
+                     data.type === 'unhandled' ? colors.magenta : 
+                     data.type === 'unhandledrejection' ? colors.magenta : 
+                     data.type === 'react' ? colors.cyan :
+                     colors.blue;
+    
+    // Print header with timestamp, type, component, and URL
+    console.log(\`\${colorCode}[BROWSER \${data.type.toUpperCase()}]\${colors.reset} [\${timestamp}] in \${colors.cyan}\${data.component || 'Unknown'}\${colors.reset} at \${colors.blue}\${data.url || 'Unknown URL'}\${colors.reset}\`);
+    
+    // Log each message part
+    data.message.forEach((msg: string) => {
+      if (typeof msg === 'object') {
+        try {
+          const parsed = JSON.parse(msg);
+          console.log(\`  \${JSON.stringify(parsed, null, 2)}\`);
+        } catch (e) {
+          console.log(\`  \${msg}\`);
+        }
+      } else {
+        console.log(\`  \${msg}\`);
+      }
+    });
+    
+    // Log stack trace if available
+    if (data.stack) {
+      console.log(\`\${colors.gray}  Stack trace:\${colors.reset}\`);
+      data.stack.split('\\n').forEach((line: string) => {
+        console.log(\`  \${colors.gray}\${line}\${colors.reset}\`);
+      });
+    }
+    
+    // Log additional information if available
+    if (data.filename && data.lineno) {
+      console.log(\`\${colors.gray}  Location: \${data.filename}:\${data.lineno}:\${data.colno || 0}\${colors.reset}\`);
+    }
+    
+    if (data.componentStack) {
+      console.log(\`\${colors.gray}  Component stack:\${colors.reset}\`);
+      data.componentStack.split('\\n').forEach((line: string) => {
+        console.log(\`  \${colors.gray}\${line.trim()}\${colors.reset}\`);
+      });
+    }
+    
+    // Add a separator for readability
+    console.log('');
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error processing browser log:', error);
+    return NextResponse.json({ success: false });
+  }
+}
 `;
 
 // Function to inject the error logger script into the HTML
@@ -121,6 +258,8 @@ const colors = {
   blue: '\\x1b[34m',
   magenta: '\\x1b[35m',
   cyan: '\\x1b[36m',
+  green: '\\x1b[32m',
+  gray: '\\x1b[90m',
 };
 
 export async function POST(req: NextRequest) {
@@ -138,14 +277,45 @@ export async function POST(req: NextRequest) {
                      data.type === 'warning' ? colors.yellow : 
                      data.type === 'unhandled' ? colors.magenta : 
                      data.type === 'unhandledrejection' ? colors.magenta : 
+                     data.type === 'react' ? colors.cyan :
                      colors.blue;
     
-    console.log(\`\${colorCode}[BROWSER \${data.type.toUpperCase()}] [\${timestamp}]\${colors.reset}\`);
+    // Print header with timestamp, type, component, and URL
+    console.log(\`\${colorCode}[BROWSER \${data.type.toUpperCase()}]\${colors.reset} [\${timestamp}] in \${colors.cyan}\${data.component || 'Unknown'}\${colors.reset} at \${colors.blue}\${data.url || 'Unknown URL'}\${colors.reset}\`);
     
     // Log each message part
     data.message.forEach((msg: string) => {
-      console.log(\`  \${msg}\`);
+      if (typeof msg === 'object') {
+        try {
+          const parsed = JSON.parse(msg);
+          console.log(\`  \${JSON.stringify(parsed, null, 2)}\`);
+        } catch (e) {
+          console.log(\`  \${msg}\`);
+        }
+      } else {
+        console.log(\`  \${msg}\`);
+      }
     });
+    
+    // Log stack trace if available
+    if (data.stack) {
+      console.log(\`\${colors.gray}  Stack trace:\${colors.reset}\`);
+      data.stack.split('\\n').forEach((line: string) => {
+        console.log(\`  \${colors.gray}\${line}\${colors.reset}\`);
+      });
+    }
+    
+    // Log additional information if available
+    if (data.filename && data.lineno) {
+      console.log(\`\${colors.gray}  Location: \${data.filename}:\${data.lineno}:\${data.colno || 0}\${colors.reset}\`);
+    }
+    
+    if (data.componentStack) {
+      console.log(\`\${colors.gray}  Component stack:\${colors.reset}\`);
+      data.componentStack.split('\\n').forEach((line: string) => {
+        console.log(\`  \${colors.gray}\${line.trim()}\${colors.reset}\`);
+      });
+    }
     
     // Add a separator for readability
     console.log('');

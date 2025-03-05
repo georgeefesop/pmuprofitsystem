@@ -20,7 +20,107 @@ export async function middleware(request: NextRequest) {
   if (isProtectedRoute && !session) {
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', path);
-    return NextResponse.redirect(url);
+    // Browser error logger injection (development only)
+  if (process.env.NODE_ENV === 'development') {
+    const response = NextResponse.redirect(url);
+    
+    // Only inject in HTML responses
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      const html = await response.text();
+      
+      // Inject the error logger script
+      const modifiedHtml = html.replace(
+        '</head>',
+        `<script>
+
+// Error logger for development
+(function() {
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+  const originalConsoleLog = console.log;
+  
+  // Function to send errors to the server
+  function sendErrorToServer(type, args) {
+    try {
+      const errorData = {
+        type,
+        timestamp: new Date().toISOString(),
+        message: Array.from(args).map(arg => {
+          try {
+            if (arg instanceof Error) {
+              return {
+                name: arg.name,
+                message: arg.message,
+                stack: arg.stack
+              };
+            }
+            return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
+          } catch (e) {
+            return 'Unstringifiable object';
+          }
+        })
+      };
+      
+      fetch('/api/dev-logger', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(errorData)
+      }).catch(e => {
+        // Silent fail - don't create infinite loops
+      });
+    } catch (e) {
+      // Silent fail
+    }
+  }
+  
+  // Override console.error
+  console.error = function() {
+    sendErrorToServer('error', arguments);
+    originalConsoleError.apply(console, arguments);
+  };
+  
+  // Override console.warn
+  console.warn = function() {
+    sendErrorToServer('warning', arguments);
+    originalConsoleWarn.apply(console, arguments);
+  };
+  
+  // Capture unhandled errors
+  window.addEventListener('error', function(event) {
+    sendErrorToServer('unhandled', [{
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error: event.error
+    }]);
+  });
+  
+  // Capture unhandled promise rejections
+  window.addEventListener('unhandledrejection', function(event) {
+    sendErrorToServer('unhandledrejection', [event.reason]);
+  });
+  
+  console.log('%c🔍 Browser error logging enabled', 'color: purple; font-weight: bold');
+})();
+
+</script></head>`
+      );
+      
+      return new NextResponse(modifiedHtml, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+      });
+    }
+    
+    return response;
+  }
+  
+  return NextResponse.redirect(url);
   }
   
   // If the user is authenticated and trying to access the dashboard,

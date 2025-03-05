@@ -22,18 +22,12 @@ function colorLog(color, message) {
 // Main function to run the development server with auto-fixing
 async function runDevWithAutoFix() {
   try {
-    colorLog(colors.cyan, '=== PMU Profit System Auto-Fix Development Server ===\n');
+    colorLog(colors.cyan, '=== PMU Profit System Development Server with Real-time Error Logging ===\n');
     
-    // Step 1: Check for build errors
-    colorLog(colors.blue, 'Checking for build errors before starting development server...');
-    
-    try {
-      // Run the check-build-errors script
-      execSync('node scripts/check-build-errors.js', { stdio: 'inherit' });
-      colorLog(colors.green, 'No build errors found or all errors fixed automatically.\n');
-    } catch (error) {
-      colorLog(colors.yellow, 'Some build errors could not be fixed automatically. Continuing with development server anyway.\n');
-    }
+    // Step 1: Set up browser error logging
+    colorLog(colors.blue, 'Setting up browser console error logging...');
+    injectErrorLogger();
+    colorLog(colors.green, 'Browser error logging enabled. Console errors will appear in this terminal.\n');
     
     // Step 2: Run TypeScript type checking
     colorLog(colors.blue, 'Running TypeScript type checking...');
@@ -51,21 +45,7 @@ async function runDevWithAutoFix() {
       }
     }
     
-    // Step 3: Run ESLint
-    colorLog(colors.blue, 'Running ESLint to check for code quality issues...');
-    
-    try {
-      execSync('npx next lint --quiet', { stdio: 'pipe' });
-      colorLog(colors.green, 'ESLint check passed.\n');
-    } catch (error) {
-      colorLog(colors.yellow, 'ESLint found some issues. Continuing with development server anyway.\n');
-    }
-    
-    // Step 4: Set up browser error logging
-    colorLog(colors.blue, 'Setting up browser error logging...');
-    injectErrorLogger();
-    
-    // Step 5: Start the development server
+    // Step 3: Start the development server
     colorLog(colors.magenta, 'Starting Next.js development server...\n');
     
     // Use the existing start-dev.js script to start the server
@@ -86,7 +66,7 @@ async function runDevWithAutoFix() {
       process.exit(code);
     });
   } catch (error) {
-    colorLog(colors.red, 'Error running development server with auto-fix:');
+    colorLog(colors.red, 'Error running development server:');
     console.error(error);
     process.exit(1);
   }
