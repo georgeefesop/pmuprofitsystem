@@ -121,23 +121,23 @@ const generateFallbackThumbnail = (moduleNumber: number) => {
 
 // Function to generate a background color based on module ID
 const getModuleColor = (moduleId: string) => {
-  // Array of color gradients (from-color to-color) - all using purple shades
+  // Array of color gradients (from-color to-color) - lighter and more varied colors
   const colorGradients = [
-    'from-purple-700 to-purple-900',     // Deep purple
-    'from-purple-600 to-indigo-800',     // Purple to indigo
-    'from-indigo-600 to-purple-800',     // Indigo to purple
-    'from-violet-600 to-purple-800',     // Violet to purple
-    'from-fuchsia-600 to-purple-800',    // Fuchsia to purple
-    'from-purple-600 to-violet-900',     // Purple to violet
-    'from-purple-500 to-purple-800',     // Medium to deep purple
-    'from-indigo-500 to-purple-700',     // Indigo to purple
-    'from-purple-800 to-indigo-900',     // Deep purple to indigo
-    'from-violet-700 to-purple-900',     // Violet to deep purple
-    'from-purple-600 to-fuchsia-800',    // Purple to fuchsia
-    'from-purple-700 to-violet-900',     // Purple to violet
-    'from-indigo-700 to-purple-900',     // Indigo to deep purple
-    'from-purple-600 to-purple-900',     // Medium to deep purple
-    'from-violet-600 to-indigo-900',     // Violet to indigo
+    'from-purple-400 to-purple-600',     // Light purple
+    'from-indigo-400 to-purple-500',     // Indigo to purple
+    'from-blue-400 to-indigo-500',       // Blue to indigo
+    'from-cyan-400 to-blue-500',         // Cyan to blue
+    'from-teal-400 to-cyan-500',         // Teal to cyan
+    'from-green-400 to-teal-500',        // Green to teal
+    'from-emerald-400 to-green-500',     // Emerald to green
+    'from-lime-400 to-emerald-500',      // Lime to emerald
+    'from-amber-400 to-orange-500',      // Amber to orange
+    'from-orange-400 to-amber-500',      // Orange to amber
+    'from-rose-400 to-pink-500',         // Rose to pink
+    'from-pink-400 to-rose-500',         // Pink to rose
+    'from-fuchsia-400 to-pink-500',      // Fuchsia to pink
+    'from-violet-400 to-indigo-500',     // Violet to indigo
+    'from-sky-400 to-blue-500',          // Sky to blue
   ];
   
   // Use the module ID to select a color (modulo to wrap around)
@@ -277,7 +277,7 @@ export default function ModulesPage() {
             <Link 
               key={module.id} 
               href={`/dashboard/module/${module.id}`}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col h-full group transform hover:scale-[1.02]"
+              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex flex-col h-full group transform hover:scale-[1.03]"
             >
               <div className={`relative aspect-video ${getPatternClass(module.id)} ${getModuleColor(module.id)} flex items-center justify-center p-6 text-center overflow-hidden rounded-t-lg`}>
                 {/* Module number badge */}
@@ -285,15 +285,11 @@ export default function ModulesPage() {
                   {module.id}
                 </div>
                 
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-white bg-opacity-10 rounded-full -mr-12 -mt-12 transition-transform duration-500 group-hover:scale-110"></div>
-                <div className="absolute bottom-0 left-0 w-16 h-16 bg-white bg-opacity-10 rounded-full -ml-8 -mb-8 transition-transform duration-500 group-hover:scale-110"></div>
-                
                 {/* Module icon */}
                 {getModuleIcon(module.id)}
                 
                 {/* Title with text shadow for better readability */}
-                <h3 className="text-xl font-bold text-white drop-shadow-lg relative z-10 transition-transform duration-300 group-hover:scale-105 font-sans">
+                <h3 className="text-xl font-bold text-white drop-shadow-lg relative z-10 font-sans">
                   {module.title}
                 </h3>
               </div>
@@ -306,17 +302,13 @@ export default function ModulesPage() {
       ) : (
         <div className="space-y-4 mb-8">
           {filteredModules.map((module) => (
-            <Link key={module.id} href={`/dashboard/module/${module.id}`} className="block group transform hover:scale-[1.01] transition-all duration-300">
+            <Link key={module.id} href={`/dashboard/module/${module.id}`} className="block group transform hover:scale-[1.03] transition-all duration-300">
               <div className="bg-white rounded-lg shadow-md hover:shadow-lg overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   <div className={`relative w-full md:w-48 h-24 md:h-auto flex-shrink-0 ${getPatternClass(module.id)} ${getModuleColor(module.id)} flex items-center justify-center p-3 overflow-hidden`}>
                     <div className="absolute top-1 left-1 bg-white bg-opacity-90 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm z-10">
                       {module.id}
                     </div>
-                    
-                    {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-white bg-opacity-10 rounded-full -mr-8 -mt-8"></div>
-                    <div className="absolute bottom-0 left-0 w-12 h-12 bg-white bg-opacity-10 rounded-full -ml-6 -mb-6"></div>
                     
                     {/* Module icon */}
                     {getModuleIcon(module.id)}
