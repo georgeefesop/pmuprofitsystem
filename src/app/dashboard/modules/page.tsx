@@ -121,23 +121,23 @@ const generateFallbackThumbnail = (moduleNumber: number) => {
 
 // Function to generate a background color based on module ID
 const getModuleColor = (moduleId: string) => {
-  // Array of color gradients (from-color to-color) - elegant, professional colors
+  // Array of color gradients (from-color to-color) - lighter and more varied colors
   const colorGradients = [
-    'from-violet-400 to-indigo-600',      // Violet to indigo
-    'from-blue-400 to-indigo-600',        // Blue to indigo
-    'from-sky-400 to-blue-600',           // Sky to blue
-    'from-cyan-400 to-teal-600',          // Cyan to teal
-    'from-emerald-400 to-green-600',      // Emerald to green
-    'from-amber-400 to-orange-600',       // Amber to orange
-    'from-rose-400 to-pink-600',          // Rose to pink
-    'from-fuchsia-400 to-purple-600',     // Fuchsia to purple
-    'from-purple-400 to-indigo-600',      // Purple to indigo
-    'from-indigo-400 to-blue-600',        // Indigo to blue
-    'from-teal-400 to-emerald-600',       // Teal to emerald
-    'from-pink-400 to-rose-600',          // Pink to rose
-    'from-orange-400 to-red-600',         // Orange to red
-    'from-red-400 to-rose-600',           // Red to rose
-    'from-green-400 to-teal-600',         // Green to teal
+    'from-purple-400 to-purple-600',     // Light purple
+    'from-indigo-400 to-purple-500',     // Indigo to purple
+    'from-blue-400 to-indigo-500',       // Blue to indigo
+    'from-cyan-400 to-blue-500',         // Cyan to blue
+    'from-teal-400 to-cyan-500',         // Teal to cyan
+    'from-green-400 to-teal-500',        // Green to teal
+    'from-emerald-400 to-green-500',     // Emerald to green
+    'from-lime-400 to-emerald-500',      // Lime to emerald
+    'from-amber-400 to-orange-500',      // Amber to orange
+    'from-orange-400 to-amber-500',      // Orange to amber
+    'from-rose-400 to-pink-500',         // Rose to pink
+    'from-pink-400 to-rose-500',         // Pink to rose
+    'from-fuchsia-400 to-pink-500',      // Fuchsia to pink
+    'from-violet-400 to-indigo-500',     // Violet to indigo
+    'from-sky-400 to-blue-500',          // Sky to blue
   ];
   
   // Use the module ID to select a color (modulo to wrap around)
@@ -147,11 +147,13 @@ const getModuleColor = (moduleId: string) => {
 
 // Function to generate a pattern for the card background
 const getPatternClass = (moduleId: string) => {
-  // Simplified patterns for a cleaner look
   const patterns = [
     'bg-gradient-to-br',  // Bottom-right gradient
-    'bg-gradient-to-r',   // Right gradient
     'bg-gradient-to-tr',  // Top-right gradient
+    'bg-gradient-to-r',   // Right gradient
+    'bg-gradient-to-br',  // Bottom-right gradient (repeated for more frequency)
+    'bg-gradient-to-tr',  // Top-right gradient (repeated for more frequency)
+    'bg-gradient-to-r',   // Right gradient (repeated for more frequency)
   ];
   
   const patternIndex = (parseInt(moduleId) - 1) % patterns.length;
@@ -160,30 +162,30 @@ const getPatternClass = (moduleId: string) => {
 
 // Function to get a decorative icon for each module
 const getModuleIcon = (moduleId: string) => {
-  // Array of SVG icons with more modern styling
+  // Array of SVG icons
   const icons = [
     // Book icon
-    <svg key="book" xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white opacity-10 absolute bottom-4 right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg key="book" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-20 absolute bottom-3 right-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
     </svg>,
     
     // Chart icon
-    <svg key="chart" xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white opacity-10 absolute bottom-4 right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg key="chart" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-20 absolute bottom-3 right-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
     </svg>,
     
     // Target icon
-    <svg key="target" xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white opacity-10 absolute bottom-4 right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg key="target" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-20 absolute bottom-3 right-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     </svg>,
     
     // Lightbulb icon
-    <svg key="lightbulb" xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white opacity-10 absolute bottom-4 right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg key="lightbulb" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-20 absolute bottom-3 right-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
     </svg>,
     
     // Presentation icon
-    <svg key="presentation" xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white opacity-10 absolute bottom-4 right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg key="presentation" xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-20 absolute bottom-3 right-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
     </svg>
   ];
@@ -205,23 +207,8 @@ export default function ModulesPage() {
            module.description.toLowerCase().includes(search.toLowerCase());
   });
 
-  // Action button for the header
-  const actionButton = (
-    <a 
-      href={googleDriveFolderUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-      </svg>
-      Download All Videos
-    </a>
-  );
-
   return (
-    <DashboardLayout title="All Modules" actionButton={actionButton}>
+    <DashboardLayout title="All Modules">
       {/* Filters and View Toggle */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
@@ -270,42 +257,42 @@ export default function ModulesPage() {
       
       {/* Modules Grid/List View */}
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8">
           {filteredModules.map((module) => (
             <Link 
               key={module.id} 
               href={`/dashboard/module/${module.id}`}
-              className="group relative flex flex-col h-full transform transition-all duration-300 hover:scale-[1.02]"
+              className="group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full overflow-hidden transform hover:scale-[1.02] hover:-translate-y-1"
             >
-              <div className="absolute inset-0 bg-white rounded-2xl shadow-md group-hover:shadow-xl transition-all duration-300"></div>
-              <div className={`relative overflow-hidden rounded-t-2xl aspect-[4/3] ${getPatternClass(module.id)} ${getModuleColor(module.id)}`}>
+              <div 
+                className={`relative aspect-[4/3] ${getPatternClass(module.id)} ${getModuleColor(module.id)} flex items-center justify-center overflow-hidden`}
+              >
+                {/* Decorative elements */}
+                <div className="absolute inset-0 opacity-20">
+                  <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white opacity-10"></div>
+                  <div className="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-white opacity-10"></div>
+                </div>
+                
                 {/* Module number badge */}
-                <div className="absolute top-3 left-3 bg-white/90 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10">
+                <div className="absolute top-3 left-3 bg-white/90 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10 backdrop-blur-sm">
                   {module.id}
                 </div>
                 
-                {/* Module icon */}
-                {getModuleIcon(module.id)}
-                
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-full"></div>
-                <div className="absolute bottom-0 left-0 w-16 h-16 bg-black/5 rounded-tr-full"></div>
-                
-                {/* Title with text shadow for better readability */}
-                <div className="absolute inset-0 flex items-center justify-center p-6">
-                  <h3 className="text-xl font-bold text-white drop-shadow-lg relative z-10 font-sans tracking-wide leading-tight text-center">
-                    {module.title}
-                  </h3>
-                </div>
+                {/* Title with elegant typography */}
+                <h3 className="text-xl font-bold text-white drop-shadow-md relative z-10 font-sans tracking-wide leading-tight px-6 text-center">
+                  {module.title}
+                </h3>
               </div>
               
-              <div className="relative p-5 flex-grow flex flex-col">
-                <p className="text-gray-600 text-sm mb-4">{module.description}</p>
-                <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
-                  <span className="text-xs text-gray-500 font-medium">View Module</span>
-                  <span className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-600 transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-purple-600 group-hover:text-white transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <div className="p-5 flex-grow flex flex-col justify-between">
+                <p className="text-gray-600 text-sm leading-relaxed">{module.description}</p>
+                
+                {/* View button */}
+                <div className="mt-4 pt-2 border-t border-gray-100">
+                  <span className="inline-flex items-center text-sm font-medium text-purple-600 group-hover:text-purple-800 transition-colors">
+                    View Module
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </span>
                 </div>
@@ -314,43 +301,33 @@ export default function ModulesPage() {
           ))}
         </div>
       ) : (
-        <div className="space-y-6 mb-8">
+        <div className="space-y-4 mb-8">
           {filteredModules.map((module) => (
             <Link 
               key={module.id} 
-              href={`/dashboard/module/${module.id}`} 
-              className="block group relative transform transition-all duration-300 hover:scale-[1.01]"
+              href={`/dashboard/module/${module.id}`}
+              className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden transform hover:scale-[1.005]"
             >
-              <div className="absolute inset-0 bg-white rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300"></div>
-              <div className="relative flex flex-col md:flex-row overflow-hidden rounded-xl">
-                <div className={`relative w-full md:w-64 h-32 md:h-auto flex-shrink-0 ${getPatternClass(module.id)} ${getModuleColor(module.id)} flex items-center justify-center p-4 overflow-hidden`}>
+              <div className="flex flex-col md:flex-row">
+                <div className={`md:w-1/4 ${getPatternClass(module.id)} ${getModuleColor(module.id)} p-6 flex items-center justify-center relative`}>
                   {/* Module number badge */}
-                  <div className="absolute top-2 left-2 bg-white/90 text-purple-800 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
+                  <div className="absolute top-3 left-3 bg-white/90 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm z-10">
                     {module.id}
                   </div>
                   
-                  {/* Module icon */}
-                  {getModuleIcon(module.id)}
-                  
-                  {/* Decorative elements */}
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full"></div>
-                  <div className="absolute bottom-0 left-0 w-12 h-12 bg-black/5 rounded-tr-full"></div>
-                  
-                  <h3 className="text-base font-bold text-white text-center drop-shadow-lg line-clamp-2 relative z-10 font-sans tracking-wide leading-tight">
+                  <h3 className="text-xl font-bold text-white drop-shadow-md text-center">
                     {module.title}
                   </h3>
                 </div>
                 
-                <div className="relative p-5 flex-1 flex flex-col">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg group-hover:text-purple-700 transition-colors duration-300 font-sans tracking-wide leading-tight">{module.title}</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">{module.description}</p>
-                  <div className="mt-auto pt-3 flex justify-end">
-                    <span className="inline-flex items-center text-xs font-medium text-purple-600 group-hover:text-purple-800 transition-colors duration-300">
+                <div className="p-6 md:w-3/4 flex flex-col md:flex-row justify-between items-start md:items-center">
+                  <p className="text-gray-600 mb-4 md:mb-0 md:mr-4">{module.description}</p>
+                  
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center text-sm font-medium text-purple-600 group-hover:text-purple-800 transition-colors">
                       View Module
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                       </svg>
                     </span>
                   </div>

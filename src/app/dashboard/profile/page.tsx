@@ -601,35 +601,12 @@ function PurchaseItem({
                 </React.Fragment>
               ))}
           </dl>
-          
-          <div className="mt-4 pt-2">
-            <Link 
-              href={viewLink}
-              className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700 transition-colors"
-            >
-              {viewText}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
         </div>
       ) : (
         <div className="mt-4 border-t border-gray-200 pt-4">
           <p className="text-sm text-gray-600">
             Purchase this add-on to enhance your PMU business growth.
           </p>
-          <div className="mt-4">
-            <Link 
-              href={purchaseLink}
-              className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700 transition-colors"
-            >
-              Learn More
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
         </div>
       )}
     </div>
