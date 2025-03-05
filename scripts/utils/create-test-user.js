@@ -1,0 +1,47 @@
+require('dotenv').config({ path: '.env.local' });
+const { createClient } = require('@supabase/supabase-js');
+
+async function createTestUser() {
+  console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('Service Role Key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    
+    // Generate a unique email with timestamp
+    const testEmail = `test-user-${Date.now()}@example.com`;
+    
+    console.log(`Creating test user with email: ${testEmail}...`);
+    const { data, error } = await supabase.auth.admin.createUser({
+      email: testEmail,
+      password: 'Password123!',
+      email_confirm: true
+    });
+    
+    if (error) {
+      console.error('Error creating user:', error);
+    } else {
+      console.log('User created successfully:', data);
+      
+      // Check if the user exists in the public.users table
+      console.log('Checking if user exists in public.users table...');
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id);
+        
+      if (userError) {
+        console.error('Error checking user in public.users table:', userError);
+      } else {
+        console.log('User in public.users table:', userData);
+      }
+    }
+  } catch (err) {
+    console.error('Exception:', err);
+  }
+}
+
+createTestUser(); 

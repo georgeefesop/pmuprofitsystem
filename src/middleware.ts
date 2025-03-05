@@ -1,10 +1,29 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@/utils/supabase/middleware';
+import { allowTestPage } from '@/lib/env-utils';
 
 export async function middleware(request: NextRequest) {
   // Get the pathname of the request
   const path = request.nextUrl.pathname;
+  
+  // Check if this is a test or diagnostic page
+  const isTestPage = 
+    path.startsWith('/diagnostics') || 
+    path.startsWith('/stripe-diagnostics') || 
+    path.startsWith('/local-diagnostics') || 
+    path.startsWith('/error-test') || 
+    path.startsWith('/logger-test') || 
+    path.startsWith('/test-auth') || 
+    path.startsWith('/test-resend') || 
+    path.startsWith('/test-connection') || 
+    path.startsWith('/api-test') || 
+    path.startsWith('/another-test');
+  
+  // Block access to test pages in production unless explicitly enabled
+  if (isTestPage && !allowTestPage()) {
+    return new NextResponse('Test and diagnostic pages are disabled in production', { status: 404 });
+  }
   
   // Define protected routes that require authentication
   const isProtectedRoute = path.startsWith('/dashboard');
@@ -21,18 +40,18 @@ export async function middleware(request: NextRequest) {
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', path);
     // Browser error logger injection (development only)
-  if (process.env.NODE_ENV === 'development') {
-    const response = NextResponse.redirect(url);
-    
-    // Only inject in HTML responses
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
-      const html = await response.text();
+    if (process.env.NODE_ENV === 'development') {
+      const response = NextResponse.redirect(url);
       
-      // Inject the error logger script
-      const modifiedHtml = html.replace(
-        '</head>',
-        `<script>
+      // Only inject in HTML responses
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        const html = await response.text();
+        
+        // Inject the error logger script
+        const modifiedHtml = html.replace(
+          '</head>',
+          `<script>
 
 // Error logger for development
 (function() {
@@ -108,19 +127,19 @@ export async function middleware(request: NextRequest) {
 })();
 
 </script></head>`
-      );
+        );
+        
+        return new NextResponse(modifiedHtml, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers
+        });
+      }
       
-      return new NextResponse(modifiedHtml, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
+      return response;
     }
     
-    return response;
-  }
-  
-  return NextResponse.redirect(url);
+    return NextResponse.redirect(url);
   }
   
   // If the user is authenticated and trying to access the dashboard,

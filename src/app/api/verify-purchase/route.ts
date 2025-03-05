@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe, safeStripeOperation } from '@/lib/stripe';
 import { getServiceSupabase } from '@/lib/supabase';
 
+// Force this route to be dynamic since it uses request.url
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     // Get the session ID from the query parameters

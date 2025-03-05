@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Metadata } from "next";
 import SignupForm from "./signup-form";
 
-export const metadata: Metadata = {
-  title: "Sign Up - PMU Profit System",
-  description: "Create a new account for the PMU Profit System",
-};
+// Metadata must be in a server component, not in a client component
+// export const metadata: Metadata = {
+//   title: "Sign Up - PMU Profit System",
+//   description: "Create a new account for the PMU Profit System",
+// };
 
 export default function SignupPage() {
   const router = useRouter();
