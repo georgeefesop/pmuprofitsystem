@@ -1,33 +1,39 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { usePurchases } from '@/context/PurchaseContext';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-export default function Navbar() {
-  const { user, logout } = useAuth();
-  const { hasPurchased } = usePurchases();
+export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  
-  // Check if user has purchased the main product
-  const hasAccessToDashboard = user && hasPurchased('pmu-profit-system');
+  const pathname = usePathname();
+  const { user, logout } = useAuth();
 
-  // Get user's first name
-  const getUserFirstName = () => {
-    if (!user) return '';
-    
-    // Try to get first name from full_name
-    if (user.full_name) {
-      return user.full_name.split(' ')[0];
-    }
-    
-    // If no full_name, use first part of email
-    return user.email?.split('@')[0] || 'Account';
-  };
+  // Get user's name from metadata or email
+  const userName = user?.email ? user.email.split('@')[0] : 'User';
 
-  // Handle scroll event to change navbar appearance
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -43,236 +49,193 @@ export default function Navbar() {
     };
   }, []);
 
-  // Handle mobile menu toggle
-  const toggleMobileMenu = () => {
+  const handleMobileMenuToggle = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-    console.log('Mobile menu toggled:', !mobileMenuOpen); // Debug log
   };
 
-  // Close mobile menu when a link is clicked
-  const handleLinkClick = () => {
-    setMobileMenuOpen(false);
-  };
+  const links = [
+    { name: 'Home', href: '/' },
+    { name: 'Features', href: '/#features' },
+    { name: 'Pricing', href: '/#pricing' },
+    { name: 'FAQ', href: '/#faq' },
+  ];
 
-  // Handle logout with menu close
-  const handleLogout = () => {
-    setMobileMenuOpen(false);
-    logout();
-  };
+  // Links that should only be shown to non-logged in users
+  const nonLoggedInLinks = [
+    { name: 'Login', href: '/login' },
+  ];
+
+  // Links that should only be shown to logged in users
+  const loggedInLinks = [
+    { name: 'Dashboard', href: '/dashboard' },
+  ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-800 to-purple-700 text-white shadow-md border-b border-purple-500/30 h-16`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-        <div className="flex justify-between items-center h-full">
-          {/* Logo */}
-          <Link href={user ? "/dashboard" : "/"} className="flex items-center">
-            <span className="text-sm md:text-base font-extrabold tracking-widest text-white">PMU PROFIT SYSTEM</span>
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur transition-all duration-200',
+        scrolled ? 'border-border shadow-sm' : 'border-transparent'
+      )}
+    >
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-6 md:gap-10">
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="text-xl font-bold">PMU Profit System</span>
           </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-5">
-            {/* Only show these links when user is not logged in */}
-            {!user && (
-              <>
-                <Link href="/#results" className="text-sm text-white hover:text-purple-100 transition-colors">
-                  Results
-                </Link>
-                <Link href="/#features" className="text-sm text-white hover:text-purple-100 transition-colors">
-                  Features
-                </Link>
-                <Link href="/#faq" className="text-sm text-white hover:text-purple-100 transition-colors">
-                  FAQ
-                </Link>
-                <Link href="/contact" className="text-sm text-white hover:text-purple-100 transition-colors">
-                  Contact
-                </Link>
-              </>
-            )}
-            
-            {/* Authentication Links */}
-            {user ? (
-              <>
-                <div className="relative group">
-                  <button className="flex items-center text-sm text-white hover:text-purple-100 transition-colors">
-                    <span className="mr-1">{getUserFirstName()}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    {hasAccessToDashboard && (
-                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
-                        Dashboard
-                      </Link>
-                    )}
-                    <Link href="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
-                      Profile
-                    </Link>
-                    {!hasAccessToDashboard && (
-                      <Link href="/checkout" className="block px-4 py-2 text-sm text-indigo-600 font-medium hover:bg-purple-50">
-                        Complete Purchase
-                      </Link>
-                    )}
-                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm text-white hover:text-purple-100 transition-colors">
-                  Login
-                </Link>
-                <Link 
-                  href="/pre-checkout" 
-                  className="bg-white text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-md transition-colors font-medium shadow-sm text-sm"
-                >
-                  Buy Now
-                </Link>
-                <Link
-                  href="/signup"
-                  className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-white/50"
-            onClick={toggleMobileMenu}
-            aria-expanded={mobileMenuOpen}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
+          <nav className="hidden gap-6 md:flex">
+            {links.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={cn(
+                  'text-sm font-medium transition-colors hover:text-primary',
+                  pathname === link.href
+                    ? 'text-foreground'
+                    : 'text-foreground/60'
+                )}
+              >
+                {link.name}
+              </Link>
+            ))}
+            {user && loggedInLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={cn(
+                  'text-sm font-medium transition-colors hover:text-primary',
+                  pathname === link.href
+                    ? 'text-foreground'
+                    : 'text-foreground/60'
+                )}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
         </div>
+        <div className="flex items-center gap-4">
+          {!user && (
+            <div className="hidden md:flex md:gap-4">
+              {nonLoggedInLinks.map((link) => (
+                <Link key={link.name} href={link.href}>
+                  <Button
+                    variant="default"
+                    size="sm"
+                  >
+                    {link.name}
+                  </Button>
+                </Link>
+              ))}
+            </div>
+          )}
 
-        {/* Mobile Menu */}
-        <div 
-          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            mobileMenuOpen ? 'max-h-[90vh] opacity-100 mt-4 pb-4' : 'max-h-0 opacity-0'
-          }`}
-          style={{ display: mobileMenuOpen ? 'block' : 'none' }} // Force display property
-        >
-          <div className="space-y-4 px-2 py-2 bg-purple-900/80 rounded-lg shadow-lg overflow-y-auto">
-            {/* Only show these links when user is not logged in */}
-            {!user && (
-              <>
-                <Link href="/#results" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                  Results
-                </Link>
-                <Link href="/#features" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                  Features
-                </Link>
-                <Link href="/#faq" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                  FAQ
-                </Link>
-                <Link href="/contact" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                  Contact
-                </Link>
-              </>
-            )}
-            
-            {/* Authentication Links */}
-            {user ? (
-              <>
-                {/* Dashboard Link - Only show if user has purchased */}
-                {hasAccessToDashboard && (
-                  <Link href="/dashboard" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                    Dashboard
-                  </Link>
-                )}
-                
-                {/* Complete Purchase Link - Only show if user hasn't purchased */}
-                {!hasAccessToDashboard && (
-                  <Link href="/checkout" onClick={handleLinkClick} className="block text-white bg-indigo-600 hover:bg-indigo-700 transition-colors p-2 rounded">
-                    Complete Purchase
-                  </Link>
-                )}
-                
-                {/* Dashboard Navigation Items - Only visible when logged in and has purchased */}
-                {hasAccessToDashboard && (
-                  <div className="mt-4 pt-4 border-t border-purple-700">
-                    <h3 className="text-white text-sm font-medium uppercase tracking-wider mb-3 px-2 opacity-70">Dashboard Menu</h3>
-                    <div className="space-y-2">
-                      <Link 
-                        href="/dashboard/courses" 
-                        onClick={handleLinkClick}
-                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        All Modules
-                      </Link>
-                      <Link 
-                        href="/dashboard/blueprint" 
-                        onClick={handleLinkClick}
-                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Consultation Success
-                      </Link>
-                      <Link 
-                        href="/dashboard/profile" 
-                        onClick={handleLinkClick}
-                        className="flex items-center text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Profile
-                      </Link>
-                    </div>
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
+                      alt={userName}
+                    />
+                    <AvatarFallback>
+                      {userName.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{userName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/account">Account</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => logout()}
+                >
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="md:hidden"
+                onClick={handleMobileMenuToggle}
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent 
+              side="right"
+            >
+              <div className="flex flex-col gap-4 mt-8">
+                {links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-lg font-medium transition-colors hover:text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                {user && loggedInLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="text-lg font-medium transition-colors hover:text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                {!user && nonLoggedInLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="text-lg font-medium transition-colors hover:text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+                {user && (
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-lg font-medium transition-colors hover:text-primary text-left"
+                  >
+                    Logout
+                  </button>
                 )}
-                
-                {/* Logout Button */}
-                <button 
-                  onClick={handleLogout}
-                  className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-4"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" onClick={handleLinkClick} className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50">
-                  Login
-                </Link>
-                <Link 
-                  href="/pre-checkout" 
-                  onClick={handleLinkClick}
-                  className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm"
-                >
-                  Buy Now
-                </Link>
-                <Link 
-                  href="/signup" 
-                  onClick={handleLinkClick}
-                  className="block text-white hover:text-purple-100 transition-colors p-2 rounded hover:bg-purple-800/50"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-    </nav>
+    </header>
   );
-} 
+}

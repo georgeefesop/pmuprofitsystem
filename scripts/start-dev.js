@@ -96,8 +96,12 @@ async function startServer() {
     // Start the Next.js development server
     const nextProcess = spawn('npx', ['next', 'dev', '-p', PORT.toString()], {
       stdio: 'inherit',
-      shell: true
+      shell: true,
+      detached: false // Ensure the process is not detached
     });
+    
+    // Keep the parent process alive as long as the child is running
+    nextProcess.unref = () => {}; // Override unref to prevent detaching
     
     // Only open the browser on first run
     if (shouldOpenBrowser) {

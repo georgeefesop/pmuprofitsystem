@@ -3,14 +3,13 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Metadata } from "next";
-import SignupForm from "./signup-form";
 
-export const metadata: Metadata = {
-  title: "Sign Up - PMU Profit System",
+export const metadata = {
+  title: "Register - PMU Profit System",
   description: "Create a new account for the PMU Profit System",
 };
 
-export default function SignupPage() {
+export default function RegisterPage() {
   const router = useRouter();
   
   useEffect(() => {

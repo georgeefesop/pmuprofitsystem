@@ -325,40 +325,55 @@ export default function ProfilePage() {
             
             <div className="space-y-6">
               {/* PMU Profit System */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">PMU Profit System</h3>
-                    <p className="text-sm text-gray-600">Full Access to Course Materials</p>
+              {usePurchases().hasPurchased('pmu-profit-system') && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">PMU Profit System</h3>
+                      <p className="text-sm text-gray-600">Full Access to Course Materials</p>
+                    </div>
+                    <div className="mt-2 md:mt-0">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </div>
                   </div>
-                  <div className="mt-2 md:mt-0">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
+                  
+                  <div className="mt-4 border-t border-gray-200 pt-4">
+                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      {usePurchases().purchases
+                        .filter(purchase => purchase.product_id === 'pmu-profit-system')
+                        .map(purchase => (
+                          <React.Fragment key={purchase.id}>
+                            <div>
+                              <dt className="text-gray-500">Purchase Date</dt>
+                              <dd className="font-medium text-gray-900">
+                                {new Date(purchase.created_at).toLocaleDateString()}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-gray-500">Order ID</dt>
+                              <dd className="font-medium text-gray-900">
+                                {purchase.id.substring(0, 8)}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="text-gray-500">Amount</dt>
+                              <dd className="font-medium text-gray-900">
+                                €{purchase.amount.toFixed(2)}
+                              </dd>
+                            </div>
+                          </React.Fragment>
+                        ))}
+                    </dl>
                   </div>
                 </div>
-                
-                <div className="mt-4 border-t border-gray-200 pt-4">
-                  <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                    <div>
-                      <dt className="text-gray-500">Purchase Date</dt>
-                      <dd className="font-medium text-gray-900">January 15, 2024</dd>
-                    </div>
-                    <div>
-                      <dt className="text-gray-500">Order ID</dt>
-                      <dd className="font-medium text-gray-900">ORD-2024-01-15-001</dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
+              )}
               
               {/* Consultation Success Blueprint */}
               <PurchaseItem 
                 title="Consultation Success Blueprint"
                 description="Framework for Converting Consultations into Bookings"
-                purchaseDate="February 10, 2024"
-                orderId="ORD-2024-02-10-003"
-                amount="€97.00"
                 productId="consultation-success-blueprint"
               />
               
@@ -366,9 +381,6 @@ export default function ProfilePage() {
               <PurchaseItem 
                 title="PMU Ad Generator"
                 description="AI-Powered Ad Creation Tool for PMU Artists"
-                purchaseDate="March 5, 2024"
-                orderId="ORD-2024-03-05-002"
-                amount="€67.00"
                 productId="pmu-ad-generator"
               />
             </div>
@@ -403,19 +415,13 @@ export default function ProfilePage() {
 function PurchaseItem({ 
   title, 
   description, 
-  purchaseDate, 
-  orderId, 
-  amount, 
   productId 
 }: { 
   title: string; 
   description: string; 
-  purchaseDate: string; 
-  orderId: string; 
-  amount: string; 
   productId: string;
 }) {
-  const { hasPurchased } = usePurchases();
+  const { hasPurchased, purchases } = usePurchases();
   const isPurchased = hasPurchased(productId as any);
   
   if (!isPurchased) {
@@ -439,6 +445,9 @@ function PurchaseItem({
     );
   }
   
+  // Find the purchase record for this product
+  const purchase = purchases.find(p => p.product_id === productId);
+  
   return (
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center">
@@ -453,18 +462,30 @@ function PurchaseItem({
         </div>
       </div>
       
-      <div className="mt-4 border-t border-gray-200 pt-4">
-        <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-          <div>
-            <dt className="text-gray-500">Purchase Date</dt>
-            <dd className="font-medium text-gray-900">{purchaseDate}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Order ID</dt>
-            <dd className="font-medium text-gray-900">{orderId}</dd>
-          </div>
-        </dl>
-      </div>
+      {purchase && (
+        <div className="mt-4 border-t border-gray-200 pt-4">
+          <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div>
+              <dt className="text-gray-500">Purchase Date</dt>
+              <dd className="font-medium text-gray-900">
+                {new Date(purchase.created_at).toLocaleDateString()}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Order ID</dt>
+              <dd className="font-medium text-gray-900">
+                {purchase.id.substring(0, 8)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Amount</dt>
+              <dd className="font-medium text-gray-900">
+                €{purchase.amount.toFixed(2)}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      )}
     </div>
   );
 } 

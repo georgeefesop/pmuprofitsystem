@@ -444,51 +444,13 @@ function LoginForm() {
               </div>
             </div>
             
-            <div className="mt-6">
-              <h3 className="text-center text-sm font-medium text-gray-700 mb-4">
-                Need to verify your email?
-              </h3>
-              
-              <form onSubmit={handleResendVerification} className="space-y-4">
-                <div>
-                  <label htmlFor="resendEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    id="resendEmail"
-                    type="email"
-                    value={resendEmail}
-                    onChange={(e) => setResendEmail(e.target.value)}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="your@email.com"
-                  />
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={isResending}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                >
-                  {isResending ? 'Sending...' : 'Resend Verification Email'}
-                </button>
-              </form>
-              
-              {resendStatus && (
-                <div className={`mt-4 p-3 rounded-md ${resendStatus.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                  <p>{resendStatus.message}</p>
-                  {resendStatus.previewUrl && (
-                    <a 
-                      href={resendStatus.previewUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block mt-2 text-indigo-600 hover:underline"
-                    >
-                      View Test Email
-                    </a>
-                  )}
-                </div>
-              )}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Need access? Purchase the PMU Profit System to create an account.{' '}
+                <Link href="/" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Learn more
+                </Link>
+              </p>
             </div>
           </div>
         </div>

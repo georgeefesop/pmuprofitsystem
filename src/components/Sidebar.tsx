@@ -39,21 +39,20 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
       <aside className="w-full max-w-[60px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
         <div className="p-3 flex-grow">
           <div className="flex justify-center items-center mb-8">
-            <h2 className="text-xl font-bold tracking-tight">P</h2>
+            {onToggleCollapse ? (
+              <button 
+                onClick={onToggleCollapse}
+                className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
+                title="Expand sidebar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                </svg>
+              </button>
+            ) : (
+              <h2 className="text-xl font-bold tracking-tight">P</h2>
+            )}
           </div>
-          
-          {/* Toggle sidebar button */}
-          {onToggleCollapse && (
-            <button 
-              onClick={onToggleCollapse}
-              className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mb-4 mx-auto"
-              title="Expand sidebar"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          )}
           
           <nav className="space-y-4 flex flex-col items-center">
             <Link 
