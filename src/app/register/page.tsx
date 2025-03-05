@@ -2,12 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Metadata } from "next";
-
-export const metadata = {
-  title: "Register - PMU Profit System",
-  description: "Create a new account for the PMU Profit System",
-};
 
 export default function RegisterPage() {
   const router = useRouter();
