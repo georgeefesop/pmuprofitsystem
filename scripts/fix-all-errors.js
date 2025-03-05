@@ -56,9 +56,6 @@ async function main() {
   // Fix Supabase configuration
   runCommand('node scripts/fix-supabase-config.js', 'Fixing Supabase configuration');
   
-  // Fix TypeScript errors
-  runCommand('node scripts/fix-typescript-errors.js', 'Fixing TypeScript errors');
-  
   // Run the development server to check for remaining issues
   console.log('\n=== Running development server to check for remaining issues ===');
   console.log('This will start the development server briefly to check for errors.');

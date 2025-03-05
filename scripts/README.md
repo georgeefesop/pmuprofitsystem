@@ -20,7 +20,6 @@ This directory contains utility scripts for development, testing, and deployment
 - `fix-all-errors.js` - Runs all error fixing scripts
 - `fix-viewport-metadata.js` - Fixes viewport metadata issues in Next.js pages
 - `fix-supabase-config.js` - Fixes Supabase configuration issues
-- `fix-typescript-errors.js` - Fixes TypeScript errors in the project
 
 ## Database Scripts
 
@@ -66,5 +65,4 @@ npm run check-errors  # Runs check-build-errors.js
 npm run fix:all       # Runs fix-all-errors.js
 npm run fix:viewport  # Runs fix-viewport-metadata.js
 npm run fix:supabase  # Runs fix-supabase-config.js
-npm run fix:typescript # Runs fix-typescript-errors.js
 ``` 

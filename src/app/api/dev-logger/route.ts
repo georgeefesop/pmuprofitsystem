@@ -11,7 +11,6 @@ const colors = {
   cyan: '\x1b[36m',
   green: '\x1b[32m',
   gray: '\x1b[90m',
-  white: '\x1b[37m',
 };
 
 export async function POST(req: NextRequest) {
@@ -23,16 +22,13 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     
-    // Format the log message
+    // Format the error message
     const timestamp = new Date(data.timestamp).toLocaleTimeString();
     const colorCode = data.type === 'error' ? colors.red : 
                      data.type === 'warning' ? colors.yellow : 
                      data.type === 'unhandled' ? colors.magenta : 
                      data.type === 'unhandledrejection' ? colors.magenta : 
                      data.type === 'react' ? colors.cyan :
-                     data.type === 'log' ? colors.white :
-                     data.type === 'info' ? colors.green :
-                     data.type === 'debug' ? colors.gray :
                      colors.blue;
     
     // Print header with timestamp, type, component, and URL
@@ -52,8 +48,8 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    // Log stack trace if available (only for errors and warnings)
-    if (data.stack && ['error', 'warning', 'unhandled', 'unhandledrejection', 'react'].includes(data.type)) {
+    // Log stack trace if available
+    if (data.stack) {
       console.log(`${colors.gray}  Stack trace:${colors.reset}`);
       data.stack.split('\n').forEach((line: string) => {
         console.log(`  ${colors.gray}${line}${colors.reset}`);

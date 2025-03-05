@@ -24,8 +24,6 @@ const errorLoggerScript = `
   const originalConsoleError = console.error;
   const originalConsoleWarn = console.warn;
   const originalConsoleLog = console.log;
-  const originalConsoleInfo = console.info;
-  const originalConsoleDebug = console.debug;
   
   // Function to get stack trace
   function getStackTrace() {
@@ -55,13 +53,13 @@ const errorLoggerScript = `
     }
   }
   
-  // Function to send logs to the server
-  function sendLogToServer(type, args, extraInfo = {}) {
+  // Function to send errors to the server
+  function sendErrorToServer(type, args, extraInfo = {}) {
     try {
       const stack = getStackTrace();
       const componentName = getComponentName(stack);
       
-      const logData = {
+      const errorData = {
         type,
         timestamp: new Date().toISOString(),
         component: componentName,
@@ -90,7 +88,7 @@ const errorLoggerScript = `
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(logData)
+        body: JSON.stringify(errorData)
       }).catch(e => {
         // Silent fail - don't create infinite loops
       });
@@ -101,37 +99,19 @@ const errorLoggerScript = `
   
   // Override console.error
   console.error = function() {
-    sendLogToServer('error', arguments);
+    sendErrorToServer('error', arguments);
     originalConsoleError.apply(console, arguments);
   };
   
   // Override console.warn
   console.warn = function() {
-    sendLogToServer('warning', arguments);
+    sendErrorToServer('warning', arguments);
     originalConsoleWarn.apply(console, arguments);
-  };
-  
-  // Override console.log
-  console.log = function() {
-    sendLogToServer('log', arguments);
-    originalConsoleLog.apply(console, arguments);
-  };
-  
-  // Override console.info
-  console.info = function() {
-    sendLogToServer('info', arguments);
-    originalConsoleInfo.apply(console, arguments);
-  };
-  
-  // Override console.debug
-  console.debug = function() {
-    sendLogToServer('debug', arguments);
-    originalConsoleDebug.apply(console, arguments);
   };
   
   // Capture unhandled errors
   window.addEventListener('error', function(event) {
-    sendLogToServer('unhandled', [{
+    sendErrorToServer('unhandled', [{
       message: event.message,
       filename: event.filename,
       lineno: event.lineno,
@@ -146,7 +126,7 @@ const errorLoggerScript = `
   
   // Capture unhandled promise rejections
   window.addEventListener('unhandledrejection', function(event) {
-    sendLogToServer('unhandledrejection', [event.reason]);
+    sendErrorToServer('unhandledrejection', [event.reason]);
   });
   
   // Capture React errors
@@ -154,7 +134,7 @@ const errorLoggerScript = `
     const originalOnErrorHandler = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning;
     window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning = function(fiber, type, error, componentStack) {
       if (type === 'error') {
-        sendLogToServer('react', [error], {
+        sendErrorToServer('react', [error], {
           componentStack
         });
       }
@@ -164,7 +144,7 @@ const errorLoggerScript = `
     };
   }
   
-  console.log('%c🔍 Browser console logging enabled - all console output will be visible in the terminal', 'color: purple; font-weight: bold');
+  console.log('%c🔍 Browser error logging enabled', 'color: purple; font-weight: bold');
 })();
 `;
 
@@ -182,7 +162,6 @@ const colors = {
   cyan: '\\x1b[36m',
   green: '\\x1b[32m',
   gray: '\\x1b[90m',
-  white: '\\x1b[37m',
 };
 
 export async function POST(req: NextRequest) {
@@ -194,16 +173,13 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     
-    // Format the log message
+    // Format the error message
     const timestamp = new Date(data.timestamp).toLocaleTimeString();
     const colorCode = data.type === 'error' ? colors.red : 
                      data.type === 'warning' ? colors.yellow : 
                      data.type === 'unhandled' ? colors.magenta : 
                      data.type === 'unhandledrejection' ? colors.magenta : 
                      data.type === 'react' ? colors.cyan :
-                     data.type === 'log' ? colors.white :
-                     data.type === 'info' ? colors.green :
-                     data.type === 'debug' ? colors.gray :
                      colors.blue;
     
     // Print header with timestamp, type, component, and URL
@@ -223,8 +199,8 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    // Log stack trace if available (only for errors and warnings)
-    if (data.stack && ['error', 'warning', 'unhandled', 'unhandledrejection', 'react'].includes(data.type)) {
+    // Log stack trace if available
+    if (data.stack) {
       console.log(\`\${colors.gray}  Stack trace:\${colors.reset}\`);
       data.stack.split('\\n').forEach((line: string) => {
         console.log(\`  \${colors.gray}\${line}\${colors.reset}\`);
@@ -284,7 +260,6 @@ const colors = {
   cyan: '\\x1b[36m',
   green: '\\x1b[32m',
   gray: '\\x1b[90m',
-  white: '\\x1b[37m',
 };
 
 export async function POST(req: NextRequest) {
@@ -296,16 +271,13 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     
-    // Format the log message
+    // Format the error message
     const timestamp = new Date(data.timestamp).toLocaleTimeString();
     const colorCode = data.type === 'error' ? colors.red : 
                      data.type === 'warning' ? colors.yellow : 
                      data.type === 'unhandled' ? colors.magenta : 
                      data.type === 'unhandledrejection' ? colors.magenta : 
                      data.type === 'react' ? colors.cyan :
-                     data.type === 'log' ? colors.white :
-                     data.type === 'info' ? colors.green :
-                     data.type === 'debug' ? colors.gray :
                      colors.blue;
     
     // Print header with timestamp, type, component, and URL
@@ -325,8 +297,8 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    // Log stack trace if available (only for errors and warnings)
-    if (data.stack && ['error', 'warning', 'unhandled', 'unhandledrejection', 'react'].includes(data.type)) {
+    // Log stack trace if available
+    if (data.stack) {
       console.log(\`\${colors.gray}  Stack trace:\${colors.reset}\`);
       data.stack.split('\\n').forEach((line: string) => {
         console.log(\`  \${colors.gray}\${line}\${colors.reset}\`);

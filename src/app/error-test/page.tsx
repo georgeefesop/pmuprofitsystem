@@ -6,8 +6,8 @@ import React, { useState, useEffect } from 'react';
 function BuggyComponent() {
   // This will cause a runtime error when rendered
   const obj = null;
-  // Add a null check to fix the TypeScript error, but still allow the runtime error for testing
-  // @ts-ignore - We're intentionally causing an error for testing
+  // Add a null check to fix the TypeScript error, but keep the runtime error for testing
+  // @ts-ignore - We intentionally want this to error at runtime for testing
   return <div>{obj?.nonExistentProperty || obj!.nonExistentProperty}</div>;
 }
 
