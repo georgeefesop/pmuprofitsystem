@@ -33,7 +33,6 @@ This directory contains utility scripts for development, testing, and deployment
 - `test-complete-checkout.js` - Tests the complete checkout flow
 - `test-webhook-handler.js` - Tests the webhook handler functionality
 - `remove-all-users.js` - Removes all test users from Supabase
-- `disable-email-confirmation.js` - Disables email verification requirement for all users
 
 ## Build Scripts
 

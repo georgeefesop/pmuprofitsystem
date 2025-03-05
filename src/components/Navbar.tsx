@@ -5,25 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,7 +14,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
-  // Get user's name from metadata or email
+  // Get user's name from email
   const userName = user?.email ? user.email.split('@')[0] : 'User';
 
   useEffect(() => {
@@ -53,7 +36,7 @@ export function Navbar() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const links = [
+  const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Features', href: '/#features' },
     { name: 'Pricing', href: '/#pricing' },
@@ -83,7 +66,7 @@ export function Navbar() {
             <span className="text-xl font-bold">PMU Profit System</span>
           </Link>
           <nav className="hidden gap-6 md:flex">
-            {links.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -130,110 +113,128 @@ export function Navbar() {
           )}
 
           {user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-2">
+              <div className="hidden md:block">
+                <span className="text-sm font-medium">{userName}</span>
+              </div>
+              <div className="flex flex-col">
                 <Button
                   variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${userName}`}
-                      alt={userName}
-                    />
-                    <AvatarFallback>
-                      {userName.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/account">Account</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer"
+                  size="sm"
                   onClick={() => logout()}
+                  className="hidden md:inline-flex"
                 >
                   Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </Button>
+                <Link href="/dashboard" className="hidden md:inline-flex">
+                  <Button variant="outline" size="sm">
+                    Dashboard
+                  </Button>
+                </Link>
+              </div>
+            </div>
           )}
 
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="md:hidden"
-                onClick={handleMobileMenuToggle}
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent 
-              side="right"
-            >
-              <div className="flex flex-col gap-4 mt-8">
-                {links.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-lg font-medium transition-colors hover:text-primary"
+          <Button
+            variant="outline"
+            size="icon"
+            className="md:hidden"
+            onClick={handleMobileMenuToggle}
+          >
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+          
+          {mobileMenuOpen && (
+            <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
+              <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xs rounded-l-xl bg-background p-6 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-semibold">PMU Profit System</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {link.name}
-                  </Link>
-                ))}
-                {user && loggedInLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="text-lg font-medium transition-colors hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-                {!user && nonLoggedInLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="text-lg font-medium transition-colors hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-                {user && (
-                  <button
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-lg font-medium transition-colors hover:text-primary text-left"
-                  >
-                    Logout
-                  </button>
-                )}
+                    <span className="sr-only">Close menu</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-6 w-6"
+                    >
+                      <path d="M18 6 6 18"></path>
+                      <path d="m6 6 12 12"></path>
+                    </svg>
+                  </Button>
+                </div>
+                <nav className="mt-6 flex flex-col gap-4">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={cn(
+                        'text-base font-medium transition-colors hover:text-primary',
+                        pathname === link.href
+                          ? 'text-foreground'
+                          : 'text-foreground/60'
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  {user && loggedInLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={cn(
+                        'text-base font-medium transition-colors hover:text-primary',
+                        pathname === link.href
+                          ? 'text-foreground'
+                          : 'text-foreground/60'
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  {!user && nonLoggedInLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={cn(
+                        'text-base font-medium transition-colors hover:text-primary',
+                        pathname === link.href
+                          ? 'text-foreground'
+                          : 'text-foreground/60'
+                      )}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  {user && (
+                    <Button
+                      variant="outline"
+                      className="mt-4 w-full justify-start"
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      Log out
+                    </Button>
+                  )}
+                </nav>
               </div>
-            </SheetContent>
-          </Sheet>
+            </div>
+          )}
         </div>
       </div>
     </header>
