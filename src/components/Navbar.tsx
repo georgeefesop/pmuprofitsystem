@@ -56,14 +56,14 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur transition-all duration-200',
-        scrolled ? 'border-border shadow-sm' : 'border-transparent'
+        'sticky top-0 z-50 w-full border-b bg-gradient-to-r from-purple-800 to-purple-700 text-white shadow-md border-purple-500/30',
+        scrolled ? 'shadow-sm' : ''
       )}
     >
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold">PMU Profit System</span>
+            <span className="text-xl font-bold text-white">PMU Profit System</span>
           </Link>
           <nav className="hidden gap-6 md:flex">
             {navLinks.map((link) => (
@@ -71,10 +71,10 @@ export function Navbar() {
                 key={link.name}
                 href={link.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary',
+                  'text-sm font-medium transition-colors hover:text-purple-100',
                   pathname === link.href
-                    ? 'text-foreground'
-                    : 'text-foreground/60'
+                    ? 'text-white'
+                    : 'text-white/80'
                 )}
               >
                 {link.name}
@@ -85,10 +85,10 @@ export function Navbar() {
                 key={link.name}
                 href={link.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-primary',
+                  'text-sm font-medium transition-colors hover:text-purple-100',
                   pathname === link.href
-                    ? 'text-foreground'
-                    : 'text-foreground/60'
+                    ? 'text-white'
+                    : 'text-white/80'
                 )}
               >
                 {link.name}
@@ -102,32 +102,46 @@ export function Navbar() {
               {nonLoggedInLinks.map((link) => (
                 <Link key={link.name} href={link.href}>
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
+                    className="bg-white text-purple-700 hover:bg-purple-50 border-none"
                   >
                     {link.name}
                   </Button>
                 </Link>
               ))}
+              <Link href="/pre-checkout">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="bg-white text-purple-700 hover:bg-purple-50"
+                >
+                  Buy Now
+                </Button>
+              </Link>
             </div>
           )}
 
           {user && (
             <div className="flex items-center gap-2">
               <div className="hidden md:block">
-                <span className="text-sm font-medium">{userName}</span>
+                <span className="text-sm font-medium text-white">{userName}</span>
               </div>
               <div className="flex flex-col">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => logout()}
-                  className="hidden md:inline-flex"
+                  className="hidden md:inline-flex text-white hover:text-purple-100 hover:bg-purple-800/50"
                 >
                   Log out
                 </Button>
                 <Link href="/dashboard" className="hidden md:inline-flex">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-white text-purple-700 hover:bg-purple-50 border-none"
+                  >
                     Dashboard
                   </Button>
                 </Link>
@@ -136,9 +150,9 @@ export function Navbar() {
           )}
 
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden text-white hover:bg-purple-800/50"
             onClick={handleMobileMenuToggle}
           >
             <Menu className="h-5 w-5" />
@@ -147,13 +161,14 @@ export function Navbar() {
           
           {mobileMenuOpen && (
             <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
-              <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xs rounded-l-xl bg-background p-6 shadow-lg">
+              <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xs rounded-l-xl bg-purple-900/80 p-6 shadow-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-semibold">PMU Profit System</span>
+                  <span className="text-lg font-semibold text-white">PMU Profit System</span>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setMobileMenuOpen(false)}
+                    className="text-white hover:bg-purple-800/50"
                   >
                     <span className="sr-only">Close menu</span>
                     <svg
@@ -179,10 +194,10 @@ export function Navbar() {
                       key={link.name}
                       href={link.href}
                       className={cn(
-                        'text-base font-medium transition-colors hover:text-primary',
+                        'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
                         pathname === link.href
-                          ? 'text-foreground'
-                          : 'text-foreground/60'
+                          ? 'text-white'
+                          : 'text-white/80'
                       )}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -194,10 +209,10 @@ export function Navbar() {
                       key={link.name}
                       href={link.href}
                       className={cn(
-                        'text-base font-medium transition-colors hover:text-primary',
+                        'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
                         pathname === link.href
-                          ? 'text-foreground'
-                          : 'text-foreground/60'
+                          ? 'text-white'
+                          : 'text-white/80'
                       )}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -209,20 +224,29 @@ export function Navbar() {
                       key={link.name}
                       href={link.href}
                       className={cn(
-                        'text-base font-medium transition-colors hover:text-primary',
+                        'text-base font-medium transition-colors hover:text-purple-100 p-2 rounded hover:bg-purple-800/50',
                         pathname === link.href
-                          ? 'text-foreground'
-                          : 'text-foreground/60'
+                          ? 'text-white'
+                          : 'text-white/80'
                       )}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {link.name}
                     </Link>
                   ))}
+                  {!user && (
+                    <Link
+                      href="/pre-checkout"
+                      className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Buy Now
+                    </Link>
+                  )}
                   {user && (
                     <Button
                       variant="outline"
-                      className="mt-4 w-full justify-start"
+                      className="mt-4 w-full justify-start bg-white text-purple-700 hover:bg-purple-50"
                       onClick={() => {
                         logout();
                         setMobileMenuOpen(false);

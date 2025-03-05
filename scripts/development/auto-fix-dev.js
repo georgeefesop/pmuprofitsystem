@@ -49,7 +49,7 @@ async function runDevWithAutoFix() {
     colorLog(colors.magenta, 'Starting Next.js development server...\n');
     
     // Use the existing start-dev.js script to start the server
-    const devProcess = spawn('node', ['scripts/start-dev.js'], {
+    const devProcess = spawn('node', ['scripts/development/start-dev.js'], {
       stdio: 'inherit',
       shell: true
     });

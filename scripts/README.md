@@ -4,11 +4,19 @@ This directory contains utility scripts for development, testing, and deployment
 
 ## Directory Structure
 
-- `development/` - Scripts for development environment
-- `testing/` - Scripts for testing functionality
 - `database/` - Scripts for database setup and management
+- `development/` - Scripts for development environment
+- `mcp/` - Scripts for Supabase MCP server
 - `setup/` - Scripts for initial setup and configuration
+- `testing/` - Scripts for testing functionality
 - `utils/` - Utility scripts for various tasks
+
+## Database Scripts
+
+- `database/setup-database.js` - Sets up the database
+- `database/verify-database.js` - Verifies the database setup
+- `database/fix-database-schema.js` - Fixes database schema issues
+- `database/delete-test-users.js` - Deletes test users from the database while preserving admin accounts
 
 ## Development Scripts
 
@@ -22,19 +30,17 @@ This directory contains utility scripts for development, testing, and deployment
 - `development/start-dev.sh` - Shell script for starting development server
 - `development/start-https.js` - Starts development server with HTTPS
 
+## MCP Server Scripts
+
+- `mcp/start-mcp-server.js` - Starts the Supabase MCP server
+- `mcp/run-mcp-direct.js` - Runs the MCP server directly
+
 ## Setup Scripts
 
 - `setup/setup-local-dev.js` - Sets up local development environment
 - `setup/setup-supabase.js` - Sets up Supabase for local development
 - `setup/setup-https.js` - Sets up HTTPS for local development
 - `setup/setup-stripe-webhook.js` - Sets up Stripe webhook
-
-## Database Scripts
-
-- `database/setup-database.js` - Sets up the database
-- `database/verify-database.js` - Verifies the database setup
-- `database/fix-database-schema.js` - Fixes database schema issues
-- `database/delete-test-users.js` - Deletes test users from the database while preserving admin accounts
 
 ## Testing Scripts
 
@@ -74,11 +80,6 @@ This directory contains utility scripts for development, testing, and deployment
 - `utils/disable-email-confirmation.js` - Disables email confirmation requirement
 - `utils/vercel-build.js` - Custom build script for Vercel deployment
 
-## MCP Server Scripts
-
-- `start-mcp-server.js` - Starts MCP server for Supabase
-- `run-mcp-direct.js` - Runs MCP server directly
-
 ## Usage
 
 Most scripts can be run directly with Node.js:
@@ -103,4 +104,6 @@ npm run fix:all       # Runs fix-all-errors.js
 npm run fix:viewport  # Runs fix-viewport-metadata.js
 npm run fix:supabase  # Runs fix-supabase-config.js
 npm run delete-users  # Deletes test users from the database
+npm run mcp-server    # Starts the Supabase MCP server
+npm run mcp-direct    # Runs the MCP server directly
 ``` 

@@ -190,9 +190,13 @@ pmuprofitsystem/
 │   └── favicon/                 # Favicon assets
 ├── ReferenceAssets/             # Reference assets
 ├── scripts/                     # Development and build scripts
-│   ├── setup-https.js           # HTTPS setup script
-│   ├── start-https.js           # HTTPS server script
-│   └── ...                      # Other scripts
+│   ├── database/                # Database scripts
+│   ├── development/             # Development scripts
+│   ├── mcp/                     # MCP server scripts
+│   ├── setup/                   # Setup scripts
+│   ├── testing/                 # Testing scripts
+│   ├── utils/                   # Utility scripts
+│   └── README.md                # Scripts documentation
 ├── src/                         # Source code
 │   ├── app/                     # Next.js App Router pages
 │   │   ├── api/                 # API routes
@@ -203,11 +207,14 @@ pmuprofitsystem/
 │   ├── components/              # React components
 │   │   ├── ui/                  # UI components
 │   │   └── sections/            # Page sections
-│   ├── contexts/                # React contexts
+│   ├── context/                 # React contexts
 │   ├── lib/                     # Utility libraries
 │   ├── utils/                   # Utility functions
 │   │   └── supabase/            # Supabase utilities
 │   └── middleware.ts            # Next.js middleware
+├── tools/                       # Development tools
+│   ├── bin/                     # Binary tools
+│   └── ...                      # Other tools
 └── ...                          # Configuration files
 ```
 
