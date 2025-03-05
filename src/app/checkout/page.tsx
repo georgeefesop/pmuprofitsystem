@@ -388,23 +388,23 @@ function CheckoutContent() {
             
             {/* Payment Form */}
             <div className="mb-4">
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-4">
-                <div className="border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
-                  <CardElement options={cardElementOptions} />
-                </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  Test Card: 4242 4242 4242 4242 | Exp: Any future date | CVC: Any 3 digits
-                </p>
-                
-                <div className="flex items-center space-x-2 mt-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span className="text-xs text-gray-500">Your payment is secure and encrypted</span>
-                </div>
-              </div>
-              
               <Elements options={elementsOptions} stripe={stripePromise}>
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-4">
+                  <div className="border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
+                    <CardElement options={cardElementOptions} />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Test Card: 4242 4242 4242 4242 | Exp: Any future date | CVC: Any 3 digits
+                  </p>
+                  
+                  <div className="flex items-center space-x-2 mt-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span className="text-xs text-gray-500">Your payment is secure and encrypted</span>
+                  </div>
+                </div>
+                
                 <CheckoutForm 
                   user={user} 
                   calculateTotal={calculateTotal} 

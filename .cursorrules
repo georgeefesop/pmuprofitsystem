@@ -6,7 +6,8 @@
   Before creating scripts, check the scripts folder (readme file within the scripts folder) to see if there is already a script that can do what you need.
   If you make a script to do something, add it to the readme so that others can use it.
   
-  If you want to update the site just push to github and it will automatically push to vercel.
+  If you want to update the live site just push to github and it will automatically push to vercel.
+  If we're just developing on the development site then just commit the changes and I will push them myself. 
   Edits to database (supabase) should be done via the MCP server we set up.
   
   Always start the mcp server in a new tab but link it to your chat!!
@@ -60,5 +61,4 @@
   Enhancements, Code Improvements
   - Include brief descriptions of what changed and why
   - Note any known issues that still need to be addressed
-  - Provide the commands for me push to github myself and give it to me with the commit summary
   

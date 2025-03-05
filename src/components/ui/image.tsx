@@ -18,6 +18,8 @@ export function SafeImage({
   src,
   alt,
   fallbackSrc = 'https://placehold.co/600x400?text=Image+Not+Available',
+  fill,
+  sizes,
   ...props
 }: SafeImageProps) {
   const [imgSrc, setImgSrc] = useState<string | typeof src>(() => {
@@ -52,11 +54,16 @@ export function SafeImage({
     }
   };
 
+  // If fill is true and sizes is not provided, add a default sizes value
+  const imageSizes = fill && !sizes ? '100vw' : sizes;
+
   return (
     <NextImage
       {...props}
       src={error ? fallbackSrc : imgSrc}
       alt={alt}
+      fill={fill}
+      sizes={imageSizes}
       onError={handleError}
     />
   );
