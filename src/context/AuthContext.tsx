@@ -263,14 +263,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Ensure user state is cleared
       setUser(null);
       
-      // Add a small delay before redirecting to ensure everything is cleared
-      setTimeout(() => {
-        router.push('/');
-        // Force a hard refresh to clear any remaining state
-        if (typeof window !== 'undefined') {
-          window.location.href = '/';
-        }
-      }, 100);
+      // Use only one navigation method to prevent conflicts
+      // Use window.location for a clean reload that ensures all state is cleared
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Logout error:', error);
       // Even if there's an error, try to clear everything
