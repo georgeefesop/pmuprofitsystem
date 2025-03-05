@@ -15,6 +15,13 @@ This directory contains utility scripts for development, testing, and deployment
 - `setup-supabase.js` - Sets up Supabase for local development
 - `check-build-errors.js` - Checks for common build errors and fixes them automatically
 
+## Error Fixing Scripts
+
+- `fix-all-errors.js` - Runs all error fixing scripts
+- `fix-viewport-metadata.js` - Fixes viewport metadata issues in Next.js pages
+- `fix-supabase-config.js` - Fixes Supabase configuration issues
+- `fix-typescript-errors.js` - Fixes TypeScript errors in the project
+
 ## Database Scripts
 
 - `setup-database.js` - Sets up the database
@@ -56,4 +63,8 @@ npm run setup         # Runs setup-local-dev.js
 npm run setup:https   # Runs setup-https.js
 npm run setup:error-logger # Sets up browser error logging
 npm run check-errors  # Runs check-build-errors.js
+npm run fix:all       # Runs fix-all-errors.js
+npm run fix:viewport  # Runs fix-viewport-metadata.js
+npm run fix:supabase  # Runs fix-supabase-config.js
+npm run fix:typescript # Runs fix-typescript-errors.js
 ``` 

@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import PreCheckoutForm from "./pre-checkout-form";
 import { motion } from "framer-motion";
 
-export default function PreCheckoutPage() {
+function PreCheckoutContent() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -120,5 +120,16 @@ export default function PreCheckoutPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Server component that uses the ClientWrapper
+import ClientWrapper from "@/components/ClientWrapper";
+
+export default function PreCheckoutPage() {
+  return (
+    <ClientWrapper>
+      <PreCheckoutContent />
+    </ClientWrapper>
   );
 } 

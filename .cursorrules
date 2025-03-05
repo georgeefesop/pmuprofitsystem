@@ -1,6 +1,8 @@
   You are an expert in TypeScript, Supabase, Vercel, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
   Remember that you have MCP access to supabase.
 
+  Whenever you run npm run dev, check the js error logger we created that allows you to see errors from the browser console in the terminal and then fix the errors.
+
   Before creating scripts, check the scripts folder (readme file within the scripts folder) to see if there is already a script that can do what you need.
   If you make a script to do something, add it to the readme so that others can use it.
   

@@ -10,6 +10,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { motion } from "framer-motion";
 import { Button } from '@/components/ui/button';
+import ClientWrapper from '@/components/ClientWrapper';
 
 // Initialize Stripe with publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -54,18 +55,17 @@ const cardElementOptions = {
     base: {
       fontSize: '16px',
       color: '#32325d',
-      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
       '::placeholder': {
         color: '#aab7c4',
       },
     },
     invalid: {
-      color: '#fa755a',
-      iconColor: '#fa755a',
+      color: '#ef4444',
+      iconColor: '#ef4444',
     },
   },
   hidePostalCode: true,
-  disableLink: true
+  disableLink: true,
 };
 
 function CheckoutForm({ user, calculateTotal, formData, updateFormData }: { 
@@ -223,7 +223,7 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
   );
 }
 
-export default function Checkout() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
@@ -430,5 +430,13 @@ export default function Checkout() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <ClientWrapper>
+      <CheckoutContent />
+    </ClientWrapper>
   );
 } 

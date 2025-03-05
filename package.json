@@ -22,7 +22,11 @@
     "check-errors": "node scripts/check-build-errors.js",
     "setup-db": "node scripts/setup-database.js",
     "verify-db": "node scripts/verify-database.js",
-    "mcp-server": "node scripts/start-mcp-server.js"
+    "mcp-server": "node scripts/start-mcp-server.js",
+    "fix:all": "node scripts/fix-all-errors.js",
+    "fix:viewport": "node scripts/fix-viewport-metadata.js",
+    "fix:supabase": "node scripts/fix-supabase-config.js",
+    "fix:typescript": "node scripts/fix-typescript-errors.js"
   },
   "dependencies": {
     "@modelcontextprotocol/server-postgres": "^0.6.2",

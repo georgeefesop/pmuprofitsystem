@@ -21,31 +21,67 @@ export async function middleware(request: NextRequest) {
     const url = new URL('/login', request.url);
     url.searchParams.set('redirect', path);
     // Browser error logger injection (development only)
-  if (process.env.NODE_ENV === 'development') {
-    const response = NextResponse.redirect(url);
-    
-    // Only inject in HTML responses
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
-      const html = await response.text();
+    if (process.env.NODE_ENV === 'development') {
+      const response = NextResponse.redirect(url);
       
-      // Inject the error logger script
-      const modifiedHtml = html.replace(
-        '</head>',
-        `<script>
+      // Only inject in HTML responses
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        const html = await response.text();
+        
+        // Inject the error logger script
+        const modifiedHtml = html.replace(
+          '</head>',
+          `<script>
 
-// Error logger for development
+// Console logger for development
 (function() {
   const originalConsoleError = console.error;
   const originalConsoleWarn = console.warn;
   const originalConsoleLog = console.log;
+  const originalConsoleInfo = console.info;
+  const originalConsoleDebug = console.debug;
   
-  // Function to send errors to the server
-  function sendErrorToServer(type, args) {
+  // Function to get stack trace
+  function getStackTrace() {
     try {
-      const errorData = {
+      throw new Error('');
+    } catch (error) {
+      return error.stack || '';
+    }
+  }
+  
+  // Function to get component name from stack trace
+  function getComponentName(stack) {
+    try {
+      // Try to extract component name from stack trace
+      const stackLines = stack.split('\\n');
+      for (let i = 0; i < stackLines.length; i++) {
+        const line = stackLines[i];
+        // Look for React component names (capitalized)
+        const componentMatch = line.match(/at ([A-Z][a-zA-Z0-9]+)/);
+        if (componentMatch && componentMatch[1]) {
+          return componentMatch[1];
+        }
+      }
+      return 'Unknown Component';
+    } catch (e) {
+      return 'Unknown Component';
+    }
+  }
+  
+  // Function to send logs to the server
+  function sendLogToServer(type, args, extraInfo = {}) {
+    try {
+      const stack = getStackTrace();
+      const componentName = getComponentName(stack);
+      
+      const logData = {
         type,
         timestamp: new Date().toISOString(),
+        component: componentName,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
         message: Array.from(args).map(arg => {
           try {
             if (arg instanceof Error) {
@@ -59,7 +95,9 @@ export async function middleware(request: NextRequest) {
           } catch (e) {
             return 'Unstringifiable object';
           }
-        })
+        }),
+        stack: stack.split('\\n').slice(1, 6).join('\\n'), // First 5 lines of stack
+        ...extraInfo
       };
       
       fetch('/api/dev-logger', {
@@ -67,7 +105,7 @@ export async function middleware(request: NextRequest) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(errorData)
+        body: JSON.stringify(logData)
       }).catch(e => {
         // Silent fail - don't create infinite loops
       });
@@ -78,49 +116,86 @@ export async function middleware(request: NextRequest) {
   
   // Override console.error
   console.error = function() {
-    sendErrorToServer('error', arguments);
+    sendLogToServer('error', arguments);
     originalConsoleError.apply(console, arguments);
   };
   
   // Override console.warn
   console.warn = function() {
-    sendErrorToServer('warning', arguments);
+    sendLogToServer('warning', arguments);
     originalConsoleWarn.apply(console, arguments);
+  };
+  
+  // Override console.log
+  console.log = function() {
+    sendLogToServer('log', arguments);
+    originalConsoleLog.apply(console, arguments);
+  };
+  
+  // Override console.info
+  console.info = function() {
+    sendLogToServer('info', arguments);
+    originalConsoleInfo.apply(console, arguments);
+  };
+  
+  // Override console.debug
+  console.debug = function() {
+    sendLogToServer('debug', arguments);
+    originalConsoleDebug.apply(console, arguments);
   };
   
   // Capture unhandled errors
   window.addEventListener('error', function(event) {
-    sendErrorToServer('unhandled', [{
+    sendLogToServer('unhandled', [{
       message: event.message,
       filename: event.filename,
       lineno: event.lineno,
       colno: event.colno,
       error: event.error
-    }]);
+    }], {
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno
+    });
   });
   
   // Capture unhandled promise rejections
   window.addEventListener('unhandledrejection', function(event) {
-    sendErrorToServer('unhandledrejection', [event.reason]);
+    sendLogToServer('unhandledrejection', [event.reason]);
   });
   
-  console.log('%c🔍 Browser error logging enabled', 'color: purple; font-weight: bold');
+  // Capture React errors
+  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    const originalOnErrorHandler = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning;
+    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning = function(fiber, type, error, componentStack) {
+      if (type === 'error') {
+        sendLogToServer('react', [error], {
+          componentStack
+        });
+      }
+      if (originalOnErrorHandler) {
+        originalOnErrorHandler.call(this, fiber, type, error, componentStack);
+      }
+    };
+  }
+  
+  console.log('%c🔍 Browser console logging enabled - all console output will be visible in the terminal', 'color: purple; font-weight: bold');
 })();
 
 </script></head>`
-      );
+        );
+        
+        return new NextResponse(modifiedHtml, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers
+        });
+      }
       
-      return new NextResponse(modifiedHtml, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
+      return response;
     }
     
-    return response;
-  }
-  
-  return NextResponse.redirect(url);
+    return NextResponse.redirect(url);
   }
   
   // If the user is authenticated and trying to access the dashboard,

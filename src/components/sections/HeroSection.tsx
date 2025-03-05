@@ -1,10 +1,30 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/ui/container';
 import SafeImage from '@/components/ui/image';
+import { motion } from 'framer-motion';
 
-const HeroSection = () => {
+export default function HeroSection() {
+  // Add console logging for testing
+  useEffect(() => {
+    console.log('HeroSection mounted - Testing console.log');
+    console.info('This is an info message from HeroSection');
+    console.debug('This is a debug message from HeroSection');
+    
+    // Log an object to test object formatting
+    console.log('User data:', {
+      name: 'Test User',
+      email: 'test@example.com',
+      preferences: {
+        theme: 'dark',
+        notifications: true
+      }
+    });
+  }, []);
+
   return (
     <section className="relative pt-28 pb-32 overflow-hidden bg-gradient-to-b from-white to-purple-50/30">
       {/* Clean background without decorative elements */}
@@ -174,6 +194,4 @@ const HeroSection = () => {
       </Container>
     </section>
   );
-};
-
-export default HeroSection; 
+} 

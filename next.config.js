@@ -23,7 +23,28 @@ const nextConfig = {
   },
   // Add image domains configuration
   images: {
-    domains: ['randomuser.me', 'images.pexels.com', 'images.unsplash.com', 'drive.google.com', 'ui-avatars.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+      },
+    ],
   },
   // Exclude development-only pages from production builds
   experimental: {
@@ -81,8 +102,20 @@ nextConfig.serverRuntimeConfig = {
   testRoutes: true,
 };
 
-// Configure which routes should not be statically generated
-nextConfig.unstable_excludeFiles = [
+// Replace unstable_excludeFiles with supported configuration
+// These routes should not be statically generated
+if (!nextConfig.experimental) {
+  nextConfig.experimental = {};
+}
+
+// Add these files to the tracing excludes to prevent static generation
+if (!nextConfig.experimental.outputFileTracingExcludes) {
+  nextConfig.experimental.outputFileTracingExcludes = {};
+}
+
+// Add the previously excluded files to the proper configuration
+nextConfig.experimental.outputFileTracingExcludes['*'] = [
+  ...(nextConfig.experimental.outputFileTracingExcludes['*'] || []),
   'src/app/api/test-auth-status/route.ts',
   'src/app/api/check-verification-status/route.ts',
   'src/app/api/update-supabase-redirect/route.ts',
