@@ -358,19 +358,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       console.log('Registration successful, user:', data.user.id);
       
-      // Check if email confirmation is required
-      if (data.session === null) {
-        console.log('Email confirmation required for:', data.user.id);
-        // Return success but indicate email confirmation is needed
-        return { 
-          success: true, 
-          error: 'Please check your email for a verification link before logging in.' 
-        };
-      }
-      
-      // If user was created, also create a profile
-      // But don't wait for this to complete - it can happen asynchronously
-      // This prevents the timeout issue
+      // Create profile in the background
       try {
         console.log('Creating user profile after registration for:', data.user.id);
         
@@ -396,13 +384,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Exception during profile creation:', err);
           }
         })();
-        
-        // Return success immediately after auth, don't wait for profile creation
-        return { success: true };
       } catch (profileError) {
         console.error('Exception during profile creation setup:', profileError);
-        // Continue anyway, as auth was successful
+      }
+      
+      // If we have a session, the user is already logged in
+      if (data.session) {
+        // Set the user in the context
+        setUser({
+          id: data.user.id,
+          email: data.user.email || email,
+          full_name: name
+        });
         return { success: true };
+      }
+      
+      // If no session, try to log in the user immediately
+      try {
+        console.log('Attempting to log in user after registration');
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (loginError) {
+          console.error('Error logging in after registration:', loginError);
+          // Return success anyway since registration was successful
+          return { success: true, error: 'Account created successfully, but you need to log in manually.' };
+        }
+        
+        if (loginData.user) {
+          // Set the user in the context
+          setUser({
+            id: loginData.user.id,
+            email: loginData.user.email || email,
+            full_name: loginData.user.user_metadata?.full_name || name
+          });
+        }
+        
+        return { success: true };
+      } catch (loginError) {
+        console.error('Exception during auto-login after registration:', loginError);
+        // Return success anyway since registration was successful
+        return { success: true, error: 'Account created successfully, but you need to log in manually.' };
       }
     } catch (error) {
       console.error('Registration error:', error);

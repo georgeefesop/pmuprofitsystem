@@ -306,15 +306,19 @@ function LoginForm() {
         <div className="mt-8 bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {/* Show connection status component if there's a connection error */}
           {connectionError && (
-            <div className="mb-6">
-              <ConnectionStatus showDetails={true} />
-              <div className="mt-4 text-center">
-                <Link 
-                  href="/diagnostics" 
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  View Detailed Diagnostics →
-                </Link>
+            <div className="mb-4 rounded-md bg-yellow-50 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    Connection issue detected. Please check your internet connection and try again.
+                    <ConnectionStatus />
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -330,21 +334,6 @@ function LoginForm() {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-700">{error}</p>
-                  
-                  {/* Add diagnostics link for connection errors */}
-                  {connectionError && (
-                    <div className="mt-2">
-                      <Link 
-                        href="/diagnostics" 
-                        className="inline-flex items-center text-sm font-medium text-red-700 hover:text-red-900"
-                      >
-                        <span>View System Diagnostics</span>
-                        <svg className="ml-1 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      </Link>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -360,23 +349,7 @@ function LoginForm() {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-green-700">Registration successful! Please check your email for a verification link.</p>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Show pending purchases message if applicable */}
-          {hasPendingPurchases && !error && (
-            <div className="mb-4 rounded-md bg-blue-50 p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">You have pending purchases. Log in to claim them.</p>
+                  <p className="text-sm text-green-700">Registration successful! You can now log in with your credentials.</p>
                 </div>
               </div>
             </div>

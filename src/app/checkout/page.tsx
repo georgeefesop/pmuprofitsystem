@@ -157,12 +157,8 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
       }
       
       if (paymentIntent.status === 'succeeded') {
-        setSuccess('Payment successful! Redirecting to success page...');
-        
-        // Redirect to success page
-        setTimeout(() => {
-          router.push(`/checkout/success?session_id=${paymentIntent.id}`);
-        }, 1500);
+        // Redirect to success page immediately without showing a message
+        router.push(`/checkout/success?session_id=${paymentIntent.id}`);
       } else {
         throw new Error(`Payment status: ${paymentIntent.status}`);
       }

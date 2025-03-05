@@ -243,7 +243,7 @@ function SuccessPageContent() {
         </div>
       ) :
         <motion.div
-          className="max-w-md w-full"
+          className="max-w-2xl w-full"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -262,41 +262,22 @@ function SuccessPageContent() {
           </motion.div>
           
           {/* Success card */}
-                <motion.div 
+          <motion.div 
             className="bg-white rounded-xl shadow-lg overflow-hidden"
-                  variants={itemVariants}
-                >
-            {/* Decorative wave */}
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-            
+            variants={itemVariants}
+          >
             <div className="p-8">
-              {/* Success icon */}
               <motion.div 
                 className="flex justify-center"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}
+                variants={itemVariants}
               >
-                <div className="relative">
-                  <div className="rounded-full bg-green-100 p-3">
-                    <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <motion.div 
-                    className="absolute -top-1 -right-1"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1 }}
-                  >
-                    <svg className="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  </motion.div>
-                  </div>
-                </motion.div>
-            
-              {/* Success message */}
+                <div className="rounded-full bg-green-100 p-3">
+                  <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </motion.div>
+              
               <motion.h1 
                 className="mt-5 text-center text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent"
                   variants={itemVariants}
@@ -313,7 +294,7 @@ function SuccessPageContent() {
               
               {/* Account Information */}
               <motion.div 
-                className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-100"
+                className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mt-8 mb-6 border border-indigo-100"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -327,15 +308,14 @@ function SuccessPageContent() {
                   <div className="ml-3">
                     <h3 className="text-lg font-medium text-gray-900">Your Account is Ready</h3>
                     <p className="mt-1 text-sm text-gray-600">
-                      You can now log in immediately using the email and password you provided during checkout.
-                      No email verification is required.
+                      You can now access your purchase immediately. Your account has been created and you're already logged in.
                     </p>
                     <div className="mt-3">
                       <Link 
-                        href="/login" 
+                        href="/dashboard" 
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
-                        Log In Now
+                        Go to Dashboard
                       </Link>
                     </div>
                   </div>
@@ -344,30 +324,27 @@ function SuccessPageContent() {
               
               {/* Order summary */}
               <motion.div 
-                className="mt-8 border border-gray-200 rounded-lg p-4 bg-gray-50"
+                className="border border-gray-200 rounded-lg p-4 mb-6"
                 variants={itemVariants}
               >
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h2>
-                
+                <h2 className="text-lg font-medium text-gray-900 mb-3">Order Summary</h2>
                 <div className="space-y-3">
                   {getProductsList().map((product, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div key={index} className="flex justify-between items-center">
                       <div className="flex items-center">
                         <span className="text-xl mr-2">{product.icon}</span>
                         <span className="text-gray-800">{product.name}</span>
                       </div>
-                      <span className="font-medium">{product.price}</span>
+                      <span className="text-gray-600 font-medium">{product.price}</span>
                     </div>
                   ))}
-                  
-                  <div className="pt-3 mt-3 border-t border-gray-200 flex items-center justify-between">
+                  <div className="border-t border-gray-200 pt-3 mt-3 flex justify-between items-center">
                     <span className="font-medium text-gray-900">Total</span>
-                    <span className="font-bold text-lg text-indigo-600">€{calculateTotalAmount(purchaseDetails)}</span>
-                        </div>
-                      </div>
+                    <span className="font-bold text-indigo-600">€{calculateTotalAmount(purchaseDetails)}</span>
+                  </div>
+                </div>
               </motion.div>
               
-              {/* What's next section */}
               <motion.div 
                 className="mt-8"
                 variants={itemVariants}
@@ -383,95 +360,35 @@ function SuccessPageContent() {
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h3 className="text-sm font-medium text-blue-800">Account Information</h3>
+                        <h3 className="text-sm font-medium text-blue-800">Access Your Content</h3>
                         <div className="mt-2 text-sm text-blue-700">
                           <p>
-                            Your account is ready to use. You can log in with the email and password you provided during checkout.
+                            Your purchase includes immediate access to all course materials. Visit your dashboard to start learning.
                           </p>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+                  <div className="bg-purple-50 border border-purple-100 rounded-lg p-4">
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <svg className="h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h3 className="text-sm font-medium text-green-800">Next Steps</h3>
-                        <div className="mt-2 text-sm text-green-700 space-y-3">
-                          <div>
-                            <p className="text-sm text-green-800 font-medium">
-                              1. Access your course
-                            </p>
-                            <p className="text-xs text-green-600 mt-1">
-                              Your purchase has been processed. You can now access your course materials.
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <p className="text-sm text-purple-800 font-medium">
-                              2. Start learning
-                            </p>
-                            <p className="text-xs text-purple-600 mt-1">
-                              Dive into the content and start implementing what you learn right away.
-                            </p>
-                          </div>
+                        <h3 className="text-sm font-medium text-purple-800">Get Support</h3>
+                        <div className="mt-2 text-sm text-purple-700">
+                          <p>
+                            If you have any questions or need assistance, please contact our support team at <a href="mailto:support@pmuprofitsystem.com" className="font-medium underline">support@pmuprofitsystem.com</a>.
+                          </p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </motion.div>
-              
-              {/* Action Buttons */}
-              <motion.div 
-                className="mt-8 space-y-4"
-                variants={itemVariants}
-              >
-                <button
-                  onClick={handleResendVerificationEmail}
-                  disabled={isResendingEmail}
-                  className="w-full block text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  {isResendingEmail ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Sending...
-                    </span>
-                  ) : 'Resend Verification Email'}
-                </button>
-                
-                <Link href="/dashboard" className="w-full block text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  Go to Dashboard
-                </Link>
-              </motion.div>
-              
-              {resendStatus === 'success' && (
-                <motion.div 
-                  className="mt-4 p-3 bg-green-50 text-green-800 rounded-md"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <p className="text-sm">Verification email sent successfully! Please check your inbox and spam folder.</p>
-                </motion.div>
-              )}
-              
-              {resendStatus === 'error' && (
-                <motion.div 
-                  className="mt-4 p-3 bg-red-50 text-red-800 rounded-md"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <p className="text-sm">{resendError || 'Failed to send verification email. Please try again.'}</p>
-                  </motion.div>
-                )}
               
               {/* Test card info */}
               <motion.div 
