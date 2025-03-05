@@ -97,8 +97,8 @@ export default function PreferencesPage() {
               <Link href="/dashboard" className="block py-2.5 px-4 rounded hover:bg-purple-700 text-white font-medium">
                 Dashboard
               </Link>
-              <Link href="/dashboard/courses" className="block py-2.5 px-4 rounded hover:bg-purple-700 text-white font-medium">
-                All Courses
+              <Link href="/dashboard/modules" className="block py-2.5 px-4 rounded hover:bg-purple-700 text-white font-medium">
+                All Modules
               </Link>
               <div className="py-2 px-4 text-purple-200 text-sm font-medium">BONUS MATERIALS</div>
               <Link href="/dashboard/blueprint" className="block py-2.5 px-4 rounded hover:bg-purple-700 text-white font-medium">

@@ -107,7 +107,7 @@
   
   /* Navbar spacing utility */
   .navbar-spacing {
-    padding-top: var(--navbar-height);
+    padding-top: 0; /* Remove the padding that was causing the gap */
   }
   
   .content-with-navbar {

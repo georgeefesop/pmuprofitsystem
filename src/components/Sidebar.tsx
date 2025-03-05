@@ -36,11 +36,12 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
 
   if (collapsed) {
     return (
-      <aside className="w-full max-w-[60px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
+      <aside id="dashboard-sidebar-collapsed" className="w-full max-w-[60px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
         <div className="p-3 flex-grow">
           <div className="flex justify-center items-center mb-8">
             {onToggleCollapse ? (
               <button 
+                id="sidebar-expand-button"
                 onClick={onToggleCollapse}
                 className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
                 title="Expand sidebar"
@@ -49,13 +50,12 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                 </svg>
               </button>
-            ) : (
-              <h2 className="text-xl font-bold tracking-tight">P</h2>
-            )}
+            ) : null}
           </div>
           
-          <nav className="space-y-4 flex flex-col items-center">
+          <nav id="sidebar-nav-collapsed" className="space-y-4 flex flex-col items-center">
             <Link 
+              id="sidebar-collapsed-dashboard-link"
               href="/dashboard" 
               className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 ${
                 isActive('/dashboard') 
@@ -69,16 +69,17 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
               </svg>
             </Link>
             <Link 
-              href="/dashboard/courses" 
+              id="sidebar-collapsed-courses-link"
+              href="/dashboard/modules" 
               className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 ${
-                isActive('/dashboard/courses') 
+                isActive('/dashboard/modules') 
                   ? 'bg-white/15 text-white shadow-sm' 
                   : 'text-purple-100 hover:bg-white/10 hover:text-white'
               }`}
               title="All Modules"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
               </svg>
             </Link>
             
@@ -156,12 +157,12 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
   }
 
   return (
-    <aside className="w-full max-w-[280px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
+    <aside id="dashboard-sidebar" className="w-full max-w-[280px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
       <div className="p-6 flex-grow">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-bold tracking-tight">PMU Profit System</h2>
+        <div className="flex justify-end items-center mb-8">
           {onClose ? (
             <button 
+              id="sidebar-close-button"
               className="text-white focus:outline-none hover:text-purple-200 transition-colors"
               onClick={onClose}
             >
@@ -171,6 +172,7 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
             </button>
           ) : onToggleCollapse && (
             <button 
+              id="sidebar-collapse-button"
               className="text-white focus:outline-none hover:text-purple-200 transition-colors"
               onClick={onToggleCollapse}
               title="Collapse sidebar"
@@ -182,8 +184,9 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
           )}
         </div>
         
-        <nav className="space-y-1.5">
+        <nav id="sidebar-nav" className="space-y-1.5">
           <Link 
+            id="sidebar-dashboard-link"
             href="/dashboard" 
             className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
               isActive('/dashboard') 
@@ -198,29 +201,16 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
           </Link>
           
           <Link 
-            href="/diagnostics" 
+            id="sidebar-courses-link"
+            href="/dashboard/modules" 
             className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
-              isActive('/diagnostics') 
+              isActive('/dashboard/modules') || (currentModuleId && isActive(`/dashboard/modules/${currentModuleId}`))
                 ? 'bg-white/15 text-white font-medium shadow-sm' 
                 : 'text-purple-100 hover:bg-white/10 hover:text-white'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span className="whitespace-nowrap">System Diagnostics</span>
-          </Link>
-          
-          <Link 
-            href="/dashboard/courses" 
-            className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
-              isActive('/dashboard/courses') || (currentModuleId && isActive(`/dashboard/courses/${currentModuleId}`))
-                ? 'bg-white/15 text-white font-medium shadow-sm' 
-                : 'text-purple-100 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
             </svg>
             <span className="whitespace-nowrap">All Modules</span>
           </Link>
@@ -229,11 +219,7 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
             <div className="mt-4 mb-2">
               <div className="py-2 px-4 text-purple-200 text-xs font-medium uppercase tracking-wider">Current Module</div>
               <div className="bg-purple-700/50 p-3 rounded-lg mx-2 mb-2 border border-purple-600/30">
-                <p className="text-white font-medium truncate text-sm flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-purple-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                <p className="text-white font-medium truncate text-sm">
                   <span className="whitespace-nowrap">Module {currentModuleId}</span>
                 </p>
               </div>
@@ -241,7 +227,9 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
           )}
           
           <div className="mt-8 mb-2">
-            <div className="py-2 px-4 text-purple-200 text-xs font-medium uppercase tracking-wider">Bonus Materials</div>
+            <div className="py-2 px-4 text-purple-200 text-xs font-medium uppercase tracking-wider w-full min-w-[200px]">
+              <span className="whitespace-nowrap">Bonus Materials</span>
+            </div>
           </div>
           
           <Link 

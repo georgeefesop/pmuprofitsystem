@@ -59,7 +59,7 @@ export function DashboardLayout({
         className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden ${
           mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={closeMobileMenu}
+                onClick={closeMobileMenu}
       ></div>
       
       {/* Mobile Sidebar */}
@@ -69,7 +69,7 @@ export function DashboardLayout({
         }`}
       >
         <Sidebar onClose={closeMobileMenu} currentModuleId={currentModuleId} />
-      </div>
+        </div>
       
       <div className="flex flex-col md:flex-row flex-1">
         {/* Desktop Sidebar Container - Only visible on desktop */}
@@ -96,29 +96,25 @@ export function DashboardLayout({
                     </svg>
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   )}
                 </button>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">{title}</h1>
+                <h1 id="dashboard-title" className="text-xl md:text-2xl font-bold text-gray-900">{title}</h1>
               </div>
               
               {/* Action Button - if provided */}
               {actionButton && (
                 <div>
-                  {actionButton}
+              {actionButton}
                 </div>
               )}
             </div>
           </header>
           
           <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-            {children}
+              {children}
           </main>
-          
-          <footer className="py-4 px-4 sm:px-6 lg:px-8 border-t border-gray-200 text-center text-sm text-gray-500">
-            <p>© {new Date().getFullYear()} PMU Profit System. All rights reserved.</p>
-          </footer>
         </div>
       </div>
     </div>

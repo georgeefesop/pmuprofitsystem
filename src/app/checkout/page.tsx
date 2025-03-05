@@ -83,15 +83,15 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!stripe || !elements) {
       setError('Stripe is still loading. Please try again in a moment.');
-      return;
-    }
-    
+        return;
+      }
+      
     setIsSubmitting(true);
     setError(null);
     setSuccess(null);
@@ -116,10 +116,10 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
       
       // Create payment intent
       const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         body: JSON.stringify({
           amount: calculateTotal(),
           email: user.email,
@@ -128,10 +128,10 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
           includeBlueprint: formData.includeBlueprint,
           userId: user.id
         }),
-      });
-      
-      const data = await response.json();
-      
+        });
+        
+        const data = await response.json();
+        
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create payment intent');
       }
@@ -149,9 +149,9 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
             name: fullName,
             email: user.email,
           },
-        },
-      });
-      
+          },
+        });
+        
       if (paymentError) {
         throw new Error(paymentError.message || 'Payment failed');
       }
@@ -159,7 +159,7 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
       if (paymentIntent.status === 'succeeded') {
         // Redirect to success page immediately without showing a message
         router.push(`/checkout/success?session_id=${paymentIntent.id}`);
-      } else {
+        } else {
         throw new Error(`Payment status: ${paymentIntent.status}`);
       }
     } catch (err) {
@@ -169,7 +169,7 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
@@ -183,12 +183,12 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
+                </svg>
+              </div>
             <div className="ml-3">
               <p className="text-sm">{error}</p>
-            </div>
-          </div>
+                </div>
+              </div>
         </motion.div>
       )}
       
@@ -204,11 +204,11 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
               <svg className="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-            </div>
+                    </div>
             <div className="ml-3">
               <p className="text-sm">{success}</p>
-            </div>
-          </div>
+                    </div>
+                  </div>
         </motion.div>
       )}
       
@@ -222,12 +222,12 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
               Processing...
-            </div>
+                    </div>
           ) : (
             `Checkout`
           )}
         </Button>
-      </div>
+                    </div>
     </form>
   );
 }
@@ -277,8 +277,8 @@ function CheckoutContent() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Checking authentication status...</p>
-        </div>
-      </div>
+                  </div>
+                </div>
     );
   }
 
@@ -306,17 +306,17 @@ function CheckoutContent() {
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
           <span>Test Mode</span>
-        </div>
-        
+              </div>
+              
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
           <div className="p-5">
             {/* Satisfaction Guarantee - Moved to top */}
             <div className="flex items-center justify-center mb-4 bg-purple-50 py-2 px-4 rounded-lg border border-purple-100">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
               <span className="text-sm font-medium text-purple-700">30-Day Satisfaction Guarantee</span>
-            </div>
+                </div>
             
             {/* Product Selection */}
             <div className="mb-5">
@@ -330,9 +330,9 @@ function CheckoutContent() {
                     <p className="text-xs text-gray-500">The complete video training system to help you reach €5,000/month as a PMU artist</p>
                   </div>
                   <span className="font-semibold text-gray-900">€37</span>
-                </div>
               </div>
-              
+            </div>
+            
               {/* Add-ons Selection */}
               <h3 className="text-sm font-medium mb-2 text-gray-700">Add-ons (Optional)</h3>
               
@@ -351,20 +351,20 @@ function CheckoutContent() {
                     <div className="flex justify-between">
                       <label htmlFor="includeAdGenerator" className="text-sm font-medium text-gray-900 flex items-center">
                         PMU Ad Generator Tool
-                      </label>
+                  </label>
                       <div className="text-right">
                         <span className="text-sm font-semibold text-purple-600">€27</span>
                         <span className="ml-1 text-xs text-gray-500 line-through">€47</span>
-                      </div>
-                    </div>
+                </div>
+                  </div>
                     <p className="text-xs text-gray-500">AI-powered tool to create high-converting ad copy</p>
                   </div>
                 </div>
                 
                 {/* Blueprint Add-on */}
                 <div className="flex items-start p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <input
-                    type="checkbox"
+                          <input
+                            type="checkbox"
                     id="includeBlueprint"
                     name="includeBlueprint"
                     checked={formData.includeBlueprint}
@@ -374,8 +374,8 @@ function CheckoutContent() {
                   <div className="ml-3 flex-grow">
                     <div className="flex justify-between">
                       <label htmlFor="includeBlueprint" className="text-sm font-medium text-gray-900 flex items-center">
-                        Consultation Success Blueprint
-                      </label>
+                            Consultation Success Blueprint
+                          </label>
                       <div className="text-right">
                         <span className="text-sm font-semibold text-purple-600">€33</span>
                         <span className="ml-1 text-xs text-gray-500 line-through">€59</span>
@@ -384,23 +384,23 @@ function CheckoutContent() {
                     <p className="text-xs text-gray-500">Our proven consultation framework that converts more prospects into paying clients</p>
                   </div>
                 </div>
-              </div>
-              
+                    </div>
+                    
               {/* Order Total */}
               <div className="mt-3 p-3 bg-purple-100 rounded-lg border border-purple-200">
                 <div className="flex justify-end items-center">
                   <span className="text-xl font-bold text-purple-700">Total: €{calculateTotal()}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            
+                
             {/* Payment Form */}
             <div className="mb-4">
               <Elements options={elementsOptions} stripe={stripePromise}>
                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-4">
                   <div className="border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500">
                     <CardElement options={cardElementOptions} />
-                  </div>
+                    </div>
                   <p className="mt-2 text-xs text-gray-500">
                     Test Card: 4242 4242 4242 4242 | Exp: Any future date | CVC: Any 3 digits
                   </p>
@@ -408,11 +408,11 @@ function CheckoutContent() {
                   <div className="flex items-center space-x-2 mt-3">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+                        </svg>
                     <span className="text-xs text-gray-500">Your payment is secure and encrypted</span>
-                  </div>
-                </div>
-                
+          </div>
+        </div>
+        
                 <CheckoutForm 
                   user={user} 
                   calculateTotal={calculateTotal} 
