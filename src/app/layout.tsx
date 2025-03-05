@@ -5,6 +5,10 @@ import { AuthProvider } from '@/context/AuthContext';
 import { PurchaseProvider } from '@/context/PurchaseContext';
 import Navbar from '@/components/Navbar';
 import SiteFooter from '@/components/SiteFooter';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the LoggerTestNav component to avoid SSR issues
+const LoggerTestNav = dynamic(() => import('@/components/LoggerTestNav'), { ssr: false });
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,6 +33,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Check if we're in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
   return (
     <html lang="en" className="h-full">
       <head>
@@ -43,6 +50,9 @@ export default function RootLayout({
               {children}
             </main>
             <SiteFooter />
+            
+            {/* Only show the LoggerTestNav in development mode */}
+            {isDevelopment && <LoggerTestNav />}
           </PurchaseProvider>
         </AuthProvider>
       </body>
