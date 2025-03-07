@@ -366,6 +366,9 @@ function SuccessPageContent() {
       localStorage.setItem('success_page_user_id', storedUserId);
     }
     
+    // Log the navigation attempt for debugging
+    console.log(`Navigating to dashboard from success page. Session ID: ${sessionId}`);
+    
     if (storedRedirectUrl && storedRedirectUrl.startsWith('/dashboard')) {
       // If there's a stored redirect URL and it's for the dashboard,
       // append the purchase_success and session_id parameters if they're not already there
@@ -379,13 +382,17 @@ function SuccessPageContent() {
       
       localStorage.removeItem('dashboardRedirectUrl');
       console.log(`Navigating to dashboard with URL: ${url.pathname + url.search}`);
-      router.push(url.pathname + url.search);
+      
+      // Use window.location.href instead of router.push to ensure a full page reload
+      window.location.href = url.pathname + url.search;
     } else {
       // If there's no stored redirect URL or it's not for the dashboard,
       // use the default dashboard URL with the parameters
       localStorage.removeItem('dashboardRedirectUrl');
       console.log(`Navigating to dashboard with URL: ${dashboardUrl}`);
-      router.push(dashboardUrl);
+      
+      // Use window.location.href instead of router.push to ensure a full page reload
+      window.location.href = dashboardUrl;
     }
   };
 

@@ -173,6 +173,8 @@ export async function middleware(req: NextRequest) {
   const purchaseSuccess = searchParams.get('purchase_success');
   const sessionId = searchParams.get('session_id');
   
+  console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
+  
   // Get the session from Supabase auth
   const { data: { session } } = await supabase.auth.getSession();
   
@@ -433,6 +435,12 @@ export async function middleware(req: NextRequest) {
             });
           
           // Allow access since we found a valid purchase
+          return res;
+        }
+        
+        // If the user is coming from a successful purchase, allow access
+        if (purchaseSuccess === 'true' && sessionId) {
+          console.log('User coming from successful purchase, allowing access to dashboard');
           return res;
         }
         
