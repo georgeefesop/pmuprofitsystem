@@ -157,7 +157,7 @@ function SuccessPageContent() {
     try {
       console.log('Auto-approving purchase for user:', userId);
       
-      // First, check if there are any purchases with this session ID that need approval
+      // First, try the auto-approve-purchase API endpoint
       const response = await fetch(`/api/auto-approve-purchase?session_id=${sessionId}&user_id=${userId}`);
       const result = await response.json();
       
@@ -170,10 +170,77 @@ function SuccessPageContent() {
           message: result.message || 'Purchase approved and entitlements created successfully'
         });
       } else {
-        console.log('Auto-approval not needed or failed:', result.message);
+        console.log('Auto-approval failed:', result.message);
+        
+        // If the API call failed, try to create entitlements directly
+        // by calling the create-entitlements API endpoint
+        console.log('Trying create-entitlements API as fallback');
+        
+        // Determine if this is a payment intent ID or checkout session ID
+        const isPaymentIntent = sessionId.startsWith('pi_');
+        
+        // Call the create-entitlements API with the appropriate parameters
+        const createResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${userId}`);
+        const createResult = await createResponse.json();
+        
+        console.log('Create entitlements result:', createResult);
+        
+        if (createResult.success) {
+          setEntitlementStatus({
+            success: true,
+            message: 'Entitlements created successfully using fallback method'
+          });
+        } else {
+          // If both methods failed, try one more approach - verify the purchase
+          console.log('Create entitlements failed, trying verify-purchase API');
+          
+          const verifyResponse = await fetch(`/api/verify-purchase?session_id=${sessionId}`);
+          const verifyResult = await verifyResponse.json();
+          
+          console.log('Verify purchase result:', verifyResult);
+          
+          if (verifyResult.success && verifyResult.verified) {
+            setEntitlementStatus({
+              success: true,
+              message: 'Purchase verified successfully, please check your dashboard'
+            });
+          } else {
+            setEntitlementStatus({
+              success: false,
+              message: 'Failed to create entitlements. Please contact support.'
+            });
+          }
+        }
       }
     } catch (error) {
       console.error('Error auto-approving purchase:', error);
+      
+      try {
+        // If there was an error, try the create-entitlements API as a last resort
+        console.log('Error in auto-approval, trying create-entitlements API');
+        const createResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${userId}`);
+        const createResult = await createResponse.json();
+        
+        console.log('Create entitlements result after error:', createResult);
+        
+        if (createResult.success) {
+          setEntitlementStatus({
+            success: true,
+            message: 'Entitlements created successfully after error recovery'
+          });
+        } else {
+          setEntitlementStatus({
+            success: false,
+            message: 'Failed to create entitlements. Please contact support.'
+          });
+        }
+      } catch (fallbackError) {
+        console.error('Error in fallback entitlement creation:', fallbackError);
+        setEntitlementStatus({
+          success: false,
+          message: 'Failed to create entitlements. Please contact support.'
+        });
+      }
     }
   }
 
@@ -301,13 +368,14 @@ function SuccessPageContent() {
   // Effect to verify purchase on component mount
   useEffect(() => {
     if (sessionId && !verificationComplete) {
+      console.log('Verifying purchase on component mount');
       verifyPurchase();
     } else if (!sessionId) {
       setIsLoading(false);
       setError('No session ID provided');
       setVerificationComplete(true);
     }
-  }, [sessionId, verificationComplete]);
+  }, [sessionId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
