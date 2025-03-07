@@ -175,77 +175,15 @@ export async function middleware(req: NextRequest) {
   
   console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
   
+  // IMPORTANT: First check if the user is coming from a successful purchase
+  // If so, allow access to the dashboard even if they're not authenticated
+  if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
+    console.log('Middleware: User coming from successful purchase, allowing access to dashboard');
+    return NextResponse.next();
+  }
+  
   // Get the session from Supabase auth
   const { data: { session } } = await supabase.auth.getSession();
-  
-  // If the route is protected and the user is coming from a successful purchase with session_id,
-  // allow access temporarily even if they're not authenticated
-  if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
-    console.log('Middleware: User coming from successful purchase, allowing access');
-    
-    // If the user is authenticated, check if they have entitlements
-    // If not, try to create them from the session ID
-    if (session?.user?.id) {
-      console.log(`Middleware: Authenticated user ${session.user.id} coming from purchase, checking entitlements`);
-      
-      try {
-        // Check if the user has entitlements
-        const { data: entitlements, error: entitlementsError } = await supabase
-          .from('user_entitlements')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .eq('is_active', true);
-        
-        if (entitlementsError) {
-          console.error('Error checking entitlements:', entitlementsError);
-        } else if (!entitlements || entitlements.length === 0) {
-          console.log('No entitlements found, attempting to create from session ID');
-          
-          // Try to create entitlements from the session ID
-          const { data: purchases, error: purchasesError } = await supabase
-            .from('purchases')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('status', 'completed')
-            .or(`stripe_checkout_session_id.eq.${sessionId},stripe_payment_intent_id.eq.${sessionId}`)
-            .order('created_at', { ascending: false })
-            .limit(1);
-          
-          if (purchasesError) {
-            console.error('Error checking purchases:', purchasesError);
-          } else if (purchases && purchases.length > 0) {
-            console.log('Found purchase, creating entitlements');
-            
-            // Create entitlements asynchronously
-            createEntitlementsFromPurchase(purchases[0], supabase)
-              .then(result => {
-                if (result.error) {
-                  console.error('Failed to create entitlements from purchase:', result.error);
-                } else {
-                  console.log('Successfully created entitlements from purchase');
-                }
-              })
-              .catch(error => {
-                console.error('Error in entitlement creation process:', error);
-              });
-          }
-        }
-      } catch (error) {
-        console.error('Error checking entitlements in middleware:', error);
-      }
-      
-      // Allow access since the user is authenticated and coming from a successful purchase
-      return NextResponse.next();
-    } else {
-      // User is not authenticated but has purchase_success and session_id
-      // Redirect to login with the current URL as the redirect target
-      // This ensures they can come back to the dashboard with the parameters after login
-      console.log('Middleware: User not authenticated but has purchase_success, redirecting to login with parameters');
-      const url = new URL('/login', req.url);
-      url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
-      return NextResponse.redirect(url);
-    }
-  }
   
   // Explicitly refresh the auth token
   try {
@@ -275,7 +213,7 @@ export async function middleware(req: NextRequest) {
   if (isProtectedRoute && !session) {
     console.log('Middleware: User not authenticated, redirecting to login');
     const url = new URL('/login', req.url);
-    url.searchParams.set('redirect', path);
+    url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
     
     // Browser error logger injection (development only)
     if (process.env.NODE_ENV === 'development') {
