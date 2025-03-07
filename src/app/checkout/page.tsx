@@ -348,21 +348,10 @@ function CheckoutContent() {
       authCheckComplete
     });
 
-    // Only redirect if:
-    // 1. Auth check is complete
-    // 2. There's no user
-    // 3. We don't have auth cookies (prevents redirect loops during auth state initialization)
-    // 4. We didn't just sign up
-    // 5. We're not in the process of authenticating
+    // Removed automatic redirect to pre-checkout
+    // Instead, just log the authentication state
     if (!user && !hasAuthCookies && !justSignedUp && !isAuthenticating) {
-      console.log('No user and no auth cookies, redirecting to pre-checkout');
-      // Preserve any product selection in the URL
-      const productParam = searchParams.get("products");
-      const redirectUrl = productParam
-        ? `/pre-checkout?products=${productParam}`
-        : '/pre-checkout';
-      
-      router.push(redirectUrl);
+      console.log('No user and no auth cookies, but not redirecting to pre-checkout');
     }
     
     // If we have a user or auth cookies, clear any authentication flags

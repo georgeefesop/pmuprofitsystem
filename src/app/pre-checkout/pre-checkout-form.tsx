@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,12 +73,35 @@ export default function PreCheckoutForm({ products }: PreCheckoutFormProps) {
       // Set the authenticating flag
       sessionStorage.setItem('isAuthenticating', 'true');
 
-      // Use a more reliable redirection method
-      setTimeout(() => {
-        console.log('Executing redirect to:', `/checkout${productQuery}`);
+      // Check if authentication was successful
+      if (data && data.session) {
+        console.log('Authentication successful, redirecting immediately');
+        window.location.href = `/checkout${productQuery}`;
+        return;
+      }
+
+      // Fallback: Use a timeout as a safety net
+      console.log('Setting up fallback redirect with 10 second timeout');
+      const redirectTimeout = setTimeout(() => {
+        console.log('Executing fallback redirect to:', `/checkout${productQuery}`);
         // Force a hard navigation instead of client-side routing
         window.location.href = `/checkout${productQuery}`;
-      }, 1500);
+      }, 10000);
+
+      // Set up an auth state listener to redirect as soon as authenticated
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          console.log('Auth state changed to authenticated, redirecting now');
+          clearTimeout(redirectTimeout);
+          window.location.href = `/checkout${productQuery}`;
+        }
+      });
+
+      // Clean up the listener if component unmounts
+      return () => {
+        authListener.subscription.unsubscribe();
+        clearTimeout(redirectTimeout);
+      };
     } catch (error) {
       console.error("Login error:", error);
       setLoginError(error instanceof Error ? error.message : "An unknown error occurred");
@@ -152,12 +175,35 @@ export default function PreCheckoutForm({ products }: PreCheckoutFormProps) {
 
       console.log('Account created and signed in successfully, redirecting to checkout');
       
-      // Use a more reliable redirection method
-      setTimeout(() => {
-        console.log('Executing redirect to:', `/checkout${productQuery}`);
+      // Check if authentication was successful
+      if (signInData && signInData.session) {
+        console.log('Authentication successful, redirecting immediately');
+        window.location.href = `/checkout${productQuery}`;
+        return;
+      }
+
+      // Fallback: Use a timeout as a safety net
+      console.log('Setting up fallback redirect with 10 second timeout');
+      const redirectTimeout = setTimeout(() => {
+        console.log('Executing fallback redirect to:', `/checkout${productQuery}`);
         // Force a hard navigation instead of client-side routing
         window.location.href = `/checkout${productQuery}`;
-      }, 1500);
+      }, 10000);
+
+      // Set up an auth state listener to redirect as soon as authenticated
+      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session) {
+          console.log('Auth state changed to authenticated, redirecting now');
+          clearTimeout(redirectTimeout);
+          window.location.href = `/checkout${productQuery}`;
+        }
+      });
+
+      // Clean up the listener if component unmounts
+      return () => {
+        authListener.subscription.unsubscribe();
+        clearTimeout(redirectTimeout);
+      };
       
     } catch (error) {
       console.error("Signup error:", error);
