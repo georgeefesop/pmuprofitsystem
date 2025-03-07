@@ -357,8 +357,15 @@ function SuccessPageContent() {
     if (redirectUrl) {
       // Clear the stored URL to prevent reuse
       localStorage.removeItem('dashboardRedirectUrl');
-      // Navigate to the redirect URL
-      window.location.href = redirectUrl;
+      
+      // Add purchase_success and session_id parameters to the redirect URL if it's a dashboard URL
+      if (redirectUrl.startsWith('/dashboard') && sessionId) {
+        const separator = redirectUrl.includes('?') ? '&' : '?';
+        window.location.href = `${redirectUrl}${separator}purchase_success=true&session_id=${sessionId}`;
+      } else {
+        // Navigate to the redirect URL as is
+        window.location.href = redirectUrl;
+      }
     } else {
       // Default to regular dashboard URL with purchase_success and session_id parameters
       // This ensures the middleware allows access even if entitlements aren't fully created yet
