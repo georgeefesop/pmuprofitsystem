@@ -168,6 +168,9 @@ export async function middleware(req: NextRequest) {
   // Define protected routes that require authentication
   const isProtectedRoute = path.startsWith('/dashboard');
   
+  // Get the session from Supabase auth
+  const { data: { session } } = await supabase.auth.getSession();
+  
   // Check if coming from a successful purchase
   const { searchParams } = new URL(req.url);
   const purchaseSuccess = searchParams.get('purchase_success');
@@ -177,6 +180,59 @@ export async function middleware(req: NextRequest) {
   // This check needs to happen before the authentication check
   if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
     console.log('Middleware: User coming from successful purchase, allowing access');
+    
+    // If the user is authenticated, check if they have entitlements
+    // If not, try to create them from the session ID
+    if (session?.user?.id) {
+      console.log(`Middleware: Authenticated user ${session.user.id} coming from purchase, checking entitlements`);
+      
+      try {
+        // Check if the user has entitlements
+        const { data: entitlements, error: entitlementsError } = await supabase
+          .from('user_entitlements')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('is_active', true);
+        
+        if (entitlementsError) {
+          console.error('Error checking entitlements:', entitlementsError);
+        } else if (!entitlements || entitlements.length === 0) {
+          console.log('No entitlements found, attempting to create from session ID');
+          
+          // Try to create entitlements from the session ID
+          const { data: purchases, error: purchasesError } = await supabase
+            .from('purchases')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('status', 'completed')
+            .or(`stripe_checkout_session_id.eq.${sessionId},stripe_payment_intent_id.eq.${sessionId}`)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          
+          if (purchasesError) {
+            console.error('Error checking purchases:', purchasesError);
+          } else if (purchases && purchases.length > 0) {
+            console.log('Found purchase, creating entitlements');
+            
+            // Create entitlements asynchronously
+            createEntitlementsFromPurchase(purchases[0], supabase)
+              .then(result => {
+                if (result.error) {
+                  console.error('Failed to create entitlements from purchase:', result.error);
+                } else {
+                  console.log('Successfully created entitlements from purchase');
+                }
+              })
+              .catch(error => {
+                console.error('Error in entitlement creation process:', error);
+              });
+          }
+        }
+      } catch (error) {
+        console.error('Error checking entitlements in middleware:', error);
+      }
+    }
+    
     return NextResponse.next();
   }
   
@@ -188,9 +244,6 @@ export async function middleware(req: NextRequest) {
   } catch (error) {
     console.error('Error refreshing auth token in middleware:', error);
   }
-  
-  // Get the session from Supabase auth
-  const { data: { session } } = await supabase.auth.getSession();
   
   // If there's a session, set the user ID in the request context
   if (session?.user?.id) {
