@@ -138,8 +138,10 @@ export async function GET(req: NextRequest) {
           [isPaymentIntent ? 'stripe_payment_intent_id' : 'stripe_checkout_session_id']: sessionId,
           status: 'completed',
           amount: amount / 100, // Convert from cents to dollars
-          include_ad_generator: includeAdGenerator,
-          include_blueprint: includeBlueprint,
+          metadata: {
+            include_ad_generator: includeAdGenerator,
+            include_blueprint: includeBlueprint
+          },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
