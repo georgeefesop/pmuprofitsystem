@@ -514,6 +514,8 @@ After registration, users must verify their email address:
 
 The PMU Profit System uses Next.js API routes to handle server-side operations. These routes are located in the `src/app/api` directory and follow the Next.js App Router convention.
 
+> **Note**: For a comprehensive list of all API endpoints with detailed request/response examples, please refer to the [API-ENDPOINTS.md](./API-ENDPOINTS.md) document.
+
 ### Authentication API
 
 #### `/api/auth`

@@ -18,6 +18,7 @@ Welcome to the PMU Profit System documentation. This directory contains comprehe
 - [Error Handling](ERROR_HANDLING.md) - Overview of the error handling system
 
 ### API Documentation
+- [API Endpoints](API-ENDPOINTS.md) - Comprehensive list of all API endpoints with examples
 - [API Routes](API-ROUTES.md) - Documentation for the API routes
 - [Stripe Integration](STRIPE-INTEGRATION.md) - Guide to the Stripe payment integration
 
@@ -49,6 +50,8 @@ When adding or updating documentation, please follow these guidelines:
 ```
 docs/
 ├── README.md                    # This file
+├── PMU-PROFIT-SYSTEM-DOCUMENTATION.md # Main documentation file
+├── API-ENDPOINTS.md             # Comprehensive API endpoints documentation
 ├── DATABASE-SCHEMA.md           # Database schema documentation
 ├── SUPABASE-AUTHENTICATION.md   # Authentication system documentation
 ├── TROUBLESHOOTING.md           # Troubleshooting guide
