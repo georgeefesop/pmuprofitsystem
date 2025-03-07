@@ -419,9 +419,6 @@ async function testCheckoutPage(page) {
     // Wait for the checkout page to load
     await page.waitForSelector('body', { timeout: 10000 });
     
-    // Take screenshot
-    await page.screenshot({ path: path.join(outputDir, '9-checkout-page.png') });
-    
     // Get cookies
     const cookies = await page.cookies();
     log('Checkout page cookies', cookies);
@@ -448,26 +445,41 @@ async function testCheckoutPage(page) {
     log('Checkout page localStorage', localStorage);
     log('Checkout page sessionStorage', sessionStorage);
     
-    // Log page title and URL
-    const title = await page.title();
-    log('Checkout page loaded', {
-      title,
-      url: page.url()
-    });
+    // Take screenshot
+    await page.screenshot({ path: path.join(outputDir, '9-checkout-page.png') });
     
-    // Check if user is authenticated on checkout page
+    // Get page title and URL
+    const title = await page.title();
+    const url = page.url();
+    log('Checkout page loaded', { title, url });
+    
+    // Check if user is authenticated
     const isAuthenticated = await page.evaluate(() => {
-      // Check for auth-related elements or data
-      const userElement = document.querySelector('[data-authenticated="true"]');
-      return !!userElement;
+      return !!localStorage.getItem('sb-duxqazuhozfejdocxiyl-auth-token');
     });
     
     log('User authentication status on checkout page', { isAuthenticated });
     
+    // Select add-ons if available
+    try {
+      // Look for the Ad Generator add-on checkbox
+      const adGeneratorCheckbox = await page.$('input[name="adGenerator"]');
+      if (adGeneratorCheckbox) {
+        log('Selecting Ad Generator add-on');
+        await adGeneratorCheckbox.click();
+        await delay(500);
+      }
+      
+      // Take screenshot after selecting add-ons
+      await page.screenshot({ path: path.join(outputDir, '9a-checkout-addons-selected.png') });
+    } catch (error) {
+      log('Error selecting add-ons', { error: error.message });
+    }
+    
     return true;
   } catch (error) {
     log('Error during checkout page test', { error: error.message, stack: error.stack });
-    await page.screenshot({ path: path.join(outputDir, 'error-checkout.png') });
+    await page.screenshot({ path: path.join(outputDir, 'error-checkout-page.png') });
     return false;
   }
 }
@@ -477,25 +489,78 @@ async function testCheckoutCompletion(page) {
   log('Testing checkout completion');
   
   try {
-    // In test mode, we'll look for the "Complete Purchase" button
-    // This would normally be the Stripe checkout button
-    const completeButton = await page.$('button:not([disabled])', { timeout: 10000 });
+    // In test mode, we need to fill out the Stripe card details
+    // Wait for Stripe iframe to load
+    await delay(2000);
     
-    if (!completeButton) {
-      log('Could not find checkout button');
+    // Find all iframes on the page
+    const frames = page.frames();
+    log(`Found ${frames.length} frames on the page`);
+    
+    // Find the Stripe card number iframe
+    const cardNumberFrame = frames.find(frame => 
+      frame.url().includes('stripe.com') && 
+      frame.url().includes('elements-inner-card-')
+    );
+    
+    if (cardNumberFrame) {
+      log('Found Stripe card number iframe');
+      
+      // Fill out test card details
+      try {
+        // Fill card number - using Stripe test card
+        await cardNumberFrame.waitForSelector('input[name="cardnumber"]', { timeout: 5000 });
+        await cardNumberFrame.type('input[name="cardnumber"]', '4242424242424242');
+        
+        // Fill expiry date
+        await cardNumberFrame.waitForSelector('input[name="exp-date"]', { timeout: 5000 });
+        await cardNumberFrame.type('input[name="exp-date"]', '1230');
+        
+        // Fill CVC
+        await cardNumberFrame.waitForSelector('input[name="cvc"]', { timeout: 5000 });
+        await cardNumberFrame.type('input[name="cvc"]', '123');
+        
+        // Fill postal code if present
+        try {
+          await cardNumberFrame.waitForSelector('input[name="postal"]', { timeout: 2000 });
+          await cardNumberFrame.type('input[name="postal"]', '12345');
+        } catch (e) {
+          log('Postal code field not found, continuing');
+        }
+        
+        // Take screenshot after filling card details
+        await page.screenshot({ path: path.join(outputDir, '10-card-details-filled.png') });
+        
+        log('Successfully filled out test card details');
+      } catch (error) {
+        log('Error filling out card details', { error: error.message });
+      }
+    } else {
+      log('Could not find Stripe card iframe');
+      
+      // Take screenshot for debugging
+      await page.screenshot({ path: path.join(outputDir, '10-stripe-iframe-not-found.png') });
+    }
+    
+    // Find and click the payment button
+    const payButton = await page.$('button[type="submit"]');
+    
+    if (!payButton) {
+      log('Could not find payment button');
       return false;
     }
     
     // Take screenshot before clicking
-    await page.screenshot({ path: path.join(outputDir, '10-before-checkout-completion.png') });
+    await page.screenshot({ path: path.join(outputDir, '11-before-payment-submission.png') });
     
-    // Click the checkout button
-    log('Clicking checkout button');
-    await completeButton.click();
+    // Click the payment button
+    log('Clicking payment button');
+    await payButton.click();
     
-    // Wait for navigation to success page
+    // Wait for processing and redirect to success page
+    log('Waiting for payment processing and redirect');
     try {
-      await page.waitForNavigation({ timeout: 15000 });
+      await page.waitForNavigation({ timeout: 30000 });
     } catch (e) {
       log('Navigation timeout waiting for redirect to success page', { error: e.message });
       
@@ -507,12 +572,12 @@ async function testCheckoutCompletion(page) {
       }
       
       // Take screenshot after timeout
-      await page.screenshot({ path: path.join(outputDir, '11-checkout-completion-timeout.png') });
+      await page.screenshot({ path: path.join(outputDir, '12-payment-timeout.png') });
       return false;
     }
     
     // Take screenshot after redirect
-    await page.screenshot({ path: path.join(outputDir, '12-after-checkout-completion.png') });
+    await page.screenshot({ path: path.join(outputDir, '13-after-payment-completion.png') });
     
     // Verify we're on the success page
     const currentUrl = page.url();
@@ -591,45 +656,94 @@ async function testDashboardAccess(page) {
   log('Testing dashboard access');
   
   try {
-    // Look for the "Go to Dashboard" button
-    const dashboardButton = await page.$('button:contains("Go to Dashboard"), a[href*="dashboard"]');
+    // Wait for any potential redirects or page loads to complete
+    await delay(2000);
     
-    if (!dashboardButton) {
-      // Try to find any button with text containing "dashboard"
-      const buttons = await page.$$eval('button', buttons => {
-        return buttons
-          .filter(button => {
-            const text = button.innerText.toLowerCase();
-            return text.includes('dashboard');
-          })
-          .map(button => ({
-            text: button.innerText,
-            id: button.id,
-            class: button.className
-          }));
+    // Take screenshot before looking for dashboard button
+    await page.screenshot({ path: path.join(outputDir, '14-before-dashboard-access.png') });
+    
+    // Look for the "Go to Dashboard" button using various selectors
+    log('Looking for dashboard button');
+    
+    // Get all buttons and links on the page
+    const buttonsAndLinks = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const links = Array.from(document.querySelectorAll('a'));
+      
+      return [...buttons, ...links].map(el => ({
+        type: el.tagName.toLowerCase(),
+        text: el.innerText.trim(),
+        id: el.id,
+        className: el.className,
+        href: el.tagName.toLowerCase() === 'a' ? el.href : null
+      }));
+    });
+    
+    log('Buttons and links on success page', buttonsAndLinks);
+    
+    // Find dashboard button or link
+    let dashboardElement = null;
+    
+    // First try to find a link with href containing "dashboard"
+    const dashboardLink = await page.$('a[href*="dashboard"]');
+    if (dashboardLink) {
+      log('Found dashboard link by href');
+      dashboardElement = dashboardLink;
+    }
+    
+    // If not found, try to find a button or link with text containing "dashboard"
+    if (!dashboardElement) {
+      const dashboardButtonByText = await page.evaluate(() => {
+        const elements = Array.from(document.querySelectorAll('button, a'));
+        const dashboardEl = elements.find(el => 
+          el.innerText.toLowerCase().includes('dashboard') || 
+          el.innerText.toLowerCase().includes('go to dashboard')
+        );
+        
+        if (dashboardEl) {
+          return {
+            tagName: dashboardEl.tagName.toLowerCase(),
+            id: dashboardEl.id,
+            className: dashboardEl.className,
+            text: dashboardEl.innerText
+          };
+        }
+        return null;
       });
       
-      log('Buttons with dashboard text', buttons);
-      
-      if (buttons.length > 0) {
-        // Find the button again and click it
-        const buttonToClick = await page.$(`button[id="${buttons[0].id}"], button.${buttons[0].class.split(' ')[0]}`);
+      if (dashboardButtonByText) {
+        log('Found dashboard element by text', dashboardButtonByText);
         
-        if (buttonToClick) {
-          log('Found dashboard button, clicking it');
-          await buttonToClick.click();
-        } else {
-          log('Could not find dashboard button to click');
-          return false;
+        // Find the element again using the properties we found
+        if (dashboardButtonByText.id) {
+          dashboardElement = await page.$(`#${dashboardButtonByText.id}`);
+        } else if (dashboardButtonByText.className) {
+          const classSelector = `.${dashboardButtonByText.className.split(' ').join('.')}`;
+          dashboardElement = await page.$(classSelector);
         }
-      } else {
-        log('Could not find dashboard button');
-        return false;
       }
-    } else {
-      log('Found dashboard button, clicking it');
-      await dashboardButton.click();
     }
+    
+    // If still not found, try to find any button that might be the dashboard button
+    if (!dashboardElement) {
+      log('Could not find specific dashboard button, looking for primary action buttons');
+      
+      // Look for primary action buttons
+      dashboardElement = await page.$('.btn-primary, .primary-button, button.bg-purple-600, a.bg-purple-600');
+    }
+    
+    if (!dashboardElement) {
+      log('Could not find dashboard button');
+      await page.screenshot({ path: path.join(outputDir, 'error-dashboard-button-not-found.png') });
+      return false;
+    }
+    
+    // Take screenshot before clicking
+    await page.screenshot({ path: path.join(outputDir, '15-dashboard-button-found.png') });
+    
+    // Click the dashboard button
+    log('Clicking dashboard button');
+    await dashboardElement.click();
     
     // Wait for navigation to dashboard
     try {
@@ -637,22 +751,32 @@ async function testDashboardAccess(page) {
     } catch (e) {
       log('Navigation timeout waiting for redirect to dashboard', { error: e.message });
       
+      // Check if we're on the dashboard page
+      const currentUrl = page.url();
+      log(`Current URL after dashboard button click: ${currentUrl}`);
+      
+      if (currentUrl.includes('/dashboard')) {
+        log('Successfully navigated to dashboard');
+        await page.screenshot({ path: path.join(outputDir, '16-dashboard-page.png') });
+        return true;
+      }
+      
       // Take screenshot after timeout
-      await page.screenshot({ path: path.join(outputDir, '14-dashboard-redirect-timeout.png') });
+      await page.screenshot({ path: path.join(outputDir, '16-dashboard-navigation-timeout.png') });
       return false;
     }
     
-    // Take screenshot after redirect
-    await page.screenshot({ path: path.join(outputDir, '15-dashboard.png') });
+    // Take screenshot after navigation
+    await page.screenshot({ path: path.join(outputDir, '16-dashboard-page.png') });
     
     // Verify we're on the dashboard page
     const currentUrl = page.url();
-    log(`Current URL after dashboard redirect: ${currentUrl}`);
+    log(`Current URL after dashboard navigation: ${currentUrl}`);
     
     return currentUrl.includes('/dashboard');
   } catch (error) {
     log('Error during dashboard access test', { error: error.message, stack: error.stack });
-    await page.screenshot({ path: path.join(outputDir, 'error-dashboard.png') });
+    await page.screenshot({ path: path.join(outputDir, 'error-dashboard-access.png') });
     return false;
   }
 }

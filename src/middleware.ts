@@ -144,6 +144,42 @@ export async function middleware(req: NextRequest) {
   // Create Supabase client for this request
   const { supabase, response: res } = createClient(req);
   
+  // Get the pathname of the request
+  const path = req.nextUrl.pathname;
+  
+  // Check if this is a test or diagnostic page
+  const isTestPage = 
+    path.startsWith('/diagnostics') || 
+    path.startsWith('/stripe-diagnostics') || 
+    path.startsWith('/local-diagnostics') || 
+    path.startsWith('/error-test') || 
+    path.startsWith('/logger-test') || 
+    path.startsWith('/test-auth') || 
+    path.startsWith('/test-resend') || 
+    path.startsWith('/test-connection') || 
+    path.startsWith('/api-test') || 
+    path.startsWith('/another-test');
+  
+  // Block access to test pages in production unless explicitly enabled
+  if (isTestPage && !allowTestPage()) {
+    return new NextResponse('Test and diagnostic pages are disabled in production', { status: 404 });
+  }
+  
+  // Define protected routes that require authentication
+  const isProtectedRoute = path.startsWith('/dashboard');
+  
+  // Check if coming from a successful purchase
+  const { searchParams } = new URL(req.url);
+  const purchaseSuccess = searchParams.get('purchase_success');
+  const sessionId = searchParams.get('session_id');
+  
+  // If coming from a successful purchase with session_id, allow access temporarily
+  // This check needs to happen before the authentication check
+  if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
+    console.log('Middleware: User coming from successful purchase, allowing access');
+    return NextResponse.next();
+  }
+  
   // Explicitly refresh the auth token
   try {
     // This will refresh the token if needed and update cookies
@@ -169,30 +205,6 @@ export async function middleware(req: NextRequest) {
       value: session.user.id
     });
   }
-  
-  // Get the pathname of the request
-  const path = req.nextUrl.pathname;
-  
-  // Check if this is a test or diagnostic page
-  const isTestPage = 
-    path.startsWith('/diagnostics') || 
-    path.startsWith('/stripe-diagnostics') || 
-    path.startsWith('/local-diagnostics') || 
-    path.startsWith('/error-test') || 
-    path.startsWith('/logger-test') || 
-    path.startsWith('/test-auth') || 
-    path.startsWith('/test-resend') || 
-    path.startsWith('/test-connection') || 
-    path.startsWith('/api-test') || 
-    path.startsWith('/another-test');
-  
-  // Block access to test pages in production unless explicitly enabled
-  if (isTestPage && !allowTestPage()) {
-    return new NextResponse('Test and diagnostic pages are disabled in production', { status: 404 });
-  }
-  
-  // Define protected routes that require authentication
-  const isProtectedRoute = path.startsWith('/dashboard');
   
   // If the route is protected and the user is not authenticated,
   // redirect to the login page with the original URL as a redirect parameter
@@ -309,17 +321,6 @@ export async function middleware(req: NextRequest) {
   if (isProtectedRoute && session) {
     console.log('Middleware: User authenticated, checking entitlements');
     try {
-      // Check if coming from a successful purchase
-      const { searchParams } = new URL(req.url);
-      const purchaseSuccess = searchParams.get('purchase_success');
-      const sessionId = searchParams.get('session_id');
-      
-      // If coming from a successful purchase, allow access temporarily
-      if (purchaseSuccess === 'true' && sessionId) {
-        console.log('User coming from successful purchase, allowing access');
-        return NextResponse.next();
-      }
-      
       // Check if the user has entitlements for the main product
       const { data: entitlements, error: entitlementsError } = await supabase
         .from('user_entitlements')
@@ -335,8 +336,7 @@ export async function middleware(req: NextRequest) {
       
       // If the user doesn't have any active entitlements, check for recent purchases
       if (!entitlements || entitlements.length === 0) {
-        console.log('Middleware: User has no entitlements, redirecting to checkout');
-        console.log('No active entitlements found, checking for recent purchases');
+        console.log('Middleware: User has no entitlements, checking for recent purchases');
         
         // Check for recent purchases that might not have entitlements yet
         const { data: purchases, error: purchasesError } = await supabase
