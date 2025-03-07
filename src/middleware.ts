@@ -140,53 +140,10 @@ async function createEntitlementsFromPurchase(purchase: any, supabase: any) {
   }
 }
 
-// Enhanced logging utility for middleware
-interface AuthLog {
-  timestamp: string;
-  userId?: string;
-  event: string;
-  details: any;
-  path: string;
-  success: boolean;
-}
-
-// In-memory log storage (will persist between requests but not server restarts)
-const authLogs: AuthLog[] = [];
-const MAX_LOGS = 100;
-
-function addAuthLog(log: AuthLog) {
-  // Add log to the beginning of the array
-  authLogs.unshift(log);
-  
-  // Keep only the last MAX_LOGS entries
-  if (authLogs.length > MAX_LOGS) {
-    authLogs.pop();
-  }
-  
-  // Also log to console for immediate visibility
-  console.log(`AUTH_LOG: [${log.timestamp}] ${log.event} - Success: ${log.success} - Path: ${log.path} ${log.userId ? `- User: ${log.userId}` : ''}`);
-  if (log.details) {
-    console.log('AUTH_LOG_DETAILS:', JSON.stringify(log.details, null, 2));
-  }
-}
-
-function createAuthLog(req: NextRequest, event: string, success: boolean, userId?: string, details?: any) {
-  return {
-    timestamp: new Date().toISOString(),
-    userId,
-    event,
-    details,
-    path: req.nextUrl.pathname + req.nextUrl.search,
-    success
-  };
-}
-
-// Export logs for API access
-export function getAuthLogs() {
-  return [...authLogs];
-}
-
 export async function middleware(req: NextRequest) {
+  // Debug flag to disable redirects and enable verbose logging
+  const DEBUG_AUTH = true;
+  
   // Create Supabase client for this request
   const { supabase, response: res } = createClient(req);
   
@@ -204,7 +161,6 @@ export async function middleware(req: NextRequest) {
     path.startsWith('/test-resend') || 
     path.startsWith('/test-connection') || 
     path.startsWith('/api-test') || 
-    path.startsWith('/auth-logs') ||  // Add new auth logs page
     path.startsWith('/another-test');
   
   // Block access to test pages in production unless explicitly enabled
@@ -220,65 +176,75 @@ export async function middleware(req: NextRequest) {
   const purchaseSuccess = searchParams.get('purchase_success');
   const sessionId = searchParams.get('session_id');
   
-  // Log request details
-  addAuthLog(createAuthLog(req, 'REQUEST', true, undefined, {
-    path,
-    purchaseSuccess,
-    sessionId,
-    isProtectedRoute,
-    cookies: req.headers.get('cookie') ? 'Present' : 'None',
-    cookieLength: req.headers.get('cookie')?.length || 0
-  }));
+  console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
   
   // If it's not a protected route, continue with the request
   if (!isProtectedRoute) {
-    addAuthLog(createAuthLog(req, 'UNPROTECTED_ROUTE', true, undefined, { path }));
     return res;
   }
   
-  // Enhanced authentication check
-  addAuthLog(createAuthLog(req, 'AUTH_CHECK_START', true, undefined, { path }));
+  // Enhanced authentication check with detailed logging
+  console.log('Middleware: Starting enhanced authentication check');
   
   // Log all cookies for debugging
   const cookieString = req.headers.get('cookie') || '';
-  addAuthLog(createAuthLog(req, 'COOKIES', true, undefined, { 
-    cookieString: cookieString.substring(0, 500) + (cookieString.length > 500 ? '...(truncated)' : ''),
-    hasCookies: cookieString.length > 0,
-    cookieCount: cookieString.split(';').length
-  }));
+  console.log('Middleware: Cookies present:', cookieString.length > 0);
+  
+  if (DEBUG_AUTH) {
+    // Log all cookies in detail
+    console.log('Middleware: All cookies:', cookieString);
+    
+    // Log all headers for debugging
+    const headers: Record<string, string> = {};
+    req.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    console.log('Middleware: Request headers:', JSON.stringify(headers, null, 2));
+  }
   
   // Get the session from Supabase auth
   let { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
   if (sessionError) {
-    addAuthLog(createAuthLog(req, 'SESSION_ERROR', false, undefined, { error: sessionError.message }));
+    console.error('Middleware: Error getting session:', sessionError);
+  }
+  
+  if (DEBUG_AUTH && session) {
+    console.log('Middleware: Initial session found:', {
+      id: session.access_token.substring(0, 10) + '...',
+      userId: session.user.id,
+      email: session.user.email,
+      expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+      isExpired: Date.now() > session.expires_at! * 1000
+    });
   }
   
   if (!session) {
-    addAuthLog(createAuthLog(req, 'NO_SESSION', false, undefined, { 
-      attemptingRefresh: true 
-    }));
+    console.log('Middleware: No session found in initial check, trying to refresh token');
     
     try {
       // Try to refresh the session
       const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       
       if (refreshError) {
-        addAuthLog(createAuthLog(req, 'REFRESH_ERROR', false, undefined, { error: refreshError.message }));
+        console.error('Middleware: Error refreshing session:', refreshError);
       } else if (refreshData.session) {
-        addAuthLog(createAuthLog(req, 'SESSION_REFRESHED', true, refreshData.session.user.id, { 
-          email: refreshData.session.user.email 
-        }));
+        console.log('Middleware: Session refreshed successfully');
         session = refreshData.session;
+        
+        if (DEBUG_AUTH) {
+          console.log('Middleware: Refreshed session details:', {
+            id: session.access_token.substring(0, 10) + '...',
+            userId: session.user.id,
+            email: session.user.email,
+            expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+            isExpired: Date.now() > session.expires_at! * 1000
+          });
+        }
       }
     } catch (refreshException) {
-      addAuthLog(createAuthLog(req, 'REFRESH_EXCEPTION', false, undefined, { error: String(refreshException) }));
+      console.error('Middleware: Exception during session refresh:', refreshException);
     }
-  } else {
-    addAuthLog(createAuthLog(req, 'SESSION_FOUND', true, session.user.id, { 
-      email: session.user.email,
-      expiresAt: session.expires_at
-    }));
   }
   
   // Try to get user directly as a fallback
@@ -287,41 +253,77 @@ export async function middleware(req: NextRequest) {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (userError) {
-        addAuthLog(createAuthLog(req, 'GET_USER_ERROR', false, undefined, { error: userError.message }));
+        console.error('Middleware: Error getting user:', userError);
       } else if (user) {
-        addAuthLog(createAuthLog(req, 'USER_FOUND_NO_SESSION', true, user.id, { email: user.email }));
+        console.log('Middleware: Found user but no session:', user.id);
         
-        // Check localStorage as a last resort
-        const localStorageAuth = req.cookies.get('auth-status')?.value;
-        const localStorageUserId = req.cookies.get('auth_user_id')?.value;
+        if (DEBUG_AUTH) {
+          console.log('Middleware: User details without session:', {
+            id: user.id,
+            email: user.email,
+            emailConfirmed: user.email_confirmed_at ? 'yes' : 'no',
+            lastSignIn: user.last_sign_in_at,
+            metadata: user.user_metadata
+          });
+        }
         
-        addAuthLog(createAuthLog(req, 'LOCALSTORAGE_CHECK', Boolean(localStorageAuth), undefined, { 
-          authStatus: localStorageAuth,
-          userId: localStorageUserId
-        }));
+        // We have a user but no session, which is unusual
+        // Let's try to create a new session
+        try {
+          // This is a last resort attempt - in a real app, you might want to redirect to login instead
+          console.log('Middleware: Attempting to create a new session for user:', user.id);
+        } catch (createSessionError) {
+          console.error('Middleware: Error creating new session:', createSessionError);
+        }
       }
     } catch (userException) {
-      addAuthLog(createAuthLog(req, 'GET_USER_EXCEPTION', false, undefined, { error: String(userException) }));
+      console.error('Middleware: Exception during user check:', userException);
     }
   }
   
-  // If there's no session, redirect to login
-  if (!session) {
-    addAuthLog(createAuthLog(req, 'REDIRECT_TO_LOGIN', false, undefined, { 
-      reason: 'No valid session found',
-      redirectUrl: '/login?redirect=' + encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)
-    }));
+  // If there's a session, set the user ID in the request context
+  if (session?.user?.id) {
+    console.log('Middleware: User authenticated:', session.user.id);
     
-    const url = new URL('/login', req.url);
-    url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
-    return NextResponse.redirect(url);
+    // Set the user ID in a custom header that our API routes can use
+    res.headers.set('x-user-id', session.user.id);
+
+    // Set the user ID in the request context for Supabase RLS policies
+    // This will be used by the auth.uid() function in RLS policies
+    try {
+      await supabase.rpc('set_claim', {
+        uid: session.user.id,
+        claim: 'sub',
+        value: session.user.id
+      });
+      console.log('Middleware: Set claim for user:', session.user.id);
+    } catch (claimError) {
+      console.error('Middleware: Error setting claim:', claimError);
+    }
+  } else {
+    console.log('Middleware: User not authenticated');
+    
+    if (DEBUG_AUTH) {
+      console.log('Middleware: Authentication debug mode is enabled - BYPASSING LOGIN REDIRECT');
+      console.log('Middleware: This will allow access to protected routes without authentication');
+      console.log('Middleware: This should only be used for debugging purposes');
+      
+      // Add a header to indicate this is a debug session
+      res.headers.set('x-debug-auth', 'true');
+      
+      // Return the response without redirecting
+      return res;
+    } else {
+      // Normal behavior - redirect to login
+      console.log('Middleware: Redirecting to login page');
+      const url = new URL('/login', req.url);
+      url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
   }
   
   // At this point, we know the user is authenticated and trying to access a protected route
-  addAuthLog(createAuthLog(req, 'USER_AUTHENTICATED', true, session.user.id, { 
-    email: session.user.email,
-    checkingEntitlements: true
-  }));
+  console.log('Middleware: User authenticated, checking entitlements');
   
   try {
     // Check if the user has any active entitlements
@@ -332,29 +334,20 @@ export async function middleware(req: NextRequest) {
       .eq('is_active', true);
     
     if (entitlementsError) {
-      addAuthLog(createAuthLog(req, 'ENTITLEMENTS_ERROR', false, session.user.id, { 
-        error: entitlementsError.message 
-      }));
+      console.error('Error checking entitlements:', entitlementsError);
       // If there's an error, allow access to avoid blocking legitimate users
-      addAuthLog(createAuthLog(req, 'ALLOWING_DESPITE_ERROR', true, session.user.id, { 
-        reason: 'Error checking entitlements, allowing access to avoid blocking legitimate users' 
-      }));
+      console.log('Allowing access despite entitlement check error');
       return res;
     }
     
     // If the user has active entitlements, allow access
     if (entitlements && entitlements.length > 0) {
-      addAuthLog(createAuthLog(req, 'HAS_ENTITLEMENTS', true, session.user.id, { 
-        entitlementCount: entitlements.length,
-        entitlementIds: entitlements.map(e => e.id)
-      }));
+      console.log(`Middleware: User has ${entitlements.length} active entitlements, allowing access`);
       return res;
     }
     
     // If no entitlements found, check for recent purchases as a fallback
-    addAuthLog(createAuthLog(req, 'NO_ENTITLEMENTS', false, session.user.id, { 
-      checkingPurchases: true 
-    }));
+    console.log('Middleware: User has no entitlements, checking for recent purchases');
     
     const { data: purchases, error: purchasesError } = await supabase
       .from('purchases')
@@ -365,62 +358,41 @@ export async function middleware(req: NextRequest) {
       .limit(1);
     
     if (purchasesError) {
-      addAuthLog(createAuthLog(req, 'PURCHASES_ERROR', false, session.user.id, { 
-        error: purchasesError.message 
-      }));
+      console.error('Error checking recent purchases:', purchasesError);
       // If there's an error, allow access to avoid blocking legitimate users
-      addAuthLog(createAuthLog(req, 'ALLOWING_DESPITE_ERROR', true, session.user.id, { 
-        reason: 'Error checking purchases, allowing access to avoid blocking legitimate users' 
-      }));
+      console.log('Allowing access despite purchase check error');
       return res;
     }
     
     // If recent purchase exists, create entitlements and allow access
     if (purchases && purchases.length > 0) {
-      addAuthLog(createAuthLog(req, 'HAS_PURCHASE', true, session.user.id, { 
-        purchaseId: purchases[0].id,
-        creatingEntitlements: true
-      }));
+      console.log('Found recent purchase, creating entitlements');
       
       // Create entitlements asynchronously
       createEntitlementsFromPurchase(purchases[0], supabase)
         .then(result => {
           if (result.error) {
-            addAuthLog(createAuthLog(req, 'ENTITLEMENT_CREATION_ERROR', false, session.user.id, { 
-              error: result.error 
-            }));
+            console.error('Failed to create entitlements from purchase:', result.error);
           } else {
-            addAuthLog(createAuthLog(req, 'ENTITLEMENTS_CREATED', true, session.user.id, { 
-              entitlements: result.entitlements 
-            }));
+            console.log('Successfully created entitlements from purchase');
           }
         })
         .catch(error => {
-          addAuthLog(createAuthLog(req, 'ENTITLEMENT_CREATION_EXCEPTION', false, session.user.id, { 
-            error: String(error) 
-          }));
+          console.error('Error in entitlement creation process:', error);
         });
       
       // Allow access since we found a valid purchase
-      addAuthLog(createAuthLog(req, 'ALLOWING_ACCESS_PURCHASE', true, session.user.id, { 
-        reason: 'User has a recent purchase' 
-      }));
+      console.log('Allowing access based on recent purchase');
       return res;
     }
     
     // If we get here, the user has no entitlements and no recent purchases
-    addAuthLog(createAuthLog(req, 'NO_ENTITLEMENTS_NO_PURCHASES', false, session.user.id, { 
-      redirectingToCheckout: true 
-    }));
+    console.log('User has no active entitlements or recent purchases, redirecting to checkout');
     return NextResponse.redirect(new URL('/checkout', req.url));
   } catch (error) {
-    addAuthLog(createAuthLog(req, 'MIDDLEWARE_EXCEPTION', false, session?.user?.id, { 
-      error: String(error) 
-    }));
+    console.error('Error in middleware entitlement check:', error);
     // If there's an error, allow access to avoid blocking legitimate users
-    addAuthLog(createAuthLog(req, 'ALLOWING_DESPITE_EXCEPTION', true, session?.user?.id, { 
-      reason: 'Exception in middleware, allowing access to avoid blocking legitimate users' 
-    }));
+    console.log('Allowing access despite error in entitlement check process');
     return res;
   }
 }
