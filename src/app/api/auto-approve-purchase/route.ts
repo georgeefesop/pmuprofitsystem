@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceSupabase } from '@/lib/supabase';
 import { createEntitlementsFromStripeSession } from '@/lib/entitlements';
+import { PRODUCT_IDS } from '@/lib/product-ids';
+import { stripe, safeStripeOperation } from '@/lib/stripe';
 
 // Force this route to be dynamic since it uses request.url
 export const dynamic = 'force-dynamic';
@@ -45,6 +47,50 @@ export async function GET(req: NextRequest) {
       });
     }
     
+    // Determine if this is a checkout session ID or payment intent ID
+    const isPaymentIntent = sessionId.startsWith('pi_');
+    
+    // If it's a payment intent, get the details to determine what was purchased
+    let includeAdGenerator = false;
+    let includeBlueprint = false;
+    let amount = 3700; // Default to main product price in cents
+    
+    if (isPaymentIntent) {
+      try {
+        const paymentIntent = await safeStripeOperation(() => 
+          stripe.paymentIntents.retrieve(sessionId, {
+            expand: ['metadata']
+          })
+        );
+        
+        if (paymentIntent && paymentIntent.metadata) {
+          includeAdGenerator = paymentIntent.metadata.includeAdGenerator === 'true';
+          includeBlueprint = paymentIntent.metadata.includeBlueprint === 'true';
+          amount = paymentIntent.amount || 3700;
+        }
+      } catch (error) {
+        console.error('[auto-approve] Error retrieving payment intent:', error);
+        // Continue with default values
+      }
+    } else {
+      try {
+        const session = await safeStripeOperation(() => 
+          stripe.checkout.sessions.retrieve(sessionId, {
+            expand: ['metadata']
+          })
+        );
+        
+        if (session && session.metadata) {
+          includeAdGenerator = session.metadata.includeAdGenerator === 'true';
+          includeBlueprint = session.metadata.includeBlueprint === 'true';
+          amount = session.amount_total || 3700;
+        }
+      } catch (error) {
+        console.error('[auto-approve] Error retrieving checkout session:', error);
+        // Continue with default values
+      }
+    }
+    
     // Check if we have a purchase record for this session
     const { data: purchaseData, error: purchaseError } = await supabase
       .from('purchases')
@@ -83,16 +129,17 @@ export async function GET(req: NextRequest) {
     } else {
       console.log('[auto-approve] No existing purchase found, creating a new one');
       
-      // Determine if this is a checkout session ID or payment intent ID
-      const isPaymentIntent = sessionId.startsWith('pi_');
-      
-      // Create a new purchase record
+      // Create a new purchase record with the main product ID
       const { data: newPurchase, error: createError } = await supabase
         .from('purchases')
         .insert({
           user_id: userId,
+          product_id: PRODUCT_IDS['pmu-profit-system'], // Always include the main product
           [isPaymentIntent ? 'stripe_payment_intent_id' : 'stripe_checkout_session_id']: sessionId,
           status: 'completed',
+          amount: amount / 100, // Convert from cents to dollars
+          include_ad_generator: includeAdGenerator,
+          include_blueprint: includeBlueprint,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
