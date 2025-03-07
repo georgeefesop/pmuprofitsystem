@@ -354,7 +354,7 @@ function SuccessPageContent() {
 
   // Function to handle dashboard navigation
   const handleDashboardClick = () => {
-    const storedRedirectUrl = localStorage.getItem('redirectUrl');
+    const storedRedirectUrl = localStorage.getItem('dashboardRedirectUrl');
     const dashboardUrl = `/dashboard?purchase_success=true&session_id=${sessionId}`;
     
     if (storedRedirectUrl && storedRedirectUrl.startsWith('/dashboard')) {
@@ -367,12 +367,12 @@ function SuccessPageContent() {
       if (!url.searchParams.has('session_id') && sessionId) {
         url.searchParams.set('session_id', sessionId);
       }
-      localStorage.removeItem('redirectUrl');
+      localStorage.removeItem('dashboardRedirectUrl');
       router.push(url.pathname + url.search);
     } else {
       // If there's no stored redirect URL or it's not for the dashboard,
       // use the default dashboard URL with the parameters
-      localStorage.removeItem('redirectUrl');
+      localStorage.removeItem('dashboardRedirectUrl');
       router.push(dashboardUrl);
     }
   };
