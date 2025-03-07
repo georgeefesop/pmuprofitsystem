@@ -19,7 +19,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   sessionCheckFailed: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (data: Partial<User>) => Promise<{ success: boolean; error?: string }>;
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     setIsLoading(true);
 
     try {
@@ -247,15 +247,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           full_name: data.user.user_metadata?.full_name || ''
         });
         
-        // Store auth status in a cookie for middleware
-        Cookies.set('auth-status', 'authenticated', { expires: 7, path: '/' });
+        // Store auth status in a cookie for middleware with proper settings
+        Cookies.set('auth-status', 'authenticated', { 
+          expires: 7, 
+          path: '/',
+          secure: window.location.protocol === 'https:',
+          sameSite: 'strict'
+        });
+        
+        // Store session ID in a cookie for middleware
+        if (data.session?.access_token) {
+          Cookies.set('sb-auth-token', data.session.access_token, {
+            expires: 7,
+            path: '/',
+            secure: window.location.protocol === 'https:',
+            sameSite: 'strict'
+          });
+        }
         
         // Store user ID in localStorage as a backup
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_user_id', data.user.id);
         }
         
-        return { success: true };
+        return { 
+          success: true,
+          user: {
+            id: data.user.id,
+            email: data.user.email || '',
+            full_name: data.user.user_metadata?.full_name || ''
+          }
+        };
       } else {
         return { 
           success: false, 

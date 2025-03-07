@@ -1,255 +1,407 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/middleware';
+import { allowTestPage } from '@/lib/env-utils';
+import { PRODUCT_IDS, legacyToUuidProductId, isValidLegacyProductId } from '@/lib/product-ids';
 
-// Function to inject the browser error logger into HTML responses
-async function injectBrowserErrorLogger(response: NextResponse): Promise<NextResponse> {
-  // Only inject in development mode
-  if (process.env.NODE_ENV !== 'development') {
-    return response;
+// Helper function to create entitlements from a purchase
+async function createEntitlementsFromPurchase(purchase: any, supabase: any) {
+  if (!purchase || !purchase.user_id) {
+    console.error('Cannot create entitlements: Invalid purchase data');
+    return { error: 'Invalid purchase data' };
   }
-  
-  // Only inject in HTML responses
-  const contentType = response.headers.get('content-type');
-  if (!contentType || !contentType.includes('text/html')) {
-    return response;
-  }
-  
+
+  const userId = purchase.user_id;
+  const now = new Date().toISOString();
+  const entitlements = [];
+
   try {
-    const html = await response.text();
-    
-    // Check if the error logger is already injected
-    if (html.includes('Browser console logging enabled')) {
-      return response;
-    }
-    
-    // Inject the error logger script
-    const modifiedHtml = html.replace(
-      '</head>',
-      `<script>
-
-// Console logger for development
-(function() {
-  const originalConsoleError = console.error;
-  const originalConsoleWarn = console.warn;
-  const originalConsoleLog = console.log;
-  const originalConsoleInfo = console.info;
-  const originalConsoleDebug = console.debug;
-  
-  // Function to get stack trace
-  function getStackTrace() {
-    try {
-      throw new Error('');
-    } catch (error) {
-      return error.stack || '';
-    }
-  }
-  
-  // Function to get component name from stack trace
-  function getComponentName(stack) {
-    try {
-      // Try to extract component name from stack trace
-      const stackLines = stack.split('\\n');
-      for (let i = 0; i < stackLines.length; i++) {
-        const line = stackLines[i];
-        // Look for React component names (capitalized)
-        const componentMatch = line.match(/at ([A-Z][a-zA-Z0-9]+)/);
-        if (componentMatch && componentMatch[1]) {
-          return componentMatch[1];
+    // Check if this is a legacy purchase with product_id field
+    if (purchase.product_id) {
+      // Convert legacy product ID to UUID if needed
+      let productId = purchase.product_id;
+      
+      // If it's a legacy string ID, convert to UUID
+      if (isValidLegacyProductId(productId)) {
+        const uuidProductId = legacyToUuidProductId(productId);
+        if (uuidProductId) {
+          productId = uuidProductId;
+        } else {
+          console.error(`Could not convert legacy product ID: ${productId}`);
+          return { error: `Invalid product ID: ${productId}` };
         }
       }
-      return 'Unknown Component';
-    } catch (e) {
-      return 'Unknown Component';
-    }
-  }
-  
-  // Function to send logs to the server
-  function sendLogToServer(type, args, extraInfo = {}) {
-    try {
-      const stack = getStackTrace();
-      const componentName = getComponentName(stack);
-      
-      const logData = {
-        type,
-        timestamp: new Date().toISOString(),
-        component: componentName,
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        message: Array.from(args).map(arg => {
-          try {
-            if (arg instanceof Error) {
-              return {
-                name: arg.name,
-                message: arg.message,
-                stack: arg.stack
-              };
-            }
-            return typeof arg === 'object' ? JSON.stringify(arg) : String(arg);
-          } catch (e) {
-            return 'Unstringifiable object';
-          }
-        }),
-        stack: stack.split('\\n').slice(1, 6).join('\\n'), // First 5 lines of stack
-        ...extraInfo
-      };
-      
-      fetch('/api/dev-logger', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(logData)
-      }).catch(e => {
-        // Silent fail - don't create infinite loops
-      });
-    } catch (e) {
-      // Silent fail
-    }
-  }
-  
-  // Override console.error
-  console.error = function() {
-    sendLogToServer('error', arguments);
-    originalConsoleError.apply(console, arguments);
-  };
-  
-  // Override console.warn
-  console.warn = function() {
-    sendLogToServer('warning', arguments);
-    originalConsoleWarn.apply(console, arguments);
-  };
-  
-  // Override console.log
-  console.log = function() {
-    sendLogToServer('log', arguments);
-    originalConsoleLog.apply(console, arguments);
-  };
-  
-  // Override console.info
-  console.info = function() {
-    sendLogToServer('info', arguments);
-    originalConsoleInfo.apply(console, arguments);
-  };
-  
-  // Override console.debug
-  console.debug = function() {
-    sendLogToServer('debug', arguments);
-    originalConsoleDebug.apply(console, arguments);
-  };
-  
-  // Capture unhandled errors
-  window.addEventListener('error', function(event) {
-    sendLogToServer('unhandled', [{
-      message: event.message,
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno,
-      error: event.error
-    }], {
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno
-    });
-  });
-  
-  // Capture unhandled promise rejections
-  window.addEventListener('unhandledrejection', function(event) {
-    sendLogToServer('unhandledrejection', [event.reason]);
-  });
-  
-  // Capture React errors
-  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-    const originalOnErrorHandler = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning;
-    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning = function(fiber, type, error, componentStack) {
-      if (type === 'error') {
-        sendLogToServer('react', [error], {
-          componentStack
-        });
-      }
-      if (originalOnErrorHandler) {
-        originalOnErrorHandler.call(this, fiber, type, error, componentStack);
-      }
-    };
-  }
-  
-  console.log('%c🔍 Browser console logging enabled - all console output will be visible in the terminal', 'color: purple; font-weight: bold');
-})();
 
-</script></head>`
-    );
+      // Create the entitlement
+      const { data: entitlement, error: entitlementError } = await supabase
+        .from('user_entitlements')
+        .insert({
+          user_id: userId,
+          product_id: productId,
+          source_type: 'purchase',
+          source_id: purchase.id,
+          valid_from: now,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (entitlementError) {
+        console.error('Error creating entitlement from legacy purchase in middleware:', entitlementError);
+      } else {
+        console.log('Created entitlement from legacy purchase in middleware:', entitlement);
+        entitlements.push(entitlement);
+      }
+      
+      return { entitlements };
+    }
     
-    return new NextResponse(modifiedHtml, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers
-    });
+    // Standard purchase with include_* fields
+    // Always create entitlement for the main product (PMU Profit System)
+    const { data: mainEntitlement, error: mainError } = await supabase
+      .from('user_entitlements')
+      .insert({
+        user_id: userId,
+        product_id: PRODUCT_IDS['pmu-profit-system'],
+        source_type: 'purchase',
+        source_id: purchase.id,
+        valid_from: now,
+        is_active: true
+      })
+      .select()
+      .single();
+
+    if (mainError) {
+      console.error('Error creating main product entitlement:', mainError);
+    } else {
+      console.log('Created main product entitlement from middleware:', mainEntitlement);
+      entitlements.push(mainEntitlement);
+    }
+
+    // Create entitlement for Ad Generator if included
+    if (purchase.include_ad_generator) {
+      const { data: adEntitlement, error: adError } = await supabase
+        .from('user_entitlements')
+        .insert({
+          user_id: userId,
+          product_id: PRODUCT_IDS['pmu-ad-generator'],
+          source_type: 'purchase',
+          source_id: purchase.id,
+          valid_from: now,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (adError) {
+        console.error('Error creating ad generator entitlement:', adError);
+      } else {
+        console.log('Created ad generator entitlement from middleware:', adEntitlement);
+        entitlements.push(adEntitlement);
+      }
+    }
+
+    // Create entitlement for Blueprint if included
+    if (purchase.include_blueprint) {
+      const { data: blueprintEntitlement, error: blueprintError } = await supabase
+        .from('user_entitlements')
+        .insert({
+          user_id: userId,
+          product_id: PRODUCT_IDS['consultation-success-blueprint'],
+          source_type: 'purchase',
+          source_id: purchase.id,
+          valid_from: now,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (blueprintError) {
+        console.error('Error creating blueprint entitlement:', blueprintError);
+      } else {
+        console.log('Created blueprint entitlement from middleware:', blueprintEntitlement);
+        entitlements.push(blueprintEntitlement);
+      }
+    }
+
+    // Update purchase status to indicate entitlements were created
+    const { error: updateError } = await supabase
+      .from('purchases')
+      .update({ status: 'completed', entitlements_created: true })
+      .eq('id', purchase.id);
+    
+    if (updateError) {
+      console.error('Error updating purchase status in middleware:', updateError);
+    }
+
+    return { entitlements };
   } catch (error) {
-    console.error('Error injecting browser error logger:', error);
-    return response;
+    console.error('Error creating entitlements in middleware:', error);
+    return { error };
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function middleware(req: NextRequest) {
+  // Debug flag to disable redirects and enable verbose logging
+  const DEBUG_AUTH = true;
+  
+  // Create Supabase client for this request
+  const { supabase, response: res } = createClient(req);
+  
   // Get the pathname of the request
-  const path = request.nextUrl.pathname;
+  const path = req.nextUrl.pathname;
+  
+  // Check if this is a test or diagnostic page
+  const isTestPage = 
+    path.startsWith('/diagnostics') || 
+    path.startsWith('/stripe-diagnostics') || 
+    path.startsWith('/local-diagnostics') || 
+    path.startsWith('/error-test') || 
+    path.startsWith('/logger-test') || 
+    path.startsWith('/test-auth') || 
+    path.startsWith('/test-resend') || 
+    path.startsWith('/test-connection') || 
+    path.startsWith('/api-test') || 
+    path.startsWith('/another-test');
+  
+  // Block access to test pages in production unless explicitly enabled
+  if (isTestPage && !allowTestPage()) {
+    return new NextResponse('Test and diagnostic pages are disabled in production', { status: 404 });
+  }
   
   // Define protected routes that require authentication
   const isProtectedRoute = path.startsWith('/dashboard');
   
-  // Create a Supabase client
-  const { supabase, response } = createClient(request);
+  // Get URL parameters for logging purposes
+  const { searchParams } = new URL(req.url);
+  const purchaseSuccess = searchParams.get('purchase_success');
+  const sessionId = searchParams.get('session_id');
   
-  // Get the user's session
-  const { data: { session } } = await supabase.auth.getSession();
+  console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
   
-  // If the route is protected and the user is not authenticated,
-  // redirect to the login page with the original URL as a redirect parameter
-  if (isProtectedRoute && !session) {
-    const url = new URL('/login', request.url);
-    url.searchParams.set('redirect', path);
-    
-    // Create the redirect response
-    const redirectResponse = NextResponse.redirect(url);
-    
-    // Inject the browser error logger
-    return await injectBrowserErrorLogger(redirectResponse);
+  // If it's not a protected route, continue with the request
+  if (!isProtectedRoute) {
+    return res;
   }
   
-  // If the user is authenticated and trying to access the dashboard,
-  // check if they have purchased the main product
-  if (isProtectedRoute && session) {
+  // Enhanced authentication check with detailed logging
+  console.log('Middleware: Starting enhanced authentication check');
+  
+  // Log all cookies for debugging
+  const cookieString = req.headers.get('cookie') || '';
+  console.log('Middleware: Cookies present:', cookieString.length > 0);
+  
+  if (DEBUG_AUTH) {
+    // Log all cookies in detail
+    console.log('Middleware: All cookies:', cookieString);
+    
+    // Log all headers for debugging
+    const headers: Record<string, string> = {};
+    req.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    console.log('Middleware: Request headers:', JSON.stringify(headers, null, 2));
+  }
+  
+  // Get the session from Supabase auth
+  let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError) {
+    console.error('Middleware: Error getting session:', sessionError);
+  }
+  
+  if (DEBUG_AUTH && session) {
+    console.log('Middleware: Initial session found:', {
+      id: session.access_token.substring(0, 10) + '...',
+      userId: session.user.id,
+      email: session.user.email,
+      expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+      isExpired: Date.now() > session.expires_at! * 1000
+    });
+  }
+  
+  if (!session) {
+    console.log('Middleware: No session found in initial check, trying to refresh token');
+    
     try {
-      // Check if the user has purchased the main product
-      const { data: purchases } = await supabase
-        .from('purchases')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('product_id', 'pmu-profit-system')
-        .eq('status', 'completed');
+      // Try to refresh the session
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
       
-      // If the user hasn't purchased the main product, redirect to checkout
-      if (!purchases || purchases.length === 0) {
-        console.log('User has not purchased the main product, redirecting to checkout');
-        const redirectResponse = NextResponse.redirect(new URL('/checkout', request.url));
+      if (refreshError) {
+        console.error('Middleware: Error refreshing session:', refreshError);
+      } else if (refreshData.session) {
+        console.log('Middleware: Session refreshed successfully');
+        session = refreshData.session;
         
-        // Inject the browser error logger
-        return await injectBrowserErrorLogger(redirectResponse);
+        if (DEBUG_AUTH) {
+          console.log('Middleware: Refreshed session details:', {
+            id: session.access_token.substring(0, 10) + '...',
+            userId: session.user.id,
+            email: session.user.email,
+            expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+            isExpired: Date.now() > session.expires_at! * 1000
+          });
+        }
       }
-    } catch (error) {
-      console.error('Error checking purchases:', error);
-      // If there's an error, allow access to avoid blocking legitimate users
+    } catch (refreshException) {
+      console.error('Middleware: Exception during session refresh:', refreshException);
     }
   }
   
-  // Inject the browser error logger into the response for all pages
-  return await injectBrowserErrorLogger(response);
+  // Try to get user directly as a fallback
+  if (!session) {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Middleware: Error getting user:', userError);
+      } else if (user) {
+        console.log('Middleware: Found user but no session:', user.id);
+        
+        if (DEBUG_AUTH) {
+          console.log('Middleware: User details without session:', {
+            id: user.id,
+            email: user.email,
+            emailConfirmed: user.email_confirmed_at ? 'yes' : 'no',
+            lastSignIn: user.last_sign_in_at,
+            metadata: user.user_metadata
+          });
+        }
+        
+        // We have a user but no session, which is unusual
+        // Let's try to create a new session
+        try {
+          // This is a last resort attempt - in a real app, you might want to redirect to login instead
+          console.log('Middleware: Attempting to create a new session for user:', user.id);
+        } catch (createSessionError) {
+          console.error('Middleware: Error creating new session:', createSessionError);
+        }
+      }
+    } catch (userException) {
+      console.error('Middleware: Exception during user check:', userException);
+    }
+  }
+  
+  // If there's a session, set the user ID in the request context
+  if (session?.user?.id) {
+    console.log('Middleware: User authenticated:', session.user.id);
+    
+    // Set the user ID in a custom header that our API routes can use
+    res.headers.set('x-user-id', session.user.id);
+
+    // Set the user ID in the request context for Supabase RLS policies
+    // This will be used by the auth.uid() function in RLS policies
+    try {
+      await supabase.rpc('set_claim', {
+        uid: session.user.id,
+        claim: 'sub',
+        value: session.user.id
+      });
+      console.log('Middleware: Set claim for user:', session.user.id);
+    } catch (claimError) {
+      console.error('Middleware: Error setting claim:', claimError);
+    }
+  } else {
+    console.log('Middleware: User not authenticated');
+    
+    if (DEBUG_AUTH) {
+      console.log('Middleware: Authentication debug mode is enabled - BYPASSING LOGIN REDIRECT');
+      console.log('Middleware: This will allow access to protected routes without authentication');
+      console.log('Middleware: This should only be used for debugging purposes');
+      
+      // Add a header to indicate this is a debug session
+      res.headers.set('x-debug-auth', 'true');
+      
+      // Return the response without redirecting
+      return res;
+    } else {
+      // Normal behavior - redirect to login
+      console.log('Middleware: Redirecting to login page');
+      const url = new URL('/login', req.url);
+      url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
+  }
+  
+  // At this point, we know the user is authenticated and trying to access a protected route
+  console.log('Middleware: User authenticated, checking entitlements');
+  
+  try {
+    // Check if the user has any active entitlements
+    const { data: entitlements, error: entitlementsError } = await supabase
+      .from('user_entitlements')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('is_active', true);
+    
+    if (entitlementsError) {
+      console.error('Error checking entitlements:', entitlementsError);
+      // If there's an error, allow access to avoid blocking legitimate users
+      console.log('Allowing access despite entitlement check error');
+      return res;
+    }
+    
+    // If the user has active entitlements, allow access
+    if (entitlements && entitlements.length > 0) {
+      console.log(`Middleware: User has ${entitlements.length} active entitlements, allowing access`);
+      return res;
+    }
+    
+    // If no entitlements found, check for recent purchases as a fallback
+    console.log('Middleware: User has no entitlements, checking for recent purchases');
+    
+    const { data: purchases, error: purchasesError } = await supabase
+      .from('purchases')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    
+    if (purchasesError) {
+      console.error('Error checking recent purchases:', purchasesError);
+      // If there's an error, allow access to avoid blocking legitimate users
+      console.log('Allowing access despite purchase check error');
+      return res;
+    }
+    
+    // If recent purchase exists, create entitlements and allow access
+    if (purchases && purchases.length > 0) {
+      console.log('Found recent purchase, creating entitlements');
+      
+      // Create entitlements asynchronously
+      createEntitlementsFromPurchase(purchases[0], supabase)
+        .then(result => {
+          if (result.error) {
+            console.error('Failed to create entitlements from purchase:', result.error);
+          } else {
+            console.log('Successfully created entitlements from purchase');
+          }
+        })
+        .catch(error => {
+          console.error('Error in entitlement creation process:', error);
+        });
+      
+      // Allow access since we found a valid purchase
+      console.log('Allowing access based on recent purchase');
+      return res;
+    }
+    
+    // If we get here, the user has no entitlements and no recent purchases
+    console.log('User has no active entitlements or recent purchases, redirecting to checkout');
+    return NextResponse.redirect(new URL('/checkout', req.url));
+  } catch (error) {
+    console.error('Error in middleware entitlement check:', error);
+    // If there's an error, allow access to avoid blocking legitimate users
+    console.log('Allowing access despite error in entitlement check process');
+    return res;
+  }
 }
 
-// Configure the middleware to run on all pages
+// Configure the middleware to run on specific paths
 export const config = {
   matcher: [
-    // Match all routes
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // Match all dashboard routes
+    '/dashboard/:path*',
+    '/api/:path*',
   ],
 }; 

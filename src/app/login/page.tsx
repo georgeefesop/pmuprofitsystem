@@ -121,15 +121,23 @@ function LoginForm() {
     setConnectionError(false);
 
     try {
-      const { success, error } = await login(email, password);
+      const { success, error, user } = await login(email, password);
       if (success) {
-        // If there are pending purchases, claim them
-        if (hasPendingPurchases) {
-          await claimPendingPurchases();
-        }
+        // Store the user ID in localStorage for middleware
+        localStorage.setItem('auth_user_id', user?.id || '');
         
-        // Redirect to the original intended destination or dashboard
-        router.push(redirectPath);
+        // Set the auth-status cookie
+        document.cookie = `auth-status=authenticated; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+        
+        // If there's a redirect URL in the query params, go there
+        const redirectUrl = searchParams.get('redirect') || '/dashboard';
+        console.log('Redirecting to:', redirectUrl);
+        
+        // Store the redirect URL in localStorage to ensure it's available after navigation
+        localStorage.setItem('loginRedirectUrl', redirectUrl);
+        
+        // Navigate to the redirect URL
+        router.push(redirectUrl);
       } else {
         // Check if the error is related to connection issues
         if (error && (

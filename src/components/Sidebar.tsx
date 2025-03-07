@@ -128,20 +128,6 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
               </svg>
             </Link>
             
-            <Link 
-              href="/auth-logs" 
-              className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 ${
-                isActive('/auth-logs') 
-                  ? 'bg-white/15 text-white shadow-sm' 
-                  : 'text-purple-100 hover:bg-white/10 hover:text-white'
-              }`}
-              title="Auth Logs"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </Link>
-            
             <button 
               onClick={handleLogout}
               className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mt-4"
@@ -293,20 +279,6 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <span className="whitespace-nowrap">My Profile</span>
-          </Link>
-          
-          <Link 
-            href="/auth-logs" 
-            className={`flex items-center py-2.5 px-4 rounded-lg transition-all ${
-              isActive('/auth-logs') 
-                ? 'bg-white/15 text-white font-medium shadow-sm' 
-                : 'text-purple-100 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="whitespace-nowrap">Auth Logs</span>
           </Link>
           
           <button 
