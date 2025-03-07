@@ -1,0 +1,12 @@
+Full User Journey Test - 2025-03-07T16:27:44.269Z
+
+[2025-03-07T16:27:44.272Z] Starting full user journey test
+[2025-03-07T16:27:44.273Z] Test user: test-user-1741364864268@example.com
+[2025-03-07T16:27:44.273Z] Cleaning up any existing test user
+[2025-03-07T16:27:44.771Z] No existing test user found
+[2025-03-07T16:27:45.760Z] Testing homepage
+[2025-03-07T16:28:10.529Z] Full user journey test failed
+{
+  "error": "Navigating frame was detached",
+  "stack": "Error: Navigating frame was detached\n    at #onFrameDetached (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\LifecycleWatcher.js:103:47)\n    at C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\third_party\\mitt\\mitt.js:62:7\n    at Array.map (<anonymous>)\n    at Object.emit (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\third_party\\mitt\\mitt.js:61:20)\n    at CdpFrame.emit (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\EventEmitter.js:83:23)\n    at #removeFramesRecursively (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\FrameManager.js:455:15)\n    at #onClientDisconnect (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\FrameManager.js:82:42)\n    at C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\FrameManager.js:66:37\n    at onceHandler (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\EventEmitter.js:94:13)\n    at C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\third_party\\mitt\\mitt.js:62:7"
+}

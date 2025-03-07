@@ -357,55 +357,12 @@ function SuccessPageContent() {
 
   // Function to handle dashboard navigation
   const handleDashboardClick = () => {
-    // Get the stored redirect URL from localStorage
-    const storedRedirectUrl = localStorage.getItem('dashboardRedirectUrl');
-    
-    // Create a dashboard URL with the necessary parameters
-    const dashboardUrl = `/dashboard?purchase_success=true&session_id=${sessionId}`;
-    
-    // Store the user ID in localStorage for the middleware to use if needed
-    const storedUserId = localStorage.getItem('checkout_user_id');
-    if (storedUserId) {
-      localStorage.setItem('success_page_user_id', storedUserId);
-    }
-    
     // Log the navigation attempt for debugging
-    console.log(`Navigating to dashboard from success page. Session ID: ${sessionId}`);
+    console.log(`Navigating to dashboard from success page`);
     
-    if (storedRedirectUrl && storedRedirectUrl.startsWith('/dashboard')) {
-      // If there's a stored redirect URL and it's for the dashboard,
-      // ensure it has the purchase_success and session_id parameters
-      try {
-        const url = new URL(storedRedirectUrl, window.location.origin);
-        
-        // Always set these parameters to ensure they're present
-        url.searchParams.set('purchase_success', 'true');
-        if (sessionId) {
-          url.searchParams.set('session_id', sessionId);
-        }
-        
-        // Remove the stored redirect URL to prevent future redirects
-        localStorage.removeItem('dashboardRedirectUrl');
-        
-        // Log the final URL for debugging
-        console.log(`Navigating to dashboard with URL: ${url.pathname + url.search}`);
-        
-        // Use window.location.href instead of router.push to ensure a full page reload
-        window.location.href = url.pathname + url.search;
-      } catch (error) {
-        console.error('Error parsing stored redirect URL:', error);
-        // Fallback to the default dashboard URL
-        window.location.href = dashboardUrl;
-      }
-    } else {
-      // If there's no stored redirect URL or it's not for the dashboard,
-      // use the default dashboard URL with the parameters
-      localStorage.removeItem('dashboardRedirectUrl');
-      console.log(`Navigating to dashboard with URL: ${dashboardUrl}`);
-      
-      // Use window.location.href instead of router.push to ensure a full page reload
-      window.location.href = dashboardUrl;
-    }
+    // Simply navigate to the dashboard without any parameters
+    // Use window.location.href instead of router.push to ensure a full page reload
+    window.location.href = '/dashboard';
   };
 
   // Effect to verify purchase on component mount

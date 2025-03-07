@@ -1,0 +1,12 @@
+Full User Journey Test - 2025-03-07T16:28:46.455Z
+
+[2025-03-07T16:28:46.460Z] Starting full user journey test
+[2025-03-07T16:28:46.461Z] Test user: test-user-1741364926455@example.com
+[2025-03-07T16:28:46.461Z] Cleaning up any existing test user
+[2025-03-07T16:28:46.627Z] No existing test user found
+[2025-03-07T16:28:47.635Z] Testing homepage
+[2025-03-07T16:29:01.039Z] Full user journey test failed
+{
+  "error": "net::ERR_CONNECTION_RESET at http://localhost:3000",
+  "stack": "Error: net::ERR_CONNECTION_RESET at http://localhost:3000\n    at navigate (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:183:27)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at listOnTimeout (node:internal/timers:555:9)\n    at process.processTimers (node:internal/timers:529:7)\n    at async Deferred.race (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\util\\Deferred.js:36:20)\n    at async CdpFrame.goto (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:149:25)\n    at async CdpPage.goto (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Page.js:574:20)\n    at async testHomepage (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\full-user-journey-test.js:209:3)\n    at async runFullJourneyTest (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\full-user-journey-test.js:120:5)"
+}
