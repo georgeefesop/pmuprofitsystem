@@ -1,33 +1,42 @@
 import sys
 import os
-import requests
 import json
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 def execute_sql_query(query):
-    """Execute a SQL query using the MCP server."""
+    """Execute a SQL query using direct PostgreSQL connection."""
     try:
-        # MCP server is typically running on localhost:8000
-        url = "http://localhost:8000/execute_sql_query"
-        
-        # Prepare the request payload
-        payload = {
-            "query": query,
-            "read_only": True  # Set to False if you need to modify data
+        # Default Supabase PostgreSQL connection parameters
+        conn_params = {
+            "host": "localhost",
+            "port": 54322,
+            "database": "postgres",
+            "user": "postgres",
+            "password": "postgres"
         }
         
-        # Send the request to the MCP server
-        response = requests.post(url, json=payload)
+        # Connect to the database
+        conn = psycopg2.connect(**conn_params)
         
-        # Check if the request was successful
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(f"Error: {response.status_code}")
-            print(response.text)
-            return None
+        # Create a cursor with dictionary-like results
+        with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+            # Execute the query
+            cursor.execute(query)
+            
+            # Fetch all results
+            results = cursor.fetchall()
+            
+            # Convert to list of dictionaries
+            data = [dict(row) for row in results]
+            
+            # Close the connection
+            conn.close()
+            
+            return {"data": data, "success": True}
     except Exception as e:
         print(f"Error executing query: {str(e)}")
-        return None
+        return {"data": [], "success": False, "error": str(e)}
 
 def main():
     # Simple query to list all tables in the public schema
@@ -46,7 +55,7 @@ def main():
     print("Executing query to list tables in the public schema...")
     result = execute_sql_query(query)
     
-    if result and 'data' in result:
+    if result and result["success"] and 'data' in result:
         print("\nTables in the public schema:")
         print("============================")
         
@@ -62,7 +71,7 @@ def main():
                 print(f"{table['table_name']:<30} {table['column_count']:<15}")
     else:
         print("Failed to execute query or no results returned.")
-        print("Make sure the MCP server is running.")
+        print("Make sure Supabase is running locally.")
 
 if __name__ == "__main__":
     main() 

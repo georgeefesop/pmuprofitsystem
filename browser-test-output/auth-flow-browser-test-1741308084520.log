@@ -1,0 +1,10 @@
+[2025-03-07T00:41:24.522Z] Starting browser-based authentication flow test
+[2025-03-07T00:41:24.524Z] Test user: test-user-1741308084519@example.com
+[2025-03-07T00:41:24.525Z] Cleaning up any existing test user
+[2025-03-07T00:41:25.022Z] No existing test user found
+[2025-03-07T00:41:26.065Z] Testing pre-checkout page
+[2025-03-07T00:41:28.473Z] Browser-based authentication flow test failed
+{
+  "error": "net::ERR_CONNECTION_REFUSED at http://localhost:3000/pre-checkout",
+  "stack": "Error: net::ERR_CONNECTION_REFUSED at http://localhost:3000/pre-checkout\n    at navigate (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:183:27)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at listOnTimeout (node:internal/timers:555:9)\n    at process.processTimers (node:internal/timers:529:7)\n    at async Deferred.race (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\util\\Deferred.js:36:20)\n    at async CdpFrame.goto (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:149:25)\n    at async CdpPage.goto (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Page.js:574:20)\n    at async testPreCheckout (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\browser-auth-test.js:176:3)\n    at async runBrowserTest (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\browser-auth-test.js:115:5)"
+}

@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -7,6 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
 import { motion } from 'framer-motion';
 import { ConnectionStatus } from '@/components/ui/connection-status';
+// Import commented out to reduce console noise
+// import { AuthDebug } from '@/components/AuthDebug';
 
 // Loading fallback component
 function LoginFormSkeleton() {
@@ -98,6 +102,17 @@ function LoginForm() {
       }
     }
   }, [urlError]);
+
+  useEffect(() => {
+    // Get the redirect URL from the query parameters
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirect');
+    
+    if (redirectTo) {
+      console.log('Storing redirect URL:', redirectTo);
+      localStorage.setItem('redirectTo', redirectTo);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -452,6 +467,11 @@ function LoginForm() {
                 </Link>
               </p>
             </div>
+          </div>
+
+          {/* Add AuthDebug component */}
+          <div className="mt-8">
+            {/* AuthDebug component is commented out */}
           </div>
         </div>
       </div>

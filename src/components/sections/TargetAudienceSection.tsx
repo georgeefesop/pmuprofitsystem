@@ -59,7 +59,7 @@ const TargetAudienceSection = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">{group.title}</h3>
                 <p className="text-gray-600 mb-6">{group.description}</p>
-                <Link href="/checkout" className="text-purple-600 font-medium inline-flex items-center group-hover:text-purple-700">
+                <Link href="/pre-checkout" className="text-purple-600 font-medium inline-flex items-center group-hover:text-purple-700">
                   Get Started
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -99,7 +99,7 @@ const TargetAudienceSection = () => {
                 ))}
               </div>
               
-              <Link href="/checkout" className="btn-primary">
+              <Link href="/pre-checkout" className="btn-primary">
                 Join Them For Only €37
               </Link>
             </div>

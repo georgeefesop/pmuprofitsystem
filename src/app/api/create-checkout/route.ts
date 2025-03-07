@@ -124,6 +124,7 @@ export async function POST(req: NextRequest) {
         cancel_url: `${getSecureSiteUrl()}/checkout`,
         customer_email: email, // Set customer email for better UX
         metadata: metadata,
+        client_reference_id: userId, // Ensure the user ID is passed as client_reference_id
         allow_promotion_codes: true,
       })
     );

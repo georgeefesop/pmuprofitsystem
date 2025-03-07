@@ -21,7 +21,7 @@ async function setupDatabase() {
     console.log('Setting up database schema...');
     
     // Read the SQL file
-    const sqlFilePath = path.join(__dirname, '..', 'supabase-setup.sql');
+    const sqlFilePath = path.join(__dirname, '..', 'sql', 'setup-database-schema.sql');
     const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
     
     // Split the SQL content into individual statements

@@ -1,0 +1,3056 @@
+[2025-03-06T23:50:21.229Z] Starting browser-based authentication flow test
+[2025-03-06T23:50:21.232Z] Test user: test-user-1741305021226@example.com
+[2025-03-06T23:50:21.233Z] Cleaning up any existing test user
+[2025-03-06T23:50:21.638Z] No existing test user found
+[2025-03-06T23:50:22.854Z] Testing pre-checkout page
+[2025-03-06T23:50:23.480Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-06T23:50:23.544Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+[2025-03-06T23:50:23.638Z] BROWSER CONSOLE [ERR]: Failed to load resource: the server responded with a status of 404 (Not Found)
+[2025-03-06T23:50:23.642Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T23:50:23.643Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T23:50:23.645Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T23:50:23.646Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T23:50:23.669Z] BROWSER CONSOLE [LOG]: Session check result: No session
+[2025-03-06T23:50:23.670Z] BROWSER CONSOLE [LOG]: No session found
+[2025-03-06T23:50:23.672Z] BROWSER CONSOLE [LOG]: Session check result: No session
+[2025-03-06T23:50:23.673Z] BROWSER CONSOLE [LOG]: No session found
+[2025-03-06T23:50:23.673Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION No session
+[2025-03-06T23:50:23.796Z] BROWSER CONSOLE [VER]: [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o
+[2025-03-06T23:50:24.539Z] Pre-checkout page cookies
+[]
+[2025-03-06T23:50:24.666Z] Pre-checkout page localStorage
+{}
+[2025-03-06T23:50:24.668Z] Pre-checkout page sessionStorage
+{}
+[2025-03-06T23:50:24.728Z] Pre-checkout page loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/pre-checkout"
+}
+[2025-03-06T23:50:25.695Z] Buttons and links on pre-checkout page
+[
+  {
+    "type": "a",
+    "text": "PMU Profit System",
+    "id": "navbar-logo",
+    "className": "flex items-center pl-6",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "nav-link-home",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "nav-link-features",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Pricing",
+    "id": "nav-link-pricing",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#pricing"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "nav-link-faq",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "Login",
+    "id": "auth-button-login",
+    "className": "",
+    "href": "http://localhost:3000/login"
+  },
+  {
+    "type": "button",
+    "text": "Login",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50 border-none",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Buy Now",
+    "id": "buy-now-button",
+    "className": "",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "button",
+    "text": "Buy Now",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 shadow h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Toggle menu",
+    "id": "mobile-menu-toggle",
+    "className": "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 w-9 md:hidden text-white hover:bg-purple-800/50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Create Account & Continue",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-9 w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Sign in",
+    "id": "",
+    "className": "text-indigo-600 hover:text-indigo-800 font-medium",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Sign in",
+    "id": "",
+    "className": "text-indigo-600 hover:text-indigo-800 font-medium",
+    "href": "http://localhost:3000/login?redirect=/checkout?products=pmu-profit-system"
+  },
+  {
+    "type": "a",
+    "text": "Facebook",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://facebook.com/"
+  },
+  {
+    "type": "a",
+    "text": "Instagram",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://instagram.com/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Testimonials",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#testimonials"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "About",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/about"
+  },
+  {
+    "type": "a",
+    "text": "Contact",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/contact"
+  },
+  {
+    "type": "a",
+    "text": "Privacy",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookies",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  },
+  {
+    "type": "a",
+    "text": "Privacy Policy\nPrivacy",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms of Service\nTerms",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookie Policy\nCookies",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  }
+]
+[2025-03-06T23:50:25.731Z] Testing signup process
+[2025-03-06T23:50:25.732Z] Looking for signup button or link
+[2025-03-06T23:50:26.945Z] Found "Create Account & Continue" button
+[2025-03-06T23:50:29.775Z] Looking for email input
+[2025-03-06T23:50:30.028Z] Filling out signup form with email: test-user-1741305021226@example.com
+[2025-03-06T23:50:33.651Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-06T23:50:33.666Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-06T23:50:35.091Z] Filling out password
+[2025-03-06T23:50:37.015Z] Clicking submit button
+[2025-03-06T23:50:37.524Z] BROWSER CONSOLE [LOG]: Creating user account...
+[2025-03-06T23:50:37.526Z] NETWORK REQUEST: POST http://localhost:3000/api/auth/signup
+[2025-03-06T23:50:38.407Z] NETWORK RESPONSE: 200 http://localhost:3000/api/auth/signup
+[2025-03-06T23:50:38.409Z] BROWSER CONSOLE [LOG]: Signup API response: JSHandle@object
+[2025-03-06T23:50:38.410Z] BROWSER CONSOLE [LOG]: User account created successfully, now signing in directly with Supabase client...
+[2025-03-06T23:50:38.411Z] NETWORK REQUEST: POST https://duxqazuhozfejdocxiyl.supabase.co/auth/v1/token?grant_type=password
+[2025-03-06T23:50:38.464Z] RESPONSE BODY: http://localhost:3000/api/auth/signup
+{
+  "success": true,
+  "user": {
+    "id": "12d03c52-4a34-4d53-8909-b7c42d5f3ff4",
+    "email": "test-user-1741305021226@example.com",
+    "fullName": "hgdh hgdgh"
+  }
+}
+[2025-03-06T23:50:38.736Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/auth/v1/token?grant_type=password
+[2025-03-06T23:50:38.751Z] BROWSER CONSOLE [LOG]: Auth state changed: SIGNED_IN User logged in
+[2025-03-06T23:50:38.752Z] BROWSER CONSOLE [LOG]: User signed in, checking for redirect
+[2025-03-06T23:50:38.753Z] BROWSER CONSOLE [LOG]: Redirecting to: /dashboard
+[2025-03-06T23:50:38.753Z] BROWSER CONSOLE [LOG]: Supabase sign-in successful: JSHandle@object
+[2025-03-06T23:50:38.754Z] BROWSER CONSOLE [LOG]: Account created and signed in successfully, redirecting to checkout
+[2025-03-06T23:50:38.755Z] NETWORK REQUEST: GET http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1ezc7
+[2025-03-06T23:50:38.756Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:38.757Z] NETWORK RESPONSE: 200 http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1ezc7
+[2025-03-06T23:50:38.759Z] NETWORK REQUEST: GET http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1u4ki
+[2025-03-06T23:50:38.786Z] NETWORK RESPONSE: 200 http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1u4ki
+[2025-03-06T23:50:38.834Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:38.992Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:38.995Z] BROWSER CONSOLE [LOG]: Loading finished, completing auth check
+[2025-03-06T23:50:38.995Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:38.996Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:38.997Z] BROWSER CONSOLE [LOG]: Loading finished, completing auth check
+[2025-03-06T23:50:38.998Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:38.999Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:39.000Z] BROWSER CONSOLE [LOG]: User just signed up, not redirecting
+[2025-03-06T23:50:39.172Z] BROWSER CONSOLE [WAR]: You may test your Stripe.js integration over HTTP. However, live Stripe.js integrations must use HTTPS.
+[2025-03-06T23:50:40.059Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.060Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.168Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: disableLink is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.170Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: linkAuthenticationElement is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.172Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: fields is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.174Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: wallets is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.183Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: disableLink is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.185Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: linkAuthenticationElement is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.187Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: fields is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.188Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: wallets is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:40.190Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.192Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.215Z] NETWORK REQUEST: POST https://merchant-ui-api.stripe.com/elements/wallet-config
+[2025-03-06T23:50:40.240Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:40.246Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:40.247Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:40.248Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:40.250Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.252Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.253Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.254Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:40.698Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-06T23:50:40.761Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+[2025-03-06T23:50:40.869Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T23:50:40.870Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T23:50:40.872Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T23:50:40.873Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T23:50:40.887Z] BROWSER CONSOLE [LOG]: Storing redirect URL: /dashboard
+[2025-03-06T23:50:40.888Z] BROWSER CONSOLE [LOG]: Storing redirect URL: /dashboard
+[2025-03-06T23:50:40.903Z] BROWSER CONSOLE [LOG]: Session check result: Session found
+[2025-03-06T23:50:40.905Z] BROWSER CONSOLE [LOG]: User authenticated: test-user-1741305021226@example.com
+[2025-03-06T23:50:40.919Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:40.920Z] BROWSER CONSOLE [LOG]: Session check result: Session found
+[2025-03-06T23:50:40.922Z] BROWSER CONSOLE [LOG]: User authenticated: test-user-1741305021226@example.com
+[2025-03-06T23:50:40.923Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION User logged in
+[2025-03-06T23:50:40.934Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:40.936Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:40.938Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:41.028Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:41.107Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:41.201Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:41.387Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.389Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.391Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.452Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.455Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.456Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.457Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.485Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.486Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.488Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.516Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.524Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.527Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.529Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.549Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.581Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.583Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.584Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.585Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.644Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.646Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.648Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.649Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.676Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.678Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.679Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.707Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.738Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.740Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.742Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.743Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.770Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.772Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.774Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.797Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.817Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.820Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.821Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.824Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.849Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.851Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.852Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.876Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.896Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.898Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.900Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.912Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.928Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.929Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.931Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.954Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:41.975Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.977Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:41.978Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:41.990Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.006Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.008Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.010Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.031Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.053Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.055Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.056Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.069Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.085Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.086Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.088Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.107Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.132Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.134Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.135Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.144Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.163Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.166Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.167Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.186Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.210Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.212Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.214Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.225Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.242Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.244Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.246Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.264Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.290Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.291Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.293Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.305Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.320Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.323Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.324Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.352Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.368Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.370Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.371Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.385Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.416Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.418Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.420Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.433Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.449Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.450Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.452Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.473Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.497Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.498Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.499Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.511Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.529Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.530Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.532Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.550Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.576Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.578Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.579Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.593Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.607Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.609Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.611Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.702Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.704Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.705Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.706Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.707Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.708Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.709Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.710Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.735Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.737Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.738Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.767Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.768Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.769Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.771Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.772Z] Cookies after signup
+[
+  {
+    "name": "auth-status",
+    "value": "authenticated",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741308638.35025,
+    "size": 24,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-refresh-token",
+    "value": "bScSos3Fgp99ErtNsyP5vA",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1743897038.350207,
+    "size": 38,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-access-token",
+    "value": "eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIxMmQwM2M1Mi00YTM0LTRkNTMtODkwOS1iN2M0MmQ1ZjNmZjQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzA4NjM4LCJpYXQiOjE3NDEzMDUwMzgsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzMDUwMjEyMjZAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJoZ2RoIGhnZGdoIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NDEzMDUwMzh9XSwic2Vzc2lvbl9pZCI6ImE5MmMyYzZlLWFiZjYtNDNhZS1iOGJiLTA0YzQyMGRjNjBhMSIsImlzX2Fub255bW91cyI6ZmFsc2V9.QIj8WwIbZdEj0gi-0FlPX9mePTxr-3HA29NidJdqt3E",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741308638.349634,
+    "size": 798,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  }
+]
+[2025-03-06T23:50:42.781Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.791Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.814Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.815Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.817Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.845Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.849Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.850Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.852Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.868Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.877Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.879Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.880Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.904Z] localStorage after signup
+{
+  "sb-duxqazuhozfejdocxiyl-auth-token": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIxMmQwM2M1Mi00YTM0LTRkNTMtODkwOS1iN2M0MmQ1ZjNmZjQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzA4NjM5LCJpYXQiOjE3NDEzMDUwMzksImVtYWlsIjoidGVzdC11c2VyLTE3NDEzMDUwMjEyMjZAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJoZ2RoIGhnZGdoIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NDEzMDUwMzl9XSwic2Vzc2lvbl9pZCI6IjZiMDFiM2VjLTUzZTctNDYyMS04NTQ3LWM0ZDk0OGVlNTdlNSIsImlzX2Fub255bW91cyI6ZmFsc2V9.3RcGDenhM6Rh_eEClorfuZyGldvaFpd6dHgAGpgmeM0\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1741308639,\"refresh_token\":\"UooPare6cEVO9R5TcfSSFg\",\"user\":{\"id\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"test-user-1741305021226@example.com\",\"email_confirmed_at\":\"2025-03-06T23:50:38.580936Z\",\"phone\":\"\",\"confirmed_at\":\"2025-03-06T23:50:38.580936Z\",\"last_sign_in_at\":\"2025-03-06T23:50:39.067287601Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true,\"full_name\":\"hgdh hgdgh\"},\"identities\":[{\"identity_id\":\"c386e121-bc72-4416-b098-1c1c379df50d\",\"id\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\",\"user_id\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\",\"identity_data\":{\"email\":\"test-user-1741305021226@example.com\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\"},\"provider\":\"email\",\"last_sign_in_at\":\"2025-03-06T23:50:38.577523Z\",\"created_at\":\"2025-03-06T23:50:38.577582Z\",\"updated_at\":\"2025-03-06T23:50:38.577582Z\",\"email\":\"test-user-1741305021226@example.com\"}],\"created_at\":\"2025-03-06T23:50:38.571687Z\",\"updated_at\":\"2025-03-06T23:50:39.069082Z\",\"is_anonymous\":false}}",
+  "redirectTo": "/dashboard"
+}
+[2025-03-06T23:50:42.911Z] sessionStorage after signup
+{
+  "lastSignupEmail": "test-user-1741305021226@example.com",
+  "isAuthenticating": "true"
+}
+[2025-03-06T23:50:42.913Z] Testing redirect to checkout page
+[2025-03-06T23:50:42.915Z] Current URL: http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-06T23:50:42.916Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.918Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.920Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.921Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.941Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:42.971Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.974Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:42.975Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:42.976Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.074Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.075Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.077Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.078Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.079Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.080Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.082Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.083Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.085Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.086Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.090Z] Waiting for redirect to checkout page
+[2025-03-06T23:50:43.114Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.117Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.119Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.143Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.145Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.147Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.158Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.160Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.161Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.171Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.189Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.191Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.193Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.212Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.236Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.238Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.239Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.249Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.269Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.270Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.272Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.299Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.301Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.302Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.304Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.323Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.346Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.349Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.351Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.361Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.378Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.381Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.383Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.411Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.426Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.429Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.431Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.434Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.458Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.461Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.462Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.490Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.492Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.494Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.495Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.522Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.524Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.525Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.527Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.554Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.556Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.558Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.559Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.580Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.602Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.604Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.605Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.617Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.634Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.636Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.637Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.656Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.681Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.683Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.684Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.696Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.713Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.715Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.716Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.736Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.760Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.762Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.764Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.769Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.791Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.793Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.795Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.823Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.825Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.827Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.828Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.855Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.857Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.858Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.860Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.879Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.903Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.905Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.906Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.919Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.935Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.937Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.938Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.958Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:43.982Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.983Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:43.985Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:43.995Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.012Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.015Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.016Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.035Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.060Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.061Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.063Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.070Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.091Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.093Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.094Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.121Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.123Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.124Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.126Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.152Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.168Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.170Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.172Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.178Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.200Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.201Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.203Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.231Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.233Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.235Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.237Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.254Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.278Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.279Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.281Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.289Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.308Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.310Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.311Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.339Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.341Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.343Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.344Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.364Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.387Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.389Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.390Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.403Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.418Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.420Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.422Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.449Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.458Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.460Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.461Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.479Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.511Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.513Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.515Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.516Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.558Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.560Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.562Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.574Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.606Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.608Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.609Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.621Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.638Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.641Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.642Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.660Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.686Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.687Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.689Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.695Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.718Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.720Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.721Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.750Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.752Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.753Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.755Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.782Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.783Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.785Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.786Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.805Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.829Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.831Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.833Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.841Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.861Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.863Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.864Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.893Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.894Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.896Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.897Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.918Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.940Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.942Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.943Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.956Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:44.972Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.973Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:44.974Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:44.994Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.020Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.021Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.022Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.026Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.052Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.053Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.055Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.084Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.086Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.087Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.089Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.116Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.117Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.119Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.121Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.139Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.148Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.149Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.151Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.177Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.196Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.197Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.198Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.212Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.244Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.245Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.247Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.253Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.276Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.278Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.279Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.307Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.308Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.309Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.310Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.339Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.341Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.342Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.355Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.361Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.386Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.387Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.388Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.395Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.418Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.420Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.422Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.450Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.452Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.453Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.455Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.481Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.483Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.484Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.486Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.512Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.514Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.515Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.517Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.544Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.545Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.547Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.548Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.576Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.577Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.580Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.581Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.607Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.623Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.625Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.626Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.639Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.655Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.657Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.658Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.686Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.687Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.688Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.689Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.716Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.718Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.719Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.721Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.740Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.763Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.765Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.767Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.774Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.795Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.797Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.798Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.826Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.828Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.831Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.833Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.850Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.873Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.876Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.877Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.886Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.903Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.906Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.907Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.929Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.950Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.951Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.952Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.966Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:45.982Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:45.983Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:45.985Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.007Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.028Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.029Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.031Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.043Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.059Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.061Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.063Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.083Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.106Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.108Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.109Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.115Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.138Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.140Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.141Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.170Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.172Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.173Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.174Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.193Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.218Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.220Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.221Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.229Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.249Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.250Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.252Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.281Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.282Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.283Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.284Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.305Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.328Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.329Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.330Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.343Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.358Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.360Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.362Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.388Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.404Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.405Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.407Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.416Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.436Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.438Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.439Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.468Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.470Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.472Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.474Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.492Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.515Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.517Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.518Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.531Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.547Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.549Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.550Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.576Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.594Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.595Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.596Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.610Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.642Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.643Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.645Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.656Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.673Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.675Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.676Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.700Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.720Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.722Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.724Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.735Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.766Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.769Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.770Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.777Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.798Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.799Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.801Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.828Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.830Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.832Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.833Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.860Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.877Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.879Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.881Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.882Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.907Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.909Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.911Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.940Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.942Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.943Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.944Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.962Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:46.971Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.973Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:46.975Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:46.997Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.018Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.020Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.021Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.032Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.049Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.051Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.053Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.073Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.096Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.098Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.100Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.110Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.129Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.130Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.132Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.152Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.176Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.178Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.179Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.188Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.207Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.209Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.210Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.239Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.241Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.243Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.244Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.267Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.285Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.287Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.289Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.302Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.333Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.335Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.336Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.344Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.365Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.366Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.368Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.396Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.398Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.399Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.400Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.423Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.443Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.445Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.446Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.458Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.475Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.477Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.478Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.498Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.521Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.523Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.525Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.536Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.552Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.554Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.555Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.576Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.600Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.602Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.604Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.609Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.631Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.633Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.634Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.663Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.665Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.666Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.668Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.691Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.709Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.711Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.712Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.724Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.754Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.756Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.757Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.769Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.785Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.787Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.788Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.810Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.833Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.834Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.836Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.842Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.865Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.867Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.868Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.897Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.899Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.900Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.901Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.929Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.931Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.933Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.934Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.952Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:47.977Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.979Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:47.980Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:47.984Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.009Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.011Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.013Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.032Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.041Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.043Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.044Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.065Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.087Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.089Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.091Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.103Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.119Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.121Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.123Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.151Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.167Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.169Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.171Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.177Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.199Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.201Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.202Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.231Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.232Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.234Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.236Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.263Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.265Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.266Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.268Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.288Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.309Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.311Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.312Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.320Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.340Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.342Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.343Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.372Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.374Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.376Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.377Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.395Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.417Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.420Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.421Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.428Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.449Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.451Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.452Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.480Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.482Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.483Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.484Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.504Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.528Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.530Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.531Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.539Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.560Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.563Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.564Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.592Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.594Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.595Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.597Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.615Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.639Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.641Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.642Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.648Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.671Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.673Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.674Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.703Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.705Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.707Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.708Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.733Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.735Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.737Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.738Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.765Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.766Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.768Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.770Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.791Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.811Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.813Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.814Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.826Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.857Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.859Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.860Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.866Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.889Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.890Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.892Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.919Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.921Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.922Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.924Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.947Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:48.966Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.968Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:48.969Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:48.982Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.013Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.014Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.015Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.022Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.044Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.047Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.048Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.074Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.075Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.077Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.078Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.106Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.122Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.123Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.124Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.129Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.153Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.155Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.156Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.185Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.187Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.189Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.190Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.207Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.216Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.218Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.220Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.240Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.263Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.264Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.266Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.275Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.294Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.295Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.297Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.325Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.327Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.328Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.330Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.350Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.373Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.375Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.376Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.386Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.405Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.407Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.408Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.437Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.438Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.439Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.441Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.461Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.484Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.486Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.487Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.498Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.516Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.517Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.518Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.538Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.564Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.565Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.566Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.575Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.595Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.596Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.598Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.627Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.629Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.630Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.632Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.649Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.675Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.677Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.677Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.683Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.706Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.708Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.709Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.738Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.739Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.741Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.742Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.769Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.771Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.773Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.775Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.793Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.816Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.818Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.819Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.827Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.846Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.848Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.849Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.878Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.879Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.881Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.882Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.901Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.925Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.927Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.928Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.938Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.957Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.959Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.960Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.989Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:49.990Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:49.992Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:49.993Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.012Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.036Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.038Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.040Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.048Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.068Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.070Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.071Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.092Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.116Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.117Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.119Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.126Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.148Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.150Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.151Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.179Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.181Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.184Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.185Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.202Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.225Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.227Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.228Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.237Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.256Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.257Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.258Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.285Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.301Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.303Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.313Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.314Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.332Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.334Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.336Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.379Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.380Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.381Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.383Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.395Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.397Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.398Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.400Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.442Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.444Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.445Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.446Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.449Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.474Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.476Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.478Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.506Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.508Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.509Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.510Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.538Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.540Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.542Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.543Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.570Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.572Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.574Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.576Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.594Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.618Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.620Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.621Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.631Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.650Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.652Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.653Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.682Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.684Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.686Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.687Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.705Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.729Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.731Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.732Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.739Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.760Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.761Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.762Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.791Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.793Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.794Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.796Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.822Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.837Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.839Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.840Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.848Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.869Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.871Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.872Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.873Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-06T23:50:50.874Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-06T23:50:50.901Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.903Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.906Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.907Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.923Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.934Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.936Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.938Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.959Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:50.982Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.984Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:50.985Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:50.992Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.012Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.014Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.016Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.044Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.046Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.048Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.049Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.069Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.090Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.092Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.093Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.105Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.122Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.124Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.125Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.146Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.167Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.169Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.170Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.182Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.198Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.200Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.202Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.222Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.244Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.246Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.248Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.259Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.275Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.276Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.278Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.300Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.323Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.324Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.326Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.338Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.354Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.356Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.357Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.380Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.401Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.403Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.405Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.417Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.433Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.435Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.436Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.456Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.480Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.482Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.484Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.490Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.512Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.514Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.516Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.543Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.545Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.546Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.547Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.575Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.576Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.578Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.579Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.599Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.620Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.622Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.624Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.634Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.652Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.667Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.669Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.675Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.700Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.702Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.703Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.732Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.734Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.735Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.736Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.763Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.764Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.765Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.767Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.787Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.811Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.813Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.814Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.818Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.842Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.844Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.845Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.873Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.876Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.878Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.879Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.896Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.920Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.922Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.923Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.934Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.951Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.953Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:51.954Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:51.978Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:51.999Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.001Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.002Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.015Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.030Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.033Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.034Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.055Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.077Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.079Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.080Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.090Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.108Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.110Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.111Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.140Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.142Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.144Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.145Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.162Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.186Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.188Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.190Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.197Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.218Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.220Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.221Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.250Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.251Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.253Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.255Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.273Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.297Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.299Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.301Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.310Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.328Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.331Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.332Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.360Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.363Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.365Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.366Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.382Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.407Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.409Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.411Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.419Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.439Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.441Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.442Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.471Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.472Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.474Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.475Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.495Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.519Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.521Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.522Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.530Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.551Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.553Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.555Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.583Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.585Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.586Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.588Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.615Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.616Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.618Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.620Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.639Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.663Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.665Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.666Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.673Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.695Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.697Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.699Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.727Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.728Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.730Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.732Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.758Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.759Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.761Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.763Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.790Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.805Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.807Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.808Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.822Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.838Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.841Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.842Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.869Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.870Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.872Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.873Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.900Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.902Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.904Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.904Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.932Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.934Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.935Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.937Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.962Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.965Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.966Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.967Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:52.994Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.996Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:52.997Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:52.999Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.026Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.028Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.029Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.030Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.057Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.059Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.060Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.061Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.089Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.091Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.093Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.094Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.096Z] Navigation timeout waiting for redirect
+{
+  "error": "Navigation timeout of 10000 ms exceeded"
+}
+[2025-03-06T23:50:53.097Z] New URL after waiting: http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-06T23:50:53.122Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.123Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.124Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.125Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.154Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.156Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.157Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.158Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.186Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.255Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.257Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.258Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.261Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.263Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.263Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.265Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.266Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.267Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.268Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.270Z] Testing checkout page
+[2025-03-06T23:50:53.270Z] Navigating to checkout page
+[2025-03-06T23:50:53.297Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.330Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.331Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.332Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.333Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.334Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+{
+  "authenticated": false,
+  "message": "No active session"
+}
+[2025-03-06T23:50:53.336Z] NETWORK RESPONSE: 200 http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.338Z] BROWSER CONSOLE [LOG]: Auth debug data: JSHandle@object
+[2025-03-06T23:50:53.339Z] NETWORK REQUEST: GET http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.466Z] BROWSER CONSOLE [ERR]: Error fetching auth debug data: JSHandle@error
+[2025-03-06T23:50:53.486Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.487Z] RESPONSE BODY: http://localhost:3000/api/debug/auth-state
+[2025-03-06T23:50:53.867Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-06T23:50:53.915Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+[2025-03-06T23:50:53.995Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T23:50:53.997Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T23:50:53.998Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T23:50:53.999Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T23:50:53.999Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:54.000Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:54.002Z] BROWSER CONSOLE [LOG]: Auth cookies detected, waiting for auth state to initialize
+[2025-03-06T23:50:54.002Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:54.003Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:54.004Z] BROWSER CONSOLE [LOG]: Auth cookies detected, waiting for auth state to initialize
+[2025-03-06T23:50:54.008Z] BROWSER CONSOLE [LOG]: Session check result: Session found
+[2025-03-06T23:50:54.009Z] BROWSER CONSOLE [LOG]: User authenticated: test-user-1741305021226@example.com
+[2025-03-06T23:50:54.012Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:54.014Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:54.015Z] BROWSER CONSOLE [LOG]: Session check result: Session found
+[2025-03-06T23:50:54.016Z] BROWSER CONSOLE [LOG]: User authenticated: test-user-1741305021226@example.com
+[2025-03-06T23:50:54.018Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:54.019Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:54.020Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION User logged in
+[2025-03-06T23:50:54.042Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:54.044Z] BROWSER CONSOLE [LOG]: Loading finished, completing auth check
+[2025-03-06T23:50:54.045Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-06T23:50:54.046Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-06T23:50:54.047Z] BROWSER CONSOLE [LOG]: Auth state: JSHandle@object
+[2025-03-06T23:50:54.048Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:54.049Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:54.050Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:54.060Z] BROWSER CONSOLE [WAR]: You may test your Stripe.js integration over HTTP. However, live Stripe.js integrations must use HTTPS.
+[2025-03-06T23:50:54.125Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:54.202Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:54.300Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.12d03c52-4a34-4d53-8909-b7c42d5f3ff4&status=eq.completed
+[2025-03-06T23:50:54.368Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.370Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.383Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.384Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.392Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: disableLink is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.393Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: linkAuthenticationElement is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.395Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: fields is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.396Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: wallets is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.407Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: disableLink is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.408Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: linkAuthenticationElement is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.409Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: fields is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.410Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: wallets is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-06T23:50:54.412Z] NETWORK REQUEST: POST https://merchant-ui-api.stripe.com/elements/wallet-config
+[2025-03-06T23:50:54.424Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:54.425Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:54.426Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:54.428Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:54.428Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.440Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.442Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.443Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.630Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.631Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-06T23:50:54.632Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:54.633Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:54.635Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:54.636Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:54.725Z] NETWORK RESPONSE: 200 https://merchant-ui-api.stripe.com/elements/wallet-config
+[2025-03-06T23:50:54.727Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:54.931Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:55.458Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:55.460Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:55.462Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:55.517Z] Checkout page cookies
+[
+  {
+    "name": "auth-status",
+    "value": "authenticated",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741308638.35025,
+    "size": 24,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-refresh-token",
+    "value": "bScSos3Fgp99ErtNsyP5vA",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1743897038.350207,
+    "size": 38,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-access-token",
+    "value": "eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIxMmQwM2M1Mi00YTM0LTRkNTMtODkwOS1iN2M0MmQ1ZjNmZjQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzA4NjM4LCJpYXQiOjE3NDEzMDUwMzgsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzMDUwMjEyMjZAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJoZ2RoIGhnZGdoIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NDEzMDUwMzh9XSwic2Vzc2lvbl9pZCI6ImE5MmMyYzZlLWFiZjYtNDNhZS1iOGJiLTA0YzQyMGRjNjBhMSIsImlzX2Fub255bW91cyI6ZmFsc2V9.QIj8WwIbZdEj0gi-0FlPX9mePTxr-3HA29NidJdqt3E",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741308638.349634,
+    "size": 798,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  }
+]
+[2025-03-06T23:50:55.627Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:55.642Z] localStorage on checkout page
+{
+  "sb-duxqazuhozfejdocxiyl-auth-token": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIxMmQwM2M1Mi00YTM0LTRkNTMtODkwOS1iN2M0MmQ1ZjNmZjQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzA4NjM5LCJpYXQiOjE3NDEzMDUwMzksImVtYWlsIjoidGVzdC11c2VyLTE3NDEzMDUwMjEyMjZAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJoZ2RoIGhnZGdoIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NDEzMDUwMzl9XSwic2Vzc2lvbl9pZCI6IjZiMDFiM2VjLTUzZTctNDYyMS04NTQ3LWM0ZDk0OGVlNTdlNSIsImlzX2Fub255bW91cyI6ZmFsc2V9.3RcGDenhM6Rh_eEClorfuZyGldvaFpd6dHgAGpgmeM0\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1741308639,\"refresh_token\":\"UooPare6cEVO9R5TcfSSFg\",\"user\":{\"id\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"test-user-1741305021226@example.com\",\"email_confirmed_at\":\"2025-03-06T23:50:38.580936Z\",\"phone\":\"\",\"confirmed_at\":\"2025-03-06T23:50:38.580936Z\",\"last_sign_in_at\":\"2025-03-06T23:50:39.067287601Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true,\"full_name\":\"hgdh hgdgh\"},\"identities\":[{\"identity_id\":\"c386e121-bc72-4416-b098-1c1c379df50d\",\"id\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\",\"user_id\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\",\"identity_data\":{\"email\":\"test-user-1741305021226@example.com\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"12d03c52-4a34-4d53-8909-b7c42d5f3ff4\"},\"provider\":\"email\",\"last_sign_in_at\":\"2025-03-06T23:50:38.577523Z\",\"created_at\":\"2025-03-06T23:50:38.577582Z\",\"updated_at\":\"2025-03-06T23:50:38.577582Z\",\"email\":\"test-user-1741305021226@example.com\"}],\"created_at\":\"2025-03-06T23:50:38.571687Z\",\"updated_at\":\"2025-03-06T23:50:39.069082Z\",\"is_anonymous\":false}}",
+  "redirectTo": "/dashboard"
+}
+[2025-03-06T23:50:55.646Z] sessionStorage on checkout page
+{
+  "lastSignupEmail": "test-user-1741305021226@example.com"
+}
+[2025-03-06T23:50:55.649Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-06T23:50:55.650Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:55.651Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:55.657Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-06T23:50:55.705Z] Checkout page loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/checkout"
+}
+[2025-03-06T23:50:55.707Z] Browser-based authentication flow test completed successfully

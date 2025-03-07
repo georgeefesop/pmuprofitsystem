@@ -49,6 +49,10 @@ function SuccessPageContent() {
     includesAdGenerator: boolean;
     includesBlueprint: boolean;
   } | null>(null);
+  const [entitlementStatus, setEntitlementStatus] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   // Animation variants
   const containerVariants = {
@@ -159,13 +163,17 @@ function SuccessPageContent() {
         // Set email from session details
         setEmail(data.sessionDetails.customer_email || '');
         
-        // Determine which products were purchased based on the amount
-        const totalAmount = data.sessionDetails.amount_total || 0;
+        // Determine which products were purchased based on the API response
+        // Use the explicit values from the API response if available
+        const includesAdGenerator = data.includeAdGenerator === true;
+        const includesBlueprint = data.includeBlueprint === true;
         
-        // Basic logic to determine what was purchased based on price
-        // This is a simplified approach - ideally we would have line items
-        const includesAdGenerator = totalAmount >= 64; // Base + Ad Generator
-        const includesBlueprint = totalAmount >= 70; // Base + Blueprint
+        console.log('Purchase details:', {
+          userId: data.userId,
+          includesAdGenerator,
+          includesBlueprint,
+          amount: data.sessionDetails.amount_total
+        });
         
         setPurchaseDetails({
           email: data.sessionDetails.customer_email || '',
@@ -176,18 +184,83 @@ function SuccessPageContent() {
         
         // Store the purchase in context if user is logged in
         try {
+          // Always add the main product
+          console.log('Adding PMU Profit System to purchases');
           await addPurchase('pmu-profit-system', 3700); // $37.00 in cents
           
+          // Only add the add-ons if they were purchased
           if (includesAdGenerator) {
+            console.log('Adding Ad Generator to purchases');
             await addPurchase('pmu-ad-generator', 2700); // $27.00 in cents
           }
           
           if (includesBlueprint) {
+            console.log('Adding Blueprint to purchases');
             await addPurchase('consultation-success-blueprint', 3300); // $33.00 in cents
           }
         } catch (purchaseError) {
           console.error('Error adding purchase to context:', purchaseError);
           // Continue anyway - this is not critical
+        }
+        
+        // If we have a redirect URL, store it for later use
+        if (data.redirectUrl) {
+          localStorage.setItem('dashboardRedirectUrl', data.redirectUrl);
+        }
+
+        // Create entitlements via API endpoint
+        if (data.userId && sessionId) {
+          console.log('Creating entitlements for user:', data.userId);
+          try {
+            const entitlementResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${data.userId}`);
+            const entitlementResult = await entitlementResponse.json();
+            
+            console.log('Entitlement creation result:', entitlementResult);
+            setEntitlementStatus(entitlementResult);
+          } catch (entitlementError) {
+            console.error('Error creating entitlements:', entitlementError);
+            setEntitlementStatus({
+              success: false,
+              message: `Error creating entitlements: ${(entitlementError as Error).message}`
+            });
+          }
+        } else {
+          // Try to get the user ID from localStorage as a backup
+          const backupUserId = localStorage.getItem('checkout_user_id');
+          
+          if (backupUserId && sessionId) {
+            console.log('Using backup user ID from localStorage:', backupUserId);
+            try {
+              const entitlementResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${backupUserId}`);
+              const entitlementResult = await entitlementResponse.json();
+              
+              console.log('Entitlement creation result (using backup ID):', entitlementResult);
+              setEntitlementStatus(entitlementResult);
+              
+              // Clear the backup user ID after use
+              localStorage.removeItem('checkout_user_id');
+            } catch (entitlementError) {
+              console.error('Error creating entitlements with backup ID:', entitlementError);
+              setEntitlementStatus({
+                success: false,
+                message: `Error creating entitlements: ${(entitlementError as Error).message}`
+              });
+            }
+          } else {
+            console.error('No user ID found in verification response or localStorage. Full response:', {
+              ...data,
+              sessionDetails: {
+                ...data.sessionDetails,
+                // Exclude any sensitive data
+                payment_intent: data.sessionDetails.payment_intent ? '[REDACTED]' : null
+              }
+            });
+            
+            setEntitlementStatus({
+              success: false,
+              message: 'User ID not found. Please contact support if your purchase is not showing up.'
+            });
+          }
         }
       } else {
         throw new Error('Purchase verification failed');
@@ -199,6 +272,21 @@ function SuccessPageContent() {
       setIsLoading(false);
     }
   }
+
+  // Function to handle dashboard navigation
+  const handleDashboardClick = () => {
+    // Check if we have a stored redirect URL
+    const redirectUrl = localStorage.getItem('dashboardRedirectUrl');
+    if (redirectUrl) {
+      // Clear the stored URL to prevent reuse
+      localStorage.removeItem('dashboardRedirectUrl');
+      // Navigate to the redirect URL
+      window.location.href = redirectUrl;
+    } else {
+      // Default to regular dashboard URL
+      window.location.href = '/dashboard';
+    }
+  };
 
   // Effect to verify purchase on component mount
   useEffect(() => {
@@ -310,13 +398,26 @@ function SuccessPageContent() {
                     <p className="mt-1 text-sm text-gray-600">
                       You can now access your purchase immediately. Your account has been created and you're already logged in.
                     </p>
-                    <div className="mt-3">
-                      <Link 
-                        href="/dashboard" 
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    
+                    {/* Entitlement status message */}
+                    {entitlementStatus && !entitlementStatus.success && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-100 rounded text-sm text-yellow-700">
+                        Note: We're still processing your purchase. If you don't see your items in your dashboard, 
+                        please wait a few minutes and refresh the page.
+                      </div>
+                    )}
+                    
+                    <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                      <motion.button
+                        variants={itemVariants}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 flex items-center justify-center"
+                        onClick={handleDashboardClick}
                       >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
                         Go to Dashboard
-                      </Link>
+                      </motion.button>
                     </div>
                   </div>
                 </div>

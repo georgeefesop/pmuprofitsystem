@@ -304,20 +304,6 @@ export default function ModulePage({ params }: { params: { id: string } }) {
             <h2 className="text-2xl font-bold mb-2">{module.title}</h2>
             <p className="text-gray-600">{module.description}</p>
           </div>
-          
-          <div className="mt-4 md:mt-0">
-            <a 
-              href={getGoogleDriveDownloadUrl(module.videoId)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-sm"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download This Video
-            </a>
-          </div>
         </div>
         
         <div className="bg-purple-50 p-6 rounded-lg mb-8">

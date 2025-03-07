@@ -5,18 +5,15 @@ This directory contains utility tools and scripts for development, testing, and 
 ## Directory Structure
 
 - `bin/` - Binary tools and executables
-- Various utility scripts for Supabase, MCP server, and other tasks
+- Various utility scripts for Supabase and other tasks
 
 ## Binary Tools
 
 - `bin/bfg.jar` - BFG Repo-Cleaner for cleaning Git repositories
 - `bin/python-installer.exe` - Python installer for Windows
 
-## Supabase MCP Server Scripts
+## Supabase Scripts
 
-- `start_supabase_mcp.bat` - Windows batch file for starting the Supabase MCP server
-- `start_supabase_mcp.ps1` - PowerShell script for starting the Supabase MCP server
-- `test_mcp_server.ps1` - PowerShell script for testing the MCP server connection
 - `test_supabase_connection.py` - Python script for testing Supabase connection
 - `test_supabase_query.py` - Python script for testing Supabase queries
 
@@ -29,21 +26,11 @@ This directory contains utility tools and scripts for development, testing, and 
 
 ## Usage
 
-### Starting the Supabase MCP Server
-
-```bash
-# Windows Command Prompt
-tools\start_supabase_mcp.bat
-
-# PowerShell
-.\tools\start_supabase_mcp.ps1
-```
-
 ### Testing Supabase Connection
 
 ```bash
-# PowerShell
-.\tools\test_mcp_server.ps1
+# Python
+python tools/test_supabase_connection.py
 ```
 
 ### Using Supabase Tools Menu

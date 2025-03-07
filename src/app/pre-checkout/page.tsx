@@ -83,23 +83,6 @@ function PreCheckoutContent() {
           ) : (
             <>
               <PreCheckoutForm products={products} />
-              
-              <motion.div 
-                className="mt-8 text-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
-                <p className="text-gray-600">
-                  Already have an account?{" "}
-                  <Link 
-                    href={`/login?redirect=/checkout${products.length > 0 ? `?products=${products.join(",")}` : ""}`}
-                    className="text-indigo-600 hover:text-indigo-800 font-medium"
-                  >
-                    Sign in
-                  </Link>
-                </p>
-              </motion.div>
             </>
           )}
         </motion.div>

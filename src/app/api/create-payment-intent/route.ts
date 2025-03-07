@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Request body:', JSON.stringify(body));
     
-    const { amount, email, name, includeAdGenerator, includeBlueprint } = body;
+    const { amount, email, name, includeAdGenerator, includeBlueprint, userId } = body;
 
     if (!amount || !email || !name) {
       console.error('Missing required parameters:', { amount, email, name });
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         metadata: {
           email,
           name,
+          userId: userId || '', // Include the user ID in metadata
           includeAdGenerator: includeAdGenerator ? 'true' : 'false',
           includeBlueprint: includeBlueprint ? 'true' : 'false',
         },
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
     );
     
     console.log('Payment intent created:', paymentIntent.id);
+    console.log('Payment intent metadata:', paymentIntent.metadata);
 
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {

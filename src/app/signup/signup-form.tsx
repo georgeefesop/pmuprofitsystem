@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/utils/supabase/client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,10 +22,8 @@ export default function SignupForm() {
     fullName: "",
   });
 
-  // Initialize Supabase client
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  // We're now using the singleton Supabase client from utils/supabase/client
+  // No need to initialize it here
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -67,21 +65,46 @@ export default function SignupForm() {
         throw new Error(data.error || 'Failed to create user');
       }
 
-      setSuccess(
-        "Account created successfully! You can now log in with your credentials."
-      );
-
-      // Clear form
-      setFormData({
-        email: "",
-        password: "",
-        fullName: "",
+      // Auto-login the user after signup
+      const loginResponse = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
-      // Redirect after a delay
+      const loginData = await loginResponse.json();
+
+      if (!loginResponse.ok) {
+        // If auto-login fails, still consider signup successful but inform the user
+        setSuccess(
+          "Account created successfully! Please log in with your credentials."
+        );
+        
+        // Redirect to login after a delay
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+        return;
+      }
+
+      setSuccess("Account created successfully! Redirecting...");
+
+      // Get the redirect URL from localStorage or default to dashboard
+      const redirectTo = localStorage.getItem('redirectTo') || '/dashboard';
+      console.log('Redirecting to:', redirectTo);
+      
+      // Clear the redirect URL from localStorage
+      localStorage.removeItem('redirectTo');
+
+      // Redirect after a short delay
       setTimeout(() => {
-        router.push("/login");
-      }, 3000);
+        router.push(redirectTo);
+      }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred");
     } finally {

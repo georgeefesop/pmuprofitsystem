@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React from 'react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/DashboardLayout';
@@ -8,23 +10,8 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 const googleDriveFolderUrl = "https://drive.google.com/drive/folders/1QaDS6BEnN-Ei3-ehi11W1YRJjPd7zlZN?usp=drive_link";
 
 export default function Dashboard() {
-  // Action button for the header
-  const actionButton = (
-    <a 
-      href={googleDriveFolderUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-      </svg>
-      Download All Course Materials
-    </a>
-  );
-
   return (
-    <DashboardLayout title="Dashboard" actionButton={actionButton}>
+    <DashboardLayout title="Dashboard">
       {/* Start Learning Card */}
       <div className="mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm">

@@ -27,7 +27,7 @@ const HeroSection = () => {
             
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <div className="relative">
-                <Link href="/checkout" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition-colors w-full">
+                <Link href="/pre-checkout" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition-colors w-full">
                   Get Started for €37
                 </Link>
                 <span className="absolute -bottom-6 left-0 right-0 text-xs text-gray-600 font-medium text-center">

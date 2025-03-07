@@ -70,7 +70,7 @@ const FeaturesSection = () => {
             </div>
             
             <div className="mt-10 space-y-4">
-              <Link href="/checkout" className="btn-primary">
+              <Link href="/pre-checkout" className="btn-primary">
                 Get Started for Only €37
               </Link>
               <div className="flex items-center text-sm text-gray-600">
@@ -145,7 +145,7 @@ const FeaturesSection = () => {
                         <p className="text-sm text-gray-500">One-time investment</p>
                         <p className="text-xl font-bold text-purple-600">€37</p>
                       </div>
-                      <Link href="/checkout" className="btn-sm bg-purple-600 text-white rounded-lg">
+                      <Link href="/pre-checkout" className="btn-sm bg-purple-600 text-white rounded-lg">
                         Get Access
                       </Link>
                     </div>

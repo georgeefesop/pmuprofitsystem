@@ -142,6 +142,10 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
         throw new Error('Card element not found');
       }
       
+      // Store user ID in localStorage as a backup
+      localStorage.setItem('checkout_user_id', user.id);
+      console.log('Stored user ID in localStorage for backup:', user.id);
+      
       const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
           card: cardElement,
@@ -237,6 +241,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
   
   // Use a single formData object for all form fields
   const [formData, setFormData] = useState({
@@ -244,18 +249,129 @@ function CheckoutContent() {
     includeBlueprint: false
   });
 
+  // Set a timeout for auth check to prevent infinite loading
+  useEffect(() => {
+    console.log('Auth check started, current state:', { 
+      isLoading, 
+      hasUser: !!user, 
+      authCheckComplete 
+    });
+    
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log('Auth check timeout reached, proceeding with checkout');
+        setAuthCheckComplete(true);
+      }
+    }, 5000); // 5 second timeout
+
+    // Also set a backup timeout that will always trigger
+    const backupTimer = setTimeout(() => {
+      if (!authCheckComplete) {
+        console.log('Backup timeout triggered, forcing auth check completion');
+        setAuthCheckComplete(true);
+      }
+    }, 8000); // 8 second backup timeout
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(backupTimer);
+    };
+  }, [isLoading, authCheckComplete, user]);
+
+  // Mark auth check as complete when loading finishes
+  useEffect(() => {
+    if (!isLoading) {
+      console.log('Loading finished, completing auth check');
+      setAuthCheckComplete(true);
+    }
+  }, [isLoading]);
+
+  // Check for authentication cookies directly
+  useEffect(() => {
+    // Check if we have auth cookies - this prevents redirect loops
+    const hasAuthCookies = document.cookie.includes('sb-access-token') || 
+                          document.cookie.includes('sb-refresh-token') ||
+                          document.cookie.includes('auth-status=authenticated');
+    
+    console.log('Cookie check:', { 
+      hasAuthCookies, 
+      cookies: document.cookie.split(';').map(c => c.trim()).filter(c => c.startsWith('sb-') || c.startsWith('auth-')),
+      isLoading,
+      hasUser: !!user
+    });
+    
+    // If we have auth cookies but no user yet, we're probably still loading
+    // Let's wait for the auth state to be properly initialized
+    if (hasAuthCookies && !user && isLoading) {
+      console.log('Auth cookies detected, waiting for auth state to initialize');
+    }
+  }, [user, isLoading]);
+
   // Redirect to pre-checkout if user is not authenticated
   useEffect(() => {
-    if (!isLoading && !user) {
+    // Don't redirect until auth check is complete or timed out
+    if (!authCheckComplete) return;
+    
+    // Check if we have auth cookies - this prevents redirect loops       
+    const hasAuthCookies = document.cookie.includes('sb-access-token') || 
+                          document.cookie.includes('sb-refresh-token') ||
+                          document.cookie.includes('auth-status=authenticated');
+    
+    // Check if we just signed up (coming from pre-checkout)
+    const justSignedUp = typeof window !== 'undefined' && sessionStorage.getItem('justSignedUp') === 'true';
+    
+    // If we just signed up, clear the flag and don't redirect
+    if (justSignedUp) {
+      console.log('User just signed up, not redirecting');
+      sessionStorage.removeItem('justSignedUp');
+      
+      // Set a timeout to clear the isAuthenticating flag after 15 seconds
+      // This prevents the authentication from hanging indefinitely
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && sessionStorage.getItem('isAuthenticating') === 'true') {
+          console.log('Authentication taking too long, clearing isAuthenticating flag');
+          sessionStorage.removeItem('isAuthenticating');
+        }
+      }, 15000);
+      
+      return;
+    }
+
+    // Check if we're in the process of logging in
+    const isAuthenticating = typeof window !== 'undefined' && sessionStorage.getItem('isAuthenticating') === 'true';
+    
+    console.log('Auth state:', { 
+      user: !!user, 
+      hasAuthCookies, 
+      justSignedUp, 
+      isAuthenticating,
+      authCheckComplete
+    });
+
+    // Only redirect if:
+    // 1. Auth check is complete
+    // 2. There's no user
+    // 3. We don't have auth cookies (prevents redirect loops during auth state initialization)
+    // 4. We didn't just sign up
+    // 5. We're not in the process of authenticating
+    if (!user && !hasAuthCookies && !justSignedUp && !isAuthenticating) {
+      console.log('No user and no auth cookies, redirecting to pre-checkout');
       // Preserve any product selection in the URL
       const productParam = searchParams.get("products");
-      const redirectUrl = productParam 
-        ? `/pre-checkout?products=${productParam}` 
+      const redirectUrl = productParam
+        ? `/pre-checkout?products=${productParam}`
         : '/pre-checkout';
       
       router.push(redirectUrl);
     }
-  }, [user, isLoading, router, searchParams]);
+    
+    // If we have a user or auth cookies, clear any authentication flags
+    if (user || hasAuthCookies) {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('isAuthenticating');
+      }
+    }
+  }, [authCheckComplete, user, router, searchParams]);
 
   // Parse product selection from URL
   useEffect(() => {

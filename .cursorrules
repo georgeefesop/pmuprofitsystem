@@ -1,20 +1,19 @@
   You are an expert in TypeScript, Supabase, Vercel, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
-  Remember that you have MCP access to supabase.
+
+  Always plan your work before you do anything, making sure to adhere to best practices and the KISS guidelines. 
 
   Whenever you run npm run dev, check the js error logger we created that allows you to see errors from the browser console in the terminal and then fix the errors.
 
   Every time you are about to make a scripts, check the scripts folder (readme file within the scripts folder) to see if there is already a script that can do what you need.
   If you make a script to do something, add it to the readme so that others can use it.
+
+  npm run dev has been modified to monitor the browser console for errors and then display them in the terminal.
   
   If you want to update the live site just push to github and it will automatically push to vercel.
   If we're just developing on the development site then just commit the changes and I will push them myself. 
   Edits to database (supabase) should be done via the MCP server we set up.
   
-  Always start the mcp server in a new tab but link it to your chat!!
-  To start the Supabase MCP server:
-  ```bash
-  cd .. && py -m supabase_mcp.main
-  ```
+  You can access the database and execute SQL commands by using the built in MCP within cursor, I've already configured the tool.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -62,3 +61,9 @@
   - Include brief descriptions of what changed and why
   - Note any known issues that still need to be addressed
   
+  Documentation Maintenance
+- When making significant changes to the codebase, update the docs/PMU-PROFIT-SYSTEM-DOCUMENTATION.md file
+- Add new features, API endpoints, database schema changes, or workflow modifications to the relevant sections
+- Keep the documentation in sync with the actual implementation to avoid confusion
+- Include code examples when appropriate to illustrate usage
+- When adding Supabase schema changes, include the SQL in the documentation

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createServiceClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,18 +21,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Initialize Supabase admin client with service role key
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
+    // Initialize Supabase service client
+    const supabase = await createServiceClient();
+
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (existingUser) {
       return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
+        { error: "A user with this email address already exists" },
+        { status: 409 }
       );
     }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Create user with email confirmation set to true
     const { data, error: signUpError } = await supabase.auth.admin.createUser({
@@ -51,26 +56,67 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create user profile in public.users table
-    const { error: profileError } = await supabase.from("users").insert({
-      id: data.user.id,
+    // Automatically sign in the user after account creation
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
       email,
-      full_name: fullName,
+      password,
     });
 
-    if (profileError) {
-      console.error("Error creating user profile:", profileError);
-      // Continue anyway as this might be handled by a trigger or already exists
+    if (signInError) {
+      console.error("Error signing in after account creation:", signInError);
+      // Even if sign-in fails, we'll return success for the account creation
+      return NextResponse.json({ 
+        success: true, 
+        message: "Account created successfully, but automatic sign-in failed. Please sign in manually." 
+      });
     }
 
-    return NextResponse.json(
-      { 
-        success: true, 
-        message: "User created successfully",
-        userId: data.user.id
+    // Set cookies for the session
+    const cookieStore = cookies();
+
+    // Set the session cookie
+    if (signInData.session) {
+      console.log('Setting auth cookies for user:', data.user?.email);
+      
+      cookieStore.set("sb-access-token", signInData.session.access_token, {
+        path: "/",
+        maxAge: signInData.session.expires_in,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+
+      cookieStore.set("sb-refresh-token", signInData.session.refresh_token, {
+        path: "/",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+
+      // Also set a non-HttpOnly cookie that the client can check
+      cookieStore.set("auth-status", "authenticated", {
+        path: "/",
+        maxAge: signInData.session.expires_in,
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+      
+      console.log('Auth cookies set successfully');
+    } else {
+      console.error('No session available to set cookies');
+    }
+
+    // Return success response with user data
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: data.user?.id,
+        email: data.user?.email,
+        fullName: fullName,
       },
-      { status: 201 }
-    );
+    });
   } catch (error) {
     console.error("Unexpected error during signup:", error);
     return NextResponse.json(

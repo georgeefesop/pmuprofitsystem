@@ -1,0 +1,233 @@
+[2025-03-06T22:56:05.939Z] Starting browser-based authentication flow test
+[2025-03-06T22:56:05.942Z] Test user: test-user-1741301765934@example.com
+[2025-03-06T22:56:05.943Z] Cleaning up any existing test user
+[2025-03-06T22:56:06.496Z] No existing test user found
+[2025-03-06T22:56:07.810Z] Testing pre-checkout page
+[2025-03-06T22:56:08.697Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-06T22:56:08.784Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+[2025-03-06T22:56:08.900Z] BROWSER CONSOLE [ERR]: Failed to load resource: the server responded with a status of 404 (Not Found)
+[2025-03-06T22:56:08.915Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T22:56:08.916Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T22:56:08.929Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-06T22:56:08.931Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-06T22:56:08.945Z] BROWSER CONSOLE [LOG]: Session check result: No session
+[2025-03-06T22:56:08.946Z] BROWSER CONSOLE [LOG]: No session found
+[2025-03-06T22:56:08.962Z] BROWSER CONSOLE [LOG]: Session check result: No session
+[2025-03-06T22:56:08.963Z] BROWSER CONSOLE [LOG]: No session found
+[2025-03-06T22:56:08.964Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION No session
+[2025-03-06T22:56:09.084Z] BROWSER CONSOLE [VER]: [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o
+[2025-03-06T22:56:09.910Z] Pre-checkout page cookies
+[]
+[2025-03-06T22:56:10.036Z] Pre-checkout page localStorage
+{}
+[2025-03-06T22:56:10.039Z] Pre-checkout page sessionStorage
+{}
+[2025-03-06T22:56:10.096Z] Pre-checkout page loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/pre-checkout"
+}
+[2025-03-06T22:56:10.160Z] Buttons and links on pre-checkout page
+[
+  {
+    "type": "a",
+    "text": "PMU Profit System",
+    "id": "navbar-logo",
+    "className": "flex items-center pl-6",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "nav-link-home",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "nav-link-features",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Pricing",
+    "id": "nav-link-pricing",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#pricing"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "nav-link-faq",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "Login",
+    "id": "auth-button-login",
+    "className": "",
+    "href": "http://localhost:3000/login"
+  },
+  {
+    "type": "button",
+    "text": "Login",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50 border-none",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Buy Now",
+    "id": "buy-now-button",
+    "className": "",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "button",
+    "text": "Buy Now",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 shadow h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Toggle menu",
+    "id": "mobile-menu-toggle",
+    "className": "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 w-9 md:hidden text-white hover:bg-purple-800/50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Create Account & Continue",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-9 w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Sign in",
+    "id": "",
+    "className": "text-indigo-600 hover:text-indigo-800 font-medium",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Sign in",
+    "id": "",
+    "className": "text-indigo-600 hover:text-indigo-800 font-medium",
+    "href": "http://localhost:3000/login?redirect=/checkout?products=pmu-profit-system"
+  },
+  {
+    "type": "a",
+    "text": "Facebook",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://facebook.com/"
+  },
+  {
+    "type": "a",
+    "text": "Instagram",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://instagram.com/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Testimonials",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#testimonials"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "About",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/about"
+  },
+  {
+    "type": "a",
+    "text": "Contact",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/contact"
+  },
+  {
+    "type": "a",
+    "text": "Privacy",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookies",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  },
+  {
+    "type": "a",
+    "text": "Privacy Policy\nPrivacy",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms of Service\nTerms",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookie Policy\nCookies",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  }
+]
+[2025-03-06T22:56:10.202Z] Testing signup process
+[2025-03-06T22:56:10.203Z] Looking for signup button or link
+[2025-03-06T22:56:10.477Z] Trying selector: a[href*="signup"]
+[2025-03-06T22:56:10.725Z] Trying selector: a[href*="sign-up"]
+[2025-03-06T22:56:10.790Z] Trying selector: a[href*="register"]
+[2025-03-06T22:56:10.854Z] Trying selector: button:has-text("Sign up")
+[2025-03-06T22:56:10.918Z] Error during signup process
+{
+  "error": "SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:has-text(\"Sign up\")' is not a valid selector.",
+  "stack": "DOMException: SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:has-text(\"Sign up\")' is not a valid selector.\n    at evaluateHandle (evaluateHandle at CSSQueryHandler.queryOne (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\QueryHandler.js:137:73), <anonymous>:1:15)\n    at #evaluate (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\ExecutionContext.js:390:56)\n    at async ExecutionContext.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\ExecutionContext.js:329:16)\n    at async IsolatedWorld.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\IsolatedWorld.js:89:16)\n    at async CdpJSHandle.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\JSHandle.js:157:20)\n    at async CdpElementHandle.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\ElementHandle.js:351:20)\n    at async CSSQueryHandler.queryOne (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\QueryHandler.js:137:59)\n    at async CdpElementHandle.$ (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\ElementHandle.js:406:21)\n    at async CdpElementHandle.<anonymous> (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\ElementHandle.js:132:24)\n    at async CdpFrame.$ (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Frame.js:386:20)"
+}
+[2025-03-06T22:56:11.210Z] Browser-based authentication flow test completed successfully

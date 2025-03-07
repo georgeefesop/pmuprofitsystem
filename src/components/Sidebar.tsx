@@ -36,13 +36,13 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
 
   if (collapsed) {
     return (
-      <aside id="dashboard-sidebar-collapsed" className="w-full h-full bg-gradient-to-b from-purple-800 to-purple-900 text-white flex flex-col shadow-xl">
-        <div className="p-3 flex-grow flex flex-col">
+      <aside id="dashboard-sidebar-collapsed" className="w-full max-w-[60px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
+        <div className="p-3 flex-grow">
           <div className="flex justify-center items-center mb-8">
             {/* Logo or brand icon could go here */}
           </div>
           
-          <nav id="sidebar-nav-collapsed" className="space-y-4 flex flex-col items-center flex-grow">
+          <nav id="sidebar-nav-collapsed" className="space-y-4 flex flex-col items-center">
             <Link 
               id="sidebar-collapsed-dashboard-link"
               href="/dashboard" 
@@ -128,30 +128,28 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
               </svg>
             </Link>
             
-            <div className="mt-auto">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mt-4"
+              title="Sign Out"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+            
+            {onToggleCollapse && (
               <button 
-                onClick={handleLogout}
-                className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white"
-                title="Sign Out"
+                id="sidebar-expand-button"
+                onClick={onToggleCollapse}
+                className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mt-2"
+                title="Expand sidebar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                 </svg>
               </button>
-              
-              {onToggleCollapse && (
-                <button 
-                  id="sidebar-expand-button"
-                  onClick={onToggleCollapse}
-                  className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mt-2"
-                  title="Expand sidebar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                  </svg>
-                </button>
-              )}
-            </div>
+            )}
           </nav>
         </div>
       </aside>
@@ -159,8 +157,8 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
   }
 
   return (
-    <aside id="dashboard-sidebar" className="w-full h-full bg-gradient-to-b from-purple-800 to-purple-900 text-white flex flex-col shadow-xl">
-      <div className="p-6 flex-grow flex flex-col">
+    <aside id="dashboard-sidebar" className="w-full max-w-[280px] bg-gradient-to-b from-purple-800 to-purple-900 text-white h-full flex flex-col shadow-xl">
+      <div className="p-6 flex-grow">
         <div className="flex justify-end items-center mb-8">
           {onClose && (
             <button 
@@ -175,7 +173,7 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
           )}
         </div>
         
-        <nav id="sidebar-nav" className="space-y-1.5 flex-grow overflow-y-auto pr-2">
+        <nav id="sidebar-nav" className="space-y-1.5">
           <Link 
             id="sidebar-dashboard-link"
             href="/dashboard" 
@@ -283,30 +281,28 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
             <span className="whitespace-nowrap">My Profile</span>
           </Link>
           
-          <div className="mt-auto pt-4">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span className="whitespace-nowrap">Sign Out</span>
+          </button>
+          
+          {onToggleCollapse && (
             <button 
-              onClick={handleLogout}
-              className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left"
+              onClick={onToggleCollapse}
+              className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left mt-1"
+              title="Collapse sidebar"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
               </svg>
-              <span className="whitespace-nowrap">Sign Out</span>
+              <span className="whitespace-nowrap">Collapse Menu</span>
             </button>
-            
-            {onToggleCollapse && (
-              <button 
-                onClick={onToggleCollapse}
-                className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left mt-1"
-                title="Collapse sidebar"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
-                <span className="whitespace-nowrap">Collapse Menu</span>
-              </button>
-            )}
-          </div>
+          )}
         </nav>
       </div>
     </aside>

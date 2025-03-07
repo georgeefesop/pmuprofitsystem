@@ -87,8 +87,6 @@ if ($supabaseInstalled -and $dockerRunning) {
     Write-Host "   supabase start"
     
     Write-Host
-    Write-Host "After starting Supabase, you can run the MCP server with:" -ForegroundColor Green
-    Write-Host "   .\start_supabase_mcp.bat"
 }
 
 Write-Host

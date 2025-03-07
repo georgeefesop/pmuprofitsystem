@@ -1,0 +1,24 @@
+Browser Auth Flow Test - 2025-03-06T22:48:37.856Z
+
+[2025-03-06T22:48:37.871Z] Starting browser-based authentication flow test
+
+[2025-03-06T22:48:37.872Z] Test user: test-user-1741301317870@example.com
+
+[2025-03-06T22:48:37.873Z] Cleaning up any existing test user
+
+[2025-03-06T22:48:38.327Z] No existing test user found
+
+[2025-03-06T22:48:40.087Z] Testing pre-checkout page
+
+[2025-03-06T22:48:50.790Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+
+[2025-03-06T22:48:50.867Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+
+[2025-03-06T22:48:51.022Z] BROWSER CONSOLE [ERR]: Failed to load resource: the server responded with a status of 404 (Not Found)
+
+[2025-03-06T22:49:00.951Z] Browser-based authentication flow test failed
+{
+  "error": "Waiting for selector `form` failed: Waiting failed: 10000ms exceeded",
+  "stack": "TimeoutError: Waiting for selector `form` failed: Waiting failed: 10000ms exceeded\n    at new WaitTask (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\WaitTask.js:48:34)\n    at IsolatedWorld.waitForFunction (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Realm.js:25:26)\n    at CSSQueryHandler.waitFor (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\QueryHandler.js:178:95)\n    at async CdpFrame.waitForSelector (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Frame.js:532:21)\n    at async CdpPage.waitForSelector (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Page.js:1373:20)\n    at async testPreCheckout (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\browser-auth-test.js:172:3)\n    at async runBrowserTest (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\browser-auth-test.js:111:5)"
+}
+

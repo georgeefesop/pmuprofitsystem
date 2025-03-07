@@ -1,5 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
+import { supabase as singletonClient } from '@/utils/supabase/client';
 
 // Helper function to ensure Supabase URL is using HTTPS in production
 export const getSecureSupabaseUrl = () => {
@@ -14,157 +15,51 @@ export const getSecureSupabaseUrl = () => {
   return supabaseUrl;
 };
 
-// Create a single supabase client for interacting with your database from the browser
-export const supabase = createBrowserClient(
-  getSecureSupabaseUrl(),
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      flowType: 'pkce',
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-    global: {
-      fetch: (...args) => {
-        // Enhanced fetch with retry logic for DNS resolution issues
-        return new Promise((resolve, reject) => {
-          const attemptFetch = (retryCount = 0, maxRetries = 3) => {
-            if (retryCount === 0) {
-              console.log(`Attempting Supabase fetch...`);
-            } else {
-              console.log(`Retrying Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
-            }
-            
-            fetch(...args)
-              .then(response => {
-                // Check if the response is ok (status in the range 200-299)
-                if (!response.ok && response.status >= 400) {
-                  console.warn(`Supabase fetch returned status ${response.status}`);
-                  
-                  // For 401/403 errors, don't retry as they're auth issues
-                  if (response.status === 401 || response.status === 403) {
-                    resolve(response);
-                    return;
-                  }
-                  
-                  // For 5xx errors, retry
-                  if (response.status >= 500 && retryCount < maxRetries) {
-                    console.log(`Server error, retrying in ${(retryCount + 1) * 1000}ms...`);
-                    setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
-                    return;
-                  }
-                }
-                
-                resolve(response);
-              })
-              .catch(err => {
-                console.error(`Supabase fetch error:`, err);
-                
-                // Check for specific error types
-                const errorMessage = err.toString();
-                if (
-                  errorMessage.includes('ERR_NAME_NOT_RESOLVED') || 
-                  errorMessage.includes('NetworkError') ||
-                  errorMessage.includes('Failed to fetch') ||
-                  errorMessage.includes('Network request failed')
-                ) {
-                  console.error('Network error detected. This may be due to network issues or Supabase service availability.');
-                  
-                  // If we haven't reached max retries, try again
-                  if (retryCount < maxRetries) {
-                    const delay = Math.min((retryCount + 1) * 1000, 5000);
-                    console.log(`Retrying in ${delay}ms...`);
-                    setTimeout(() => attemptFetch(retryCount + 1, maxRetries), delay);
-                    return;
-                  }
-                }
-                
-                // If we've exhausted retries or it's not a retriable error, reject with a user-friendly message
-                reject(new Error('Failed to connect to Supabase. Please check your network connection or try again later.'));
-              });
-          };
-          
-          // Start the first attempt
-          attemptFetch();
-        });
-      },
-      headers: {
-        'X-Client-Info': 'PMU Profit System',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    },
-    // Increase request timeout for slower connections
-    realtime: {
-      timeout: 60000 // 60 seconds
-    }
-  }
-);
+// Use the singleton Supabase client instead of creating a new one
+export const supabase = singletonClient;
 
-// For server-side operations that need elevated privileges
+// Create a Supabase client with custom auth for a specific user
+export const createUserSpecificSupabaseClient = (userId: string) => {
+  if (!userId) {
+    console.error('No user ID provided to createUserSpecificSupabaseClient');
+    return supabase;
+  }
+
+  // Create a custom client with the user's ID in the JWT claims
+  const customClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+      global: {
+        headers: {
+          'X-User-ID': userId,
+        },
+      },
+    }
+  );
+
+  return customClient;
+};
+
+// Create a Supabase client with service role for admin operations
 export const getServiceSupabase = () => {
-  const supabaseUrl = getSecureSupabaseUrl();
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
-  // Use the standard createClient for server-side operations
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase credentials for service client. Please check your environment variables.');
+  }
+  
   return createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
+      persistSession: false,
     },
-    global: {
-      headers: {
-        'X-Client-Info': 'PMU Profit System Server',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      fetch: (...args) => {
-        // Enhanced fetch with retry logic for server-side operations
-        return new Promise((resolve, reject) => {
-          const attemptFetch = (retryCount = 0, maxRetries = 3) => {
-            if (retryCount === 0) {
-              console.log(`Server: Attempting Supabase fetch...`);
-            } else {
-              console.log(`Server: Retrying Supabase fetch (attempt ${retryCount + 1}/${maxRetries + 1})...`);
-            }
-            
-            fetch(...args)
-              .then(response => {
-                // Check if the response is ok (status in the range 200-299)
-                if (!response.ok && response.status >= 500 && retryCount < maxRetries) {
-                  console.log(`Server: Server error, retrying in ${(retryCount + 1) * 1000}ms...`);
-                  setTimeout(() => attemptFetch(retryCount + 1, maxRetries), (retryCount + 1) * 1000);
-                  return;
-                }
-                
-                resolve(response);
-              })
-              .catch(err => {
-                console.error(`Server: Supabase fetch error:`, err);
-                
-                // If we haven't reached max retries, try again
-                if (retryCount < maxRetries) {
-                  const delay = Math.min((retryCount + 1) * 1000, 5000);
-                  console.log(`Server: Retrying in ${delay}ms...`);
-                  setTimeout(() => attemptFetch(retryCount + 1, maxRetries), delay);
-                  return;
-                }
-                
-                // If we've exhausted retries, reject with a detailed error
-                reject(err);
-              });
-          };
-          
-          // Start the first attempt
-          attemptFetch();
-        });
-      }
-    },
-    // Increase request timeout
-    realtime: {
-      timeout: 60000 // 60 seconds
-    }
   });
 };
 

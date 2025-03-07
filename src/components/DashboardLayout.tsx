@@ -59,7 +59,7 @@ export function DashboardLayout({
         className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden ${
           mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        onClick={closeMobileMenu}
+                onClick={closeMobileMenu}
       ></div>
       
       {/* Mobile Sidebar */}
@@ -69,21 +69,31 @@ export function DashboardLayout({
         }`}
       >
         <Sidebar onClose={closeMobileMenu} currentModuleId={currentModuleId} />
-      </div>
+        </div>
       
       <div className="flex flex-col md:flex-row flex-1">
         {/* Desktop Sidebar Container - Only visible on desktop */}
-        <div className={`hidden md:block fixed left-0 top-0 h-screen z-10 ${sidebarCollapsed ? 'w-[60px]' : 'w-[280px]'} transition-all duration-300`}>
-          <div className="h-full bg-gradient-to-b from-purple-800 to-purple-900">
+        <div className={`hidden md:block bg-purple-900 w-full ${sidebarCollapsed ? 'max-w-[60px]' : 'max-w-[280px]'} shrink-0 transition-all duration-300`}>
+          <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
             <Sidebar currentModuleId={currentModuleId} collapsed={sidebarCollapsed} onToggleCollapse={toggleSidebar} />
           </div>
         </div>
         
         {/* Main Content Area */}
-        <div className={`flex-1 flex flex-col ${sidebarCollapsed ? 'md:ml-[60px]' : 'md:ml-[280px]'} transition-all duration-300`}>
-          <header className="bg-white shadow-sm">
+        <div className="flex-1 flex flex-col">
+          <header className="bg-white shadow-sm sticky top-0 z-10">
             <div className="py-4 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 max-w-7xl mx-auto w-full">
               <div className="flex items-center">
+                {/* Mobile Sidebar Toggle Button - Only visible on mobile */}
+                <button 
+                  className="mr-4 text-gray-700 focus:outline-none hover:text-purple-600 transition-colors md:hidden block"
+                  onClick={openMobileMenu}
+                  aria-label="Open sidebar menu"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
                 {/* Desktop Sidebar Toggle Button - Only visible on desktop */}
                 <button 
                   className="mr-4 text-gray-700 focus:outline-none hover:text-purple-600 transition-colors md:block hidden"
@@ -113,7 +123,7 @@ export function DashboardLayout({
           </header>
           
           <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-            {children}
+              {children}
           </main>
         </div>
       </div>

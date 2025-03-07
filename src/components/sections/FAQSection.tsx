@@ -182,7 +182,7 @@ const FAQSection = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative">
-                  <Link href="/checkout" className="btn-white">
+                  <Link href="/pre-checkout" className="btn-white">
                     Get Started For €37
                   </Link>
                   <span className="absolute -bottom-6 left-0 right-0 text-xs text-center">

@@ -2,8 +2,12 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { supabase, getSecureSiteUrl } from '@/lib/supabase';
+import { supabase } from '@/utils/supabase/client';
+import { getSecureSiteUrl } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+
+// Log that we're using the singleton client
+console.log('AuthContext: Using singleton Supabase client');
 
 interface User {
   id: string;
@@ -33,92 +37,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check for active session on initial load
     const checkSession = async () => {
+      console.log('Checking session...');
       try {
-        console.log('Checking session...');
-        
-        // Add a timeout to prevent hanging
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session check timed out after 15 seconds')), 15000)
-        );
-        
-        // Race the session check against the timeout
-        const { data: { session } } = await Promise.race([
-          sessionPromise,
-          timeoutPromise.then(() => {
-            console.warn('Session check timed out - attempting to recover');
-            
-            // Try to recover by checking local storage directly
-            let recoveredSession = null;
-            try {
-              if (typeof window !== 'undefined') {
-                const storedSession = localStorage.getItem('supabase.auth.token');
-                if (storedSession) {
-                  console.log('Found stored session in local storage');
-                  // We found a stored session, but we won't parse it here
-                  // Just indicate that we might have a session
-                  recoveredSession = true;
-                }
-              }
-            } catch (storageError) {
-              console.error('Error accessing local storage:', storageError);
-            }
-            
-            // If we found a stored session, try one more time with a longer timeout
-            if (recoveredSession) {
-              console.log('Attempting to recover session...');
-              return supabase.auth.getSession()
-                .catch(error => {
-                  console.error('Recovery attempt failed:', error);
-                  return { data: { session: null } };
-                });
-            }
-            
-            // Log diagnostic information
-            if (typeof window !== 'undefined') {
-              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-              console.log('Supabase URL:', supabaseUrl);
-              console.log('Current protocol:', window.location.protocol);
-              console.log('Current hostname:', window.location.hostname);
-              
-              // Check if we're using HTTPS in production but HTTP for Supabase
-              if (window.location.protocol === 'https:' && supabaseUrl.startsWith('http:')) {
-                console.error('Protocol mismatch: Site is using HTTPS but Supabase URL is using HTTP. This may cause connection issues.');
-              }
-            }
-            
-            // Return a structure that matches what getSession would return
-            return { data: { session: null } };
-          }).catch(error => {
-            console.error('Timeout promise error:', error);
-            return { data: { session: null } };
-          })
-        ]).catch(error => {
-          console.error('Error checking session:', error);
-          setSessionCheckFailed(true);
-          return { data: { session: null } };
+        // Create a promise that will resolve with the session check result
+        const sessionPromise = new Promise<any>(async (resolve, reject) => {
+          try {
+            console.log('Getting session from Supabase...');
+            const { data: { session } } = await supabase.auth.getSession();
+            console.log('Session check result:', session ? 'Session found' : 'No session');
+            resolve(session);
+          } catch (error) {
+            console.error('Error getting session:', error);
+            reject(error);
+          }
         });
+
+        // Create a timeout promise that will reject after 10 seconds (reduced from 30)
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            console.error('Session check timed out after 10 seconds');
+            reject(new Error('Session check timed out after 10 seconds'));
+          }, 10000);
+        });
+
+        // Race the promises
+        let session;
+        try {
+          session = await Promise.race([sessionPromise, timeoutPromise]);
+        } catch (error) {
+          console.error('Session check race failed:', error);
+          // Gracefully handle timeout by assuming no session
+          setUser(null);
+          setSessionCheckFailed(true);
+          setIsLoading(false);
+          return null;
+        }
         
         if (session) {
-          // We have a session, set the user
-          const { user } = session;
-          
-          if (user) {
-            setUser({
-              id: user.id,
-              email: user.email || '',
-              full_name: user.user_metadata?.full_name || ''
-            });
-          }
+          setUser(session.user);
+          setSessionCheckFailed(false);
+          console.log('User authenticated:', session.user?.email);
+          return session;
         } else {
-          // No session, clear the user
-          setUser(null);
+          setSessionCheckFailed(true);
+          console.log('No session found');
+          return null;
         }
       } catch (error) {
-        console.error('Session check error:', error);
+        console.error('Session check failed:', error);
         setSessionCheckFailed(true);
-      } finally {
         setIsLoading(false);
+        return null;
       }
     };
     
@@ -126,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', event, session ? 'User logged in' : 'No session');
       
       if (session) {
         const { user } = session;
@@ -135,8 +104,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: user.email || '',
           full_name: user.user_metadata?.full_name || ''
         });
+        
+        // Handle redirection on sign in
+        if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
+          console.log('User signed in, checking for redirect');
+          const redirectTo = localStorage.getItem('redirectTo') || '/dashboard';
+          console.log('Redirecting to:', redirectTo);
+          
+          // Clear the redirect before navigating to prevent redirect loops
+          localStorage.removeItem('redirectTo');
+          
+          // Use a small delay to ensure the auth state is fully updated
+          setTimeout(() => {
+            // Use router.push instead of window.location for better Next.js integration
+            if (typeof window !== 'undefined') {
+              window.location.href = redirectTo;
+            }
+          }, 500); // Increased delay to ensure auth state is fully processed
+        }
       } else {
         setUser(null);
+        
+        // Handle redirection on sign out
+        if (event === 'SIGNED_OUT' && typeof window !== 'undefined') {
+          console.log('User signed out, redirecting to login');
+          
+          // Use a small delay to ensure the auth state is fully updated
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 300);
+        }
       }
       
       setIsLoading(false);
@@ -149,41 +146,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
-    
+
     try {
       console.log('Attempting login with:', email);
-      
-      // Add a timeout to prevent hanging
+
+      // Add a shorter timeout to prevent hanging
       const loginPromise = supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Login timed out after 15 seconds')), 15000)
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Login timed out after 8 seconds')), 8000)
       );
+
+      let data, error;
       
-      // Race the login against the timeout
-      const { data, error } = await Promise.race([
-        loginPromise,
-        timeoutPromise.then(() => {
-          console.warn('Login timed out - attempting to recover');
-          
-          // Try one more time with a longer timeout
-          return supabase.auth.signInWithPassword({
+      try {
+        // Race the login against the timeout
+        const result = await Promise.race([loginPromise, timeoutPromise]) as { 
+          data: any; 
+          error: any;
+        };
+        data = result.data;
+        error = result.error;
+      } catch (timeoutError) {
+        console.warn('Login timed out - attempting to recover');
+        
+        try {
+          // Try one more time with a shorter timeout
+          const retryResult = await supabase.auth.signInWithPassword({
             email,
             password,
-          }).catch(retryError => {
-            console.error('Login retry failed:', retryError);
-            return { 
-              data: null, 
-              error: { 
-                message: 'Login timed out after retry. Please check your network connection and try again.' 
-              } 
-            };
           });
-        })
-      ]) as any;
+          
+          data = retryResult.data;
+          error = retryResult.error;
+        } catch (retryError) {
+          console.error('Login retry failed:', retryError);
+          setIsLoading(false);
+          return {
+            success: false,
+            error: 'Login timed out. Please check your network connection and try again.'
+          };
+        }
+      }
       
       if (error) {
         console.error('Login error from Supabase:', error);

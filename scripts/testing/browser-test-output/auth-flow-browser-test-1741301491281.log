@@ -1,0 +1,338 @@
+Browser Auth Flow Test - 2025-03-06T22:51:31.281Z
+
+[2025-03-06T22:51:31.287Z] Starting browser-based authentication flow test
+
+[2025-03-06T22:51:31.289Z] Test user: test-user-1741301491287@example.com
+
+[2025-03-06T22:51:31.291Z] Cleaning up any existing test user
+
+[2025-03-06T22:51:31.873Z] No existing test user found
+
+[2025-03-06T22:51:32.761Z] Testing pre-checkout page
+
+[2025-03-06T22:51:33.437Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+
+[2025-03-06T22:51:33.515Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+
+[2025-03-06T22:51:33.664Z] BROWSER CONSOLE [ERR]: Failed to load resource: the server responded with a status of 404 (Not Found)
+
+[2025-03-06T22:51:33.678Z] BROWSER CONSOLE [LOG]: Checking session...
+
+[2025-03-06T22:51:33.680Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+
+[2025-03-06T22:51:33.682Z] BROWSER CONSOLE [LOG]: Checking session...
+
+[2025-03-06T22:51:33.684Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+
+[2025-03-06T22:51:33.702Z] BROWSER CONSOLE [LOG]: Session check result: No session
+
+[2025-03-06T22:51:33.704Z] BROWSER CONSOLE [LOG]: No session found
+
+[2025-03-06T22:51:33.712Z] BROWSER CONSOLE [LOG]: Session check result: No session
+
+[2025-03-06T22:51:33.714Z] BROWSER CONSOLE [LOG]: No session found
+
+[2025-03-06T22:51:33.716Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION No session
+
+[2025-03-06T22:51:33.829Z] BROWSER CONSOLE [VER]: [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o
+
+[2025-03-06T22:51:34.716Z] Pre-checkout page cookies
+[]
+
+[2025-03-06T22:51:34.720Z] Pre-checkout page loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/pre-checkout"
+}
+
+[2025-03-06T22:51:34.723Z] Testing signup process
+
+[2025-03-06T22:51:34.789Z] Found buttons on page
+[
+  {
+    "text": "pmu profit system",
+    "id": "navbar-logo",
+    "class": "flex items-center pl-6"
+  },
+  {
+    "text": "home",
+    "id": "nav-link-home",
+    "class": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80"
+  },
+  {
+    "text": "features",
+    "id": "nav-link-features",
+    "class": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80"
+  },
+  {
+    "text": "pricing",
+    "id": "nav-link-pricing",
+    "class": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80"
+  },
+  {
+    "text": "faq",
+    "id": "nav-link-faq",
+    "class": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80"
+  },
+  {
+    "text": "login",
+    "id": "auth-button-login",
+    "class": ""
+  },
+  {
+    "text": "login",
+    "id": "",
+    "class": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50 border-none"
+  },
+  {
+    "text": "buy now",
+    "id": "buy-now-button",
+    "class": ""
+  },
+  {
+    "text": "buy now",
+    "id": "",
+    "class": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 shadow h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50"
+  },
+  {
+    "text": "toggle menu",
+    "id": "mobile-menu-toggle",
+    "class": "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 w-9 md:hidden text-white hover:bg-purple-800/50"
+  },
+  {
+    "text": "create account & continue",
+    "id": "",
+    "class": "inline-flex items-center justify-center whitespace-nowrap text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-9 w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+  },
+  {
+    "text": "sign in",
+    "id": "",
+    "class": "text-indigo-600 hover:text-indigo-800 font-medium"
+  },
+  {
+    "text": "sign in",
+    "id": "",
+    "class": "text-indigo-600 hover:text-indigo-800 font-medium"
+  },
+  {
+    "text": "facebook",
+    "id": "",
+    "class": "text-purple-600 hover:text-purple-700 transition-colors"
+  },
+  {
+    "text": "instagram",
+    "id": "",
+    "class": "text-purple-600 hover:text-purple-700 transition-colors"
+  },
+  {
+    "text": "home",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "features",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "testimonials",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "faq",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "about",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "contact",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "privacy",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "terms",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "cookies",
+    "id": "",
+    "class": "text-xs text-gray-600 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "privacy policy\nprivacy",
+    "id": "",
+    "class": "text-xs text-gray-500 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "terms of service\nterms",
+    "id": "",
+    "class": "text-xs text-gray-500 hover:text-purple-600 transition-colors"
+  },
+  {
+    "text": "cookie policy\ncookies",
+    "id": "",
+    "class": "text-xs text-gray-500 hover:text-purple-600 transition-colors"
+  }
+]
+
+[2025-03-06T22:51:34.813Z] Error during signup process
+{
+  "error": "SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:has-text(\"Sign up\"), button:has-text(\"Create account\"), a:has-text(\"Sign up\"), a:has-text(\"Create account\")' is not a valid selector.",
+  "stack": "DOMException: SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:has-text(\"Sign up\"), button:has-text(\"Create account\"), a:has-text(\"Sign up\"), a:has-text(\"Create account\")' is not a valid selector.\n    at evaluateHandle (evaluateHandle at CSSQueryHandler.queryOne (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\QueryHandler.js:137:73), <anonymous>:1:15)\n    at #evaluate (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\ExecutionContext.js:390:56)\n    at async ExecutionContext.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\ExecutionContext.js:329:16)\n    at async IsolatedWorld.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\IsolatedWorld.js:89:16)\n    at async CdpJSHandle.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\JSHandle.js:157:20)\n    at async CdpElementHandle.evaluateHandle (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\ElementHandle.js:351:20)\n    at async CSSQueryHandler.queryOne (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\common\\QueryHandler.js:137:59)\n    at async CdpElementHandle.$ (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\ElementHandle.js:406:21)\n    at async CdpElementHandle.<anonymous> (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\ElementHandle.js:132:24)\n    at async CdpFrame.$ (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Frame.js:386:20)"
+}
+
+[2025-03-06T22:51:35.032Z] Testing redirect to checkout
+
+[2025-03-06T22:51:35.034Z] Current URL after signup
+{
+  "url": "http://localhost:3000/pre-checkout"
+}
+
+[2025-03-06T22:51:35.035Z] Not on checkout page yet, waiting for redirect
+
+[2025-03-06T22:51:45.039Z] Navigation timeout waiting for checkout redirect
+{
+  "error": "Navigation timeout of 10000 ms exceeded"
+}
+
+[2025-03-06T22:51:45.041Z] Forcing navigation to checkout
+
+[2025-03-06T22:51:45.046Z] BROWSER REQUEST: GET http://localhost:3000/checkout
+
+[2025-03-06T22:51:45.302Z] BROWSER CONSOLE [LOG]: [Fast Refresh] rebuilding
+
+[2025-03-06T22:51:46.758Z] BROWSER RESPONSE: 200 http://localhost:3000/checkout
+
+[2025-03-06T22:51:46.763Z] BROWSER CONSOLE [ERR]: Failed to fetch RSC payload for http://localhost:3000/pre-checkout. Falling back to browser navigation. JSHandle@error
+
+[2025-03-06T22:51:46.774Z] BROWSER REQUEST: GET http://localhost:3000/_next/static/chunks/app/checkout/page.js
+
+[2025-03-06T22:51:46.946Z] BROWSER RESPONSE: 200 http://localhost:3000/_next/static/chunks/app/checkout/page.js
+
+[2025-03-06T22:51:47.231Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+
+[2025-03-06T22:51:47.289Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+
+[2025-03-06T22:51:47.402Z] BROWSER CONSOLE [LOG]: Checking session...
+
+[2025-03-06T22:51:47.404Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+
+[2025-03-06T22:51:47.407Z] BROWSER CONSOLE [LOG]: Checking session...
+
+[2025-03-06T22:51:47.408Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+
+[2025-03-06T22:51:47.414Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:47.416Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+
+[2025-03-06T22:51:47.417Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:47.419Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+
+[2025-03-06T22:51:47.420Z] BROWSER CONSOLE [LOG]: Session check result: No session
+
+[2025-03-06T22:51:47.421Z] BROWSER CONSOLE [LOG]: No session found
+
+[2025-03-06T22:51:47.423Z] BROWSER CONSOLE [LOG]: Session check result: No session
+
+[2025-03-06T22:51:47.424Z] BROWSER CONSOLE [LOG]: No session found
+
+[2025-03-06T22:51:47.426Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION No session
+
+[2025-03-06T22:51:47.427Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:47.429Z] BROWSER CONSOLE [LOG]: Loading finished, completing auth check
+
+[2025-03-06T22:51:47.430Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+
+[2025-03-06T22:51:47.432Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:47.434Z] BROWSER CONSOLE [LOG]: Auth state: JSHandle@object
+
+[2025-03-06T22:51:47.435Z] BROWSER CONSOLE [LOG]: No user and no auth cookies, redirecting to pre-checkout
+
+[2025-03-06T22:51:47.709Z] BROWSER CONSOLE [WAR]: You may test your Stripe.js integration over HTTP. However, live Stripe.js integrations must use HTTPS.
+
+[2025-03-06T22:51:47.740Z] BROWSER CONSOLE [VER]: [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o
+
+[2025-03-06T22:51:48.513Z] Cookies after redirect to checkout
+[]
+
+[2025-03-06T22:51:48.514Z] Testing checkout page
+
+[2025-03-06T22:51:48.515Z] Current URL for checkout test
+{
+  "url": "http://localhost:3000/pre-checkout"
+}
+
+[2025-03-06T22:51:48.517Z] Not on checkout page, navigating there
+
+[2025-03-06T22:51:48.524Z] BROWSER REQUEST: GET http://localhost:3000/checkout
+
+[2025-03-06T22:51:48.583Z] BROWSER RESPONSE: 200 http://localhost:3000/checkout
+
+[2025-03-06T22:51:48.597Z] BROWSER REQUEST: GET http://localhost:3000/_next/static/chunks/app/checkout/page.js
+
+[2025-03-06T22:51:48.742Z] BROWSER RESPONSE: 200 http://localhost:3000/_next/static/chunks/app/checkout/page.js
+
+[2025-03-06T22:51:49.031Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+
+[2025-03-06T22:51:49.079Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+
+[2025-03-06T22:51:49.181Z] BROWSER CONSOLE [LOG]: Checking session...
+
+[2025-03-06T22:51:49.183Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+
+[2025-03-06T22:51:49.185Z] BROWSER CONSOLE [LOG]: Checking session...
+
+[2025-03-06T22:51:49.186Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+
+[2025-03-06T22:51:49.193Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:49.195Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+
+[2025-03-06T22:51:49.197Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:49.198Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+
+[2025-03-06T22:51:49.200Z] BROWSER CONSOLE [LOG]: Session check result: No session
+
+[2025-03-06T22:51:49.201Z] BROWSER CONSOLE [LOG]: No session found
+
+[2025-03-06T22:51:49.243Z] BROWSER CONSOLE [WAR]: You may test your Stripe.js integration over HTTP. However, live Stripe.js integrations must use HTTPS.
+
+[2025-03-06T22:51:49.245Z] BROWSER CONSOLE [LOG]: Session check result: No session
+
+[2025-03-06T22:51:49.246Z] BROWSER CONSOLE [LOG]: No session found
+
+[2025-03-06T22:51:49.248Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION No session
+
+[2025-03-06T22:51:49.250Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:49.252Z] BROWSER CONSOLE [LOG]: Loading finished, completing auth check
+
+[2025-03-06T22:51:49.258Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+
+[2025-03-06T22:51:49.260Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+
+[2025-03-06T22:51:49.263Z] BROWSER CONSOLE [LOG]: Auth state: JSHandle@object
+
+[2025-03-06T22:51:49.266Z] BROWSER CONSOLE [LOG]: No user and no auth cookies, redirecting to pre-checkout
+
+[2025-03-06T22:51:49.462Z] Browser-based authentication flow test failed
+{
+  "error": "page.waitForTimeout is not a function",
+  "stack": "TypeError: page.waitForTimeout is not a function\n    at testCheckoutPage (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\browser-auth-test.js:306:14)\n    at async runBrowserTest (C:\\Users\\georg\\Desktop\\pmucourse\\pmuprofitsystem\\scripts\\testing\\browser-auth-test.js:120:5)"
+}
+
