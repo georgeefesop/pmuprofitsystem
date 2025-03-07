@@ -3,18 +3,11 @@
   Always plan your work before you do anything, making sure to adhere to best practices and the KISS guidelines.
   If you build something, test it and check the console / terminal for errors and fix them before handing off to me.
 
-  Whenever you run npm run dev, check the js error logger we created that allows you to see errors from the browser console in the terminal and then fix the errors.
-
-  Every time you are about to make a scripts, check the scripts folder (readme file within the scripts folder) to see if there is already a script that can do what you need.
-  If you make a script to do something, add it to the readme so that others can use it.
-
   npm run dev has been modified to monitor the browser console for errors and then display them in the terminal.
   
   If you want to update the live site just push to github and it will automatically push to vercel.
-  If we're just developing on the development site then just commit the changes and I will push them myself. 
-  Edits to database (supabase) should be done via the MCP server we set up.
   
-  You can access the database and execute SQL commands by using the built in MCP within cursor, I've already configured the tool.
+  You should access the database and execute SQL commands by using the built in MCP within cursor, I've already configured the tool.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -22,7 +15,8 @@
   - Prefer iteration and modularization over code duplication.
   - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
   - Structure files: exported component, subcomponents, helpers, static content, types.
-  - Implement code in chunks so as to avoid timeouts 
+  - Implement code in chunks so as to avoid timeouts
+   - Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
   
   Naming Conventions
   - Use lowercase with dashes for directories (e.g., components/auth-wizard).
@@ -43,7 +37,6 @@
   - Implement responsive design with Tailwind CSS; use a mobile-first approach.
   
   Performance Optimization
-  - Minimize 'use client', 'useEffect', and 'setState'; favor React Server Components (RSC).
   - Wrap client components in Suspense with fallback.
   - Use dynamic loading for non-critical components.
   - Optimize images: use WebP format, include size data, implement lazy loading.
