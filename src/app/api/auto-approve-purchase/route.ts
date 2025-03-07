@@ -58,9 +58,7 @@ export async function GET(req: NextRequest) {
     if (isPaymentIntent) {
       try {
         const paymentIntent = await safeStripeOperation(() => 
-          stripe.paymentIntents.retrieve(sessionId, {
-            expand: ['metadata']
-          })
+          stripe.paymentIntents.retrieve(sessionId)
         );
         
         if (paymentIntent && paymentIntent.metadata) {
@@ -75,9 +73,7 @@ export async function GET(req: NextRequest) {
     } else {
       try {
         const session = await safeStripeOperation(() => 
-          stripe.checkout.sessions.retrieve(sessionId, {
-            expand: ['metadata']
-          })
+          stripe.checkout.sessions.retrieve(sessionId)
         );
         
         if (session && session.metadata) {

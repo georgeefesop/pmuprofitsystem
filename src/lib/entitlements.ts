@@ -93,7 +93,7 @@ export async function createEntitlementsFromPaymentIntent(
 
     // Get payment intent data from Stripe
     const paymentIntent = await stripeServer.paymentIntents.retrieve(paymentIntentId, {
-      expand: ['metadata', 'customer']
+      expand: ['customer']
     });
     
     console.log(`[entitlements] Retrieved payment intent: ${paymentIntent.id}, status: ${paymentIntent.status}`);
