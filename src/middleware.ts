@@ -175,13 +175,6 @@ export async function middleware(req: NextRequest) {
   
   console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
   
-  // IMPORTANT: First check if the user is coming from a successful purchase
-  // If so, allow access to the dashboard even if they're not authenticated
-  if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
-    console.log('Middleware: User coming from successful purchase, allowing access to dashboard');
-    return NextResponse.next();
-  }
-  
   // Get the session from Supabase auth
   const { data: { session } } = await supabase.auth.getSession();
   
@@ -194,18 +187,118 @@ export async function middleware(req: NextRequest) {
     console.error('Error refreshing auth token in middleware:', error);
   }
   
-  // If there's a session, set the user ID in the request context
-  if (session?.user?.id) {
-    // Set the user ID in a custom header that our API routes can use
-    res.headers.set('x-user-id', session.user.id);
+  // IMPORTANT: Check if the user is coming from a successful purchase
+  // If so, we need to handle this case specially
+  if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
+    console.log('Middleware: User coming from successful purchase with session ID:', sessionId);
+    
+    // If the user is authenticated, set the user ID in the request context
+    if (session?.user?.id) {
+      console.log('Middleware: User is authenticated, setting user ID in request context');
+      res.headers.set('x-user-id', session.user.id);
 
-    // Set the user ID in the request context for Supabase RLS policies
-    // This will be used by the auth.uid() function in RLS policies
-    await supabase.rpc('set_claim', {
-      uid: session.user.id,
-      claim: 'sub',
-      value: session.user.id
-    });
+      // Set the user ID in the request context for Supabase RLS policies
+      await supabase.rpc('set_claim', {
+        uid: session.user.id,
+        claim: 'sub',
+        value: session.user.id
+      });
+      
+      // Check if the user has entitlements for the main product
+      try {
+        console.log('Middleware: Checking entitlements for authenticated user with purchase_success=true');
+        const { data: entitlements, error: entitlementsError } = await supabase
+          .from('user_entitlements')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('is_active', true);
+        
+        if (entitlementsError) {
+          console.error('Error checking entitlements:', entitlementsError);
+          // If there's an error, allow access to avoid blocking legitimate users
+          return res;
+        }
+        
+        // If the user doesn't have any active entitlements, check for recent purchases
+        if (!entitlements || entitlements.length === 0) {
+          console.log('Middleware: User has no entitlements, checking for recent purchases');
+          
+          // Check for recent purchases that might not have entitlements yet
+          const { data: purchases, error: purchasesError } = await supabase
+            .from('purchases')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('status', 'completed')
+            .order('created_at', { ascending: false })
+            .limit(1);
+          
+          if (purchasesError) {
+            console.error('Error checking recent purchases:', purchasesError);
+            // If there's an error, allow access to avoid blocking legitimate users
+            return res;
+          }
+          
+          // If recent purchase exists, create entitlements and allow access
+          if (purchases && purchases.length > 0) {
+            console.log('Found recent purchase, creating entitlements');
+            
+            // Create entitlements asynchronously
+            createEntitlementsFromPurchase(purchases[0], supabase)
+              .then(result => {
+                if (result.error) {
+                  console.error('Failed to create entitlements from purchase:', result.error);
+                } else {
+                  console.log('Successfully created entitlements from purchase');
+                }
+              })
+              .catch(error => {
+                console.error('Error in entitlement creation process:', error);
+              });
+            
+            // Allow access since we found a valid purchase
+            return res;
+          }
+          
+          // If we have a session ID, try to create entitlements from it
+          if (sessionId) {
+            console.log('Middleware: Attempting to create entitlements from session ID:', sessionId);
+            
+            // Try to verify the purchase and create entitlements
+            try {
+              // Make a request to the verify-purchase API
+              const verifyResponse = await fetch(`${req.nextUrl.origin}/api/verify-purchase?session_id=${sessionId}`);
+              const verifyResult = await verifyResponse.json();
+              
+              if (verifyResult.success && verifyResult.verified) {
+                console.log('Middleware: Purchase verified successfully');
+                
+                // If the purchase is verified, allow access to the dashboard
+                return res;
+              }
+            } catch (verifyError) {
+              console.error('Error verifying purchase in middleware:', verifyError);
+            }
+          }
+        } else {
+          console.log('Middleware: User has entitlements, allowing access to dashboard');
+          return res;
+        }
+      } catch (error) {
+        console.error('Error in middleware entitlement check:', error);
+        // If there's an error, allow access to avoid blocking legitimate users
+        return res;
+      }
+    } else {
+      // User is not authenticated but has purchase_success=true and session_id
+      console.log('Middleware: User not authenticated but has purchase_success=true and session_id');
+      
+      // Store the original URL for redirection after login
+      const url = new URL('/login', req.url);
+      url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
+      
+      console.log('Middleware: Redirecting to login with redirect URL:', url.toString());
+      return NextResponse.redirect(url);
+    }
   }
   
   // If the route is protected and the user is not authenticated,
@@ -391,6 +484,20 @@ export async function middleware(req: NextRequest) {
       console.error('Error in middleware entitlement check:', error);
       // If there's an error, allow access to avoid blocking legitimate users
     }
+  }
+  
+  // If the user is authenticated, set the user ID in the request context
+  if (session?.user?.id) {
+    // Set the user ID in a custom header that our API routes can use
+    res.headers.set('x-user-id', session.user.id);
+
+    // Set the user ID in the request context for Supabase RLS policies
+    // This will be used by the auth.uid() function in RLS policies
+    await supabase.rpc('set_claim', {
+      uid: session.user.id,
+      claim: 'sub',
+      value: session.user.id
+    });
   }
   
   // Continue with the request if authenticated or not a protected route
