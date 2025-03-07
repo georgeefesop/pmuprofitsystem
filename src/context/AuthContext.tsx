@@ -222,11 +222,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       if (data?.user) {
+        console.log('Login successful, user:', data.user.id);
+        
+        // Ensure cookies are set properly
+        try {
+          // Force a session refresh to ensure cookies are set
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          
+          if (refreshError) {
+            console.warn('Session refresh after login failed:', refreshError);
+            // Continue anyway since the initial login was successful
+          } else if (refreshData.session) {
+            console.log('Session refreshed successfully after login');
+          }
+        } catch (refreshError) {
+          console.warn('Exception during session refresh after login:', refreshError);
+          // Continue anyway since the initial login was successful
+        }
+        
+        // Set the user in the context
         setUser({
           id: data.user.id,
           email: data.user.email || '',
           full_name: data.user.user_metadata?.full_name || ''
         });
+        
+        // Store auth status in a cookie for middleware
+        Cookies.set('auth-status', 'authenticated', { expires: 7, path: '/' });
+        
+        // Store user ID in localStorage as a backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_user_id', data.user.id);
+        }
+        
         return { success: true };
       } else {
         return { 

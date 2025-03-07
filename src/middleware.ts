@@ -180,34 +180,81 @@ export async function middleware(req: NextRequest) {
     return res;
   }
   
-  // Get the session from Supabase auth
-  const { data: { session } } = await supabase.auth.getSession();
+  // Enhanced authentication check
+  console.log('Middleware: Starting enhanced authentication check');
   
-  // Explicitly refresh the auth token
-  try {
-    // This will refresh the token if needed and update cookies
-    const { data: { user } } = await supabase.auth.getUser();
-    console.log('Middleware auth check:', user ? 'User authenticated' : 'No user found');
-  } catch (error) {
-    console.error('Error refreshing auth token in middleware:', error);
+  // Log all cookies for debugging
+  const cookieString = req.headers.get('cookie') || '';
+  console.log('Middleware: Cookies present:', cookieString.length > 0);
+  
+  // Get the session from Supabase auth
+  let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError) {
+    console.error('Middleware: Error getting session:', sessionError);
+  }
+  
+  if (!session) {
+    console.log('Middleware: No session found in initial check, trying to refresh token');
+    
+    try {
+      // Try to refresh the session
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error('Middleware: Error refreshing session:', refreshError);
+      } else if (refreshData.session) {
+        console.log('Middleware: Session refreshed successfully');
+        session = refreshData.session;
+      }
+    } catch (refreshException) {
+      console.error('Middleware: Exception during session refresh:', refreshException);
+    }
+  }
+  
+  // Try to get user directly as a fallback
+  if (!session) {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Middleware: Error getting user:', userError);
+      } else if (user) {
+        console.log('Middleware: Found user but no session:', user.id);
+        // We have a user but no session, which is unusual
+        // Let's try to create a new session
+        try {
+          // This is a last resort attempt - in a real app, you might want to redirect to login instead
+          console.log('Middleware: Attempting to create a new session for user:', user.id);
+        } catch (createSessionError) {
+          console.error('Middleware: Error creating new session:', createSessionError);
+        }
+      }
+    } catch (userException) {
+      console.error('Middleware: Exception during user check:', userException);
+    }
   }
   
   // If there's a session, set the user ID in the request context
   if (session?.user?.id) {
+    console.log('Middleware: User authenticated:', session.user.id);
+    
     // Set the user ID in a custom header that our API routes can use
     res.headers.set('x-user-id', session.user.id);
 
     // Set the user ID in the request context for Supabase RLS policies
     // This will be used by the auth.uid() function in RLS policies
-    await supabase.rpc('set_claim', {
-      uid: session.user.id,
-      claim: 'sub',
-      value: session.user.id
-    });
-  }
-  
-  // If the user is not authenticated, redirect to login
-  if (!session) {
+    try {
+      await supabase.rpc('set_claim', {
+        uid: session.user.id,
+        claim: 'sub',
+        value: session.user.id
+      });
+      console.log('Middleware: Set claim for user:', session.user.id);
+    } catch (claimError) {
+      console.error('Middleware: Error setting claim:', claimError);
+    }
+  } else {
     console.log('Middleware: User not authenticated, redirecting to login');
     const url = new URL('/login', req.url);
     url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
