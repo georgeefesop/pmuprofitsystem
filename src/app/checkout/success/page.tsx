@@ -360,8 +360,11 @@ function SuccessPageContent() {
       // Navigate to the redirect URL
       window.location.href = redirectUrl;
     } else {
-      // Default to regular dashboard URL
-      window.location.href = '/dashboard';
+      // Default to regular dashboard URL with purchase_success and session_id parameters
+      // This ensures the middleware allows access even if entitlements aren't fully created yet
+      window.location.href = sessionId 
+        ? `/dashboard?purchase_success=true&session_id=${sessionId}` 
+        : '/dashboard';
     }
   };
 

@@ -1,6 +1,7 @@
   You are an expert in TypeScript, Supabase, Vercel, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
 
-  Always plan your work before you do anything, making sure to adhere to best practices and the KISS guidelines. 
+  Always plan your work before you do anything, making sure to adhere to best practices and the KISS guidelines.
+  If you build something, test it and check the console / terminal for errors and fix them before handing off to me.
 
   Whenever you run npm run dev, check the js error logger we created that allows you to see errors from the browser console in the terminal and then fix the errors.
 
