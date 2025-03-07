@@ -53,6 +53,7 @@ function SuccessPageContent() {
     success: boolean;
     message: string;
   } | null>(null);
+  const [verificationComplete, setVerificationComplete] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -146,8 +147,41 @@ function SuccessPageContent() {
     return total.toFixed(2);
   };
 
+  // Function to auto-approve pending purchases and create entitlements
+  async function autoApprovePurchase(userId: string, sessionId: string) {
+    if (!userId || !sessionId) {
+      console.log('Cannot auto-approve purchase: Missing user ID or session ID');
+      return;
+    }
+
+    try {
+      console.log('Auto-approving purchase for user:', userId);
+      
+      // First, check if there are any purchases with this session ID that need approval
+      const response = await fetch(`/api/auto-approve-purchase?session_id=${sessionId}&user_id=${userId}`);
+      const result = await response.json();
+      
+      console.log('Auto-approval result:', result);
+      
+      if (result.success) {
+        // Update the entitlement status
+        setEntitlementStatus({
+          success: true,
+          message: result.message || 'Purchase approved and entitlements created successfully'
+        });
+      } else {
+        console.log('Auto-approval not needed or failed:', result.message);
+      }
+    } catch (error) {
+      console.error('Error auto-approving purchase:', error);
+    }
+  }
+
   // Function to verify purchase
   async function verifyPurchase() {
+    // Prevent duplicate calls
+    if (verificationComplete) return;
+    
     try {
       console.log('Verifying purchase with session ID:', sessionId);
       const response = await fetch(`/api/verify-purchase?session_id=${sessionId}`);
@@ -208,44 +242,19 @@ function SuccessPageContent() {
           localStorage.setItem('dashboardRedirectUrl', data.redirectUrl);
         }
 
-        // Create entitlements via API endpoint
+        // Auto-approve the purchase and create entitlements immediately
         if (data.userId && sessionId) {
-          console.log('Creating entitlements for user:', data.userId);
-          try {
-            const entitlementResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${data.userId}`);
-            const entitlementResult = await entitlementResponse.json();
-            
-            console.log('Entitlement creation result:', entitlementResult);
-            setEntitlementStatus(entitlementResult);
-          } catch (entitlementError) {
-            console.error('Error creating entitlements:', entitlementError);
-            setEntitlementStatus({
-              success: false,
-              message: `Error creating entitlements: ${(entitlementError as Error).message}`
-            });
-          }
+          await autoApprovePurchase(data.userId, sessionId);
         } else {
           // Try to get the user ID from localStorage as a backup
           const backupUserId = localStorage.getItem('checkout_user_id');
           
           if (backupUserId && sessionId) {
             console.log('Using backup user ID from localStorage:', backupUserId);
-            try {
-              const entitlementResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${backupUserId}`);
-              const entitlementResult = await entitlementResponse.json();
-              
-              console.log('Entitlement creation result (using backup ID):', entitlementResult);
-              setEntitlementStatus(entitlementResult);
-              
-              // Clear the backup user ID after use
-              localStorage.removeItem('checkout_user_id');
-            } catch (entitlementError) {
-              console.error('Error creating entitlements with backup ID:', entitlementError);
-              setEntitlementStatus({
-                success: false,
-                message: `Error creating entitlements: ${(entitlementError as Error).message}`
-              });
-            }
+            await autoApprovePurchase(backupUserId, sessionId);
+            
+            // Clear the backup user ID after use
+            localStorage.removeItem('checkout_user_id');
           } else {
             console.error('No user ID found in verification response or localStorage. Full response:', {
               ...data,
@@ -270,6 +279,7 @@ function SuccessPageContent() {
       setError(error instanceof Error ? error.message : 'Failed to verify purchase');
     } finally {
       setIsLoading(false);
+      setVerificationComplete(true);
     }
   }
 
@@ -290,13 +300,14 @@ function SuccessPageContent() {
 
   // Effect to verify purchase on component mount
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId && !verificationComplete) {
       verifyPurchase();
-    } else {
+    } else if (!sessionId) {
       setIsLoading(false);
       setError('No session ID provided');
+      setVerificationComplete(true);
     }
-  }, [sessionId]);
+  }, [sessionId, verificationComplete]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
