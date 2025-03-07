@@ -9,6 +9,14 @@ import { usePurchases } from '@/context/PurchaseContext';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
+// Define the PurchaseDetails type
+interface PurchaseDetails {
+  email: string;
+  productName: string;
+  includesAdGenerator: boolean;
+  includesBlueprint: boolean;
+}
+
 // Loading fallback component
 function SuccessPageSkeleton() {
   return (
@@ -42,14 +50,9 @@ function SuccessPageContent() {
   const { resendVerificationEmail } = useAuth();
   const { addPurchase } = usePurchases();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
-  const [purchaseDetails, setPurchaseDetails] = useState<{
-    email: string;
-    productName: string;
-    includesAdGenerator: boolean;
-    includesBlueprint: boolean;
-  } | null>(null);
+  const [purchaseDetails, setPurchaseDetails] = useState<PurchaseDetails | null>(null);
   const [entitlementStatus, setEntitlementStatus] = useState<{
     success: boolean;
     message: string;
@@ -357,22 +360,31 @@ function SuccessPageContent() {
     const storedRedirectUrl = localStorage.getItem('dashboardRedirectUrl');
     const dashboardUrl = `/dashboard?purchase_success=true&session_id=${sessionId}`;
     
+    // Store the user ID in localStorage for the middleware to use
+    const storedUserId = localStorage.getItem('checkout_user_id');
+    if (storedUserId) {
+      localStorage.setItem('success_page_user_id', storedUserId);
+    }
+    
     if (storedRedirectUrl && storedRedirectUrl.startsWith('/dashboard')) {
       // If there's a stored redirect URL and it's for the dashboard,
       // append the purchase_success and session_id parameters if they're not already there
       const url = new URL(storedRedirectUrl, window.location.origin);
-      if (!url.searchParams.has('purchase_success')) {
-        url.searchParams.set('purchase_success', 'true');
-      }
-      if (!url.searchParams.has('session_id') && sessionId) {
+      
+      // Always set these parameters to ensure they're present
+      url.searchParams.set('purchase_success', 'true');
+      if (sessionId) {
         url.searchParams.set('session_id', sessionId);
       }
+      
       localStorage.removeItem('dashboardRedirectUrl');
+      console.log(`Navigating to dashboard with URL: ${url.pathname + url.search}`);
       router.push(url.pathname + url.search);
     } else {
       // If there's no stored redirect URL or it's not for the dashboard,
       // use the default dashboard URL with the parameters
       localStorage.removeItem('dashboardRedirectUrl');
+      console.log(`Navigating to dashboard with URL: ${dashboardUrl}`);
       router.push(dashboardUrl);
     }
   };

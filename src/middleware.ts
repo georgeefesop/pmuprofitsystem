@@ -168,16 +168,16 @@ export async function middleware(req: NextRequest) {
   // Define protected routes that require authentication
   const isProtectedRoute = path.startsWith('/dashboard');
   
-  // Get the session from Supabase auth
-  const { data: { session } } = await supabase.auth.getSession();
-  
   // Check if coming from a successful purchase
   const { searchParams } = new URL(req.url);
   const purchaseSuccess = searchParams.get('purchase_success');
   const sessionId = searchParams.get('session_id');
   
-  // If coming from a successful purchase with session_id, allow access temporarily
-  // This check needs to happen before the authentication check
+  // Get the session from Supabase auth
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  // If the route is protected and the user is coming from a successful purchase with session_id,
+  // allow access temporarily even if they're not authenticated
   if (isProtectedRoute && purchaseSuccess === 'true' && sessionId) {
     console.log('Middleware: User coming from successful purchase, allowing access');
     
@@ -231,17 +231,18 @@ export async function middleware(req: NextRequest) {
       } catch (error) {
         console.error('Error checking entitlements in middleware:', error);
       }
+      
+      // Allow access since the user is authenticated and coming from a successful purchase
+      return NextResponse.next();
     } else {
       // User is not authenticated but has purchase_success and session_id
       // Redirect to login with the current URL as the redirect target
       // This ensures they can come back to the dashboard with the parameters after login
-      console.log('Middleware: User not authenticated but has purchase_success, redirecting to login');
+      console.log('Middleware: User not authenticated but has purchase_success, redirecting to login with parameters');
       const url = new URL('/login', req.url);
       url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
       return NextResponse.redirect(url);
     }
-    
-    return NextResponse.next();
   }
   
   // Explicitly refresh the auth token
@@ -270,16 +271,6 @@ export async function middleware(req: NextRequest) {
   // If the route is protected and the user is not authenticated,
   // redirect to the login page with the original URL as a redirect parameter
   if (isProtectedRoute && !session) {
-    // Check if coming from a successful purchase again
-    // This is a fallback in case the earlier check didn't catch it
-    if (purchaseSuccess === 'true' && sessionId) {
-      console.log('Middleware: User not authenticated but has purchase_success, redirecting to login with parameters');
-      const url = new URL('/login', req.url);
-      // Include the full URL with parameters as the redirect target
-      url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
-      return NextResponse.redirect(url);
-    }
-    
     console.log('Middleware: User not authenticated, redirecting to login');
     const url = new URL('/login', req.url);
     url.searchParams.set('redirect', path);
