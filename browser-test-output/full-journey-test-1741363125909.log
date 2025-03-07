@@ -1,0 +1,1099 @@
+Full User Journey Test - 2025-03-07T15:58:45.909Z
+
+[2025-03-07T15:58:45.913Z] Starting full user journey test
+[2025-03-07T15:58:45.914Z] Test user: test-user-1741363125909@example.com
+[2025-03-07T15:58:45.914Z] Cleaning up any existing test user
+[2025-03-07T15:58:46.091Z] No existing test user found
+[2025-03-07T15:58:47.081Z] Testing homepage
+[2025-03-07T15:58:48.115Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-07T15:58:48.175Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+[2025-03-07T15:58:48.265Z] BROWSER CONSOLE [ERR]: Failed to load resource: the server responded with a status of 404 (Not Found)
+[2025-03-07T15:58:48.312Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-07T15:58:48.314Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-07T15:58:48.315Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-07T15:58:48.316Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-07T15:58:48.317Z] BROWSER CONSOLE [LOG]: Session check result: No session
+[2025-03-07T15:58:48.318Z] BROWSER CONSOLE [LOG]: No session found
+[2025-03-07T15:58:48.319Z] BROWSER CONSOLE [LOG]: Session check result: No session
+[2025-03-07T15:58:48.320Z] BROWSER CONSOLE [LOG]: No session found
+[2025-03-07T15:58:48.321Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION No session
+[2025-03-07T15:58:49.126Z] Homepage loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/"
+}
+[2025-03-07T15:58:49.187Z] Buttons and links on homepage
+[
+  {
+    "type": "a",
+    "text": "PMU Profit System",
+    "id": "navbar-logo",
+    "className": "flex items-center pl-6",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "nav-link-home",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "nav-link-features",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Pricing",
+    "id": "nav-link-pricing",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#pricing"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "nav-link-faq",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "Login",
+    "id": "auth-button-login",
+    "className": "",
+    "href": "http://localhost:3000/login"
+  },
+  {
+    "type": "button",
+    "text": "Login",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50 border-none",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Buy Now",
+    "id": "buy-now-button",
+    "className": "",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "button",
+    "text": "Buy Now",
+    "id": "",
+    "className": "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 shadow h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Toggle menu",
+    "id": "mobile-menu-toggle",
+    "className": "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 w-9 md:hidden text-white hover:bg-purple-800/50",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Get Started for €37",
+    "id": "",
+    "className": "inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition-colors w-full",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "See How It Works",
+    "id": "",
+    "className": "inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-colors",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Get Started for Only €37",
+    "id": "",
+    "className": "btn-primary",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "Get Access",
+    "id": "",
+    "className": "btn-sm bg-purple-600 text-white rounded-lg",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "Get Started",
+    "id": "",
+    "className": "text-purple-600 font-medium inline-flex items-center group-hover:text-purple-700",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "Get Started",
+    "id": "",
+    "className": "text-purple-600 font-medium inline-flex items-center group-hover:text-purple-700",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "Get Started",
+    "id": "",
+    "className": "text-purple-600 font-medium inline-flex items-center group-hover:text-purple-700",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "Join Them For Only €37",
+    "id": "",
+    "className": "btn-primary",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "button",
+    "text": "Q\nHow long will it take to see results?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nI'm not tech-savvy. Will I be able to set this up?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nHow much do I need to spend on ads?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nWill this work in my city/country?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nDo I get lifetime access?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nWhat if it doesn't work for me?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nWhat if I've tried other marketing methods before and they didn't work?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nWhat exactly is included in the Consultation Success Blueprint?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nHow many video lessons are included in the course?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nHow quickly can I implement the system?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nIs there support if I have questions while implementing the system?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Q\nDo I need any special software or tools?",
+    "id": "",
+    "className": "w-full p-6 text-left flex items-start justify-between cursor-pointer hover:bg-gray-50 transition-colors",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "Get Started For €37",
+    "id": "",
+    "className": "btn-white",
+    "href": "http://localhost:3000/pre-checkout"
+  },
+  {
+    "type": "a",
+    "text": "Facebook",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://facebook.com/"
+  },
+  {
+    "type": "a",
+    "text": "Instagram",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://instagram.com/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Testimonials",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#testimonials"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "About",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/about"
+  },
+  {
+    "type": "a",
+    "text": "Contact",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/contact"
+  },
+  {
+    "type": "a",
+    "text": "Privacy",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookies",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  },
+  {
+    "type": "a",
+    "text": "Privacy Policy\nPrivacy",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms of Service\nTerms",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookie Policy\nCookies",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  }
+]
+[2025-03-07T15:58:49.223Z] Testing homepage CTA button
+[2025-03-07T15:58:49.648Z] Found CTA button, clicking it
+[2025-03-07T15:58:50.369Z] NETWORK REQUEST: GET http://localhost:3000/pre-checkout?_rsc=1wtp7
+[2025-03-07T15:58:50.827Z] NETWORK RESPONSE: 200 http://localhost:3000/pre-checkout?_rsc=1wtp7
+[2025-03-07T15:58:50.829Z] NETWORK REQUEST: GET http://localhost:3000/pre-checkout?_rsc=1hev6
+[2025-03-07T15:58:50.873Z] NETWORK RESPONSE: 200 http://localhost:3000/pre-checkout?_rsc=1hev6
+[2025-03-07T15:58:51.088Z] BROWSER CONSOLE [VER]: [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o
+[2025-03-07T15:58:51.304Z] Navigated to: http://localhost:3000/pre-checkout
+[2025-03-07T15:58:51.305Z] Successfully navigated to pre-checkout page
+[2025-03-07T15:58:51.306Z] Testing pre-checkout form
+[2025-03-07T15:58:51.903Z] Filling out pre-checkout form with email: test-user-1741363125909@example.com
+[2025-03-07T15:58:58.319Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-07T15:58:58.320Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-07T15:59:00.234Z] Clicking submit button
+[2025-03-07T15:59:00.726Z] BROWSER CONSOLE [LOG]: Creating user account...
+[2025-03-07T15:59:00.727Z] NETWORK REQUEST: POST http://localhost:3000/api/auth/signup
+[2025-03-07T15:59:01.615Z] NETWORK RESPONSE: 200 http://localhost:3000/api/auth/signup
+[2025-03-07T15:59:01.616Z] BROWSER CONSOLE [LOG]: Signup API response: JSHandle@object
+[2025-03-07T15:59:01.617Z] BROWSER CONSOLE [LOG]: User account created successfully, now signing in directly with Supabase client...
+[2025-03-07T15:59:01.618Z] NETWORK REQUEST: POST https://duxqazuhozfejdocxiyl.supabase.co/auth/v1/token?grant_type=password
+[2025-03-07T15:59:01.677Z] RESPONSE BODY: http://localhost:3000/api/auth/signup
+{
+  "success": true,
+  "user": {
+    "id": "ba53067e-882d-4f71-8910-5d6dcc709bd3",
+    "email": "test-user-1741363125909@example.com",
+    "fullName": "Test User"
+  }
+}
+[2025-03-07T15:59:01.844Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/auth/v1/token?grant_type=password
+[2025-03-07T15:59:01.846Z] BROWSER CONSOLE [LOG]: Auth state changed: SIGNED_IN User logged in
+[2025-03-07T15:59:01.847Z] BROWSER CONSOLE [LOG]: User signed in, checking for redirect
+[2025-03-07T15:59:01.848Z] BROWSER CONSOLE [LOG]: Redirecting to: /dashboard
+[2025-03-07T15:59:01.849Z] BROWSER CONSOLE [LOG]: Supabase sign-in successful: JSHandle@object
+[2025-03-07T15:59:01.849Z] BROWSER CONSOLE [LOG]: Account created and signed in successfully, redirecting to checkout
+[2025-03-07T15:59:01.850Z] BROWSER CONSOLE [LOG]: Authentication successful, redirecting immediately
+[2025-03-07T15:59:01.851Z] NETWORK REQUEST: GET http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1ezc7
+[2025-03-07T15:59:01.852Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:01.954Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:02.043Z] NETWORK RESPONSE: 200 http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1ezc7
+[2025-03-07T15:59:02.096Z] NETWORK REQUEST: GET http://localhost:3000/checkout?products=pmu-profit-system&_rsc=1u4ki
+[2025-03-07T15:59:02.158Z] BROWSER CONSOLE [ERR]: Failed to fetch RSC payload for http://localhost:3000/checkout?products=pmu-profit-system. Falling back to browser navigation. JSHandle@error
+[2025-03-07T15:59:02.459Z] BROWSER CONSOLE [INF]: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-07T15:59:02.506Z] BROWSER CONSOLE [LOG]: AuthContext: Using singleton Supabase client
+[2025-03-07T15:59:02.586Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-07T15:59:02.587Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-07T15:59:02.587Z] BROWSER CONSOLE [LOG]: Checking session...
+[2025-03-07T15:59:02.588Z] BROWSER CONSOLE [LOG]: Getting session from Supabase...
+[2025-03-07T15:59:02.588Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-07T15:59:02.589Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-07T15:59:02.589Z] BROWSER CONSOLE [LOG]: Auth cookies detected, waiting for auth state to initialize
+[2025-03-07T15:59:02.590Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-07T15:59:02.590Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-07T15:59:02.591Z] BROWSER CONSOLE [LOG]: Auth cookies detected, waiting for auth state to initialize
+[2025-03-07T15:59:02.591Z] BROWSER CONSOLE [LOG]: Session check result: Session found
+[2025-03-07T15:59:02.592Z] BROWSER CONSOLE [LOG]: User authenticated: test-user-1741363125909@example.com
+[2025-03-07T15:59:02.592Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-07T15:59:02.593Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-07T15:59:02.593Z] BROWSER CONSOLE [LOG]: Session check result: Session found
+[2025-03-07T15:59:02.593Z] BROWSER CONSOLE [LOG]: User authenticated: test-user-1741363125909@example.com
+[2025-03-07T15:59:02.594Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-07T15:59:02.594Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-07T15:59:02.595Z] BROWSER CONSOLE [LOG]: Auth state changed: INITIAL_SESSION User logged in
+[2025-03-07T15:59:02.601Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-07T15:59:02.602Z] BROWSER CONSOLE [LOG]: Loading finished, completing auth check
+[2025-03-07T15:59:02.603Z] BROWSER CONSOLE [LOG]: Cookie check: JSHandle@object
+[2025-03-07T15:59:02.611Z] BROWSER CONSOLE [LOG]: Auth check started, current state: JSHandle@object
+[2025-03-07T15:59:02.612Z] BROWSER CONSOLE [LOG]: User just signed up, not redirecting
+[2025-03-07T15:59:02.612Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:02.613Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:02.614Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:02.697Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:02.790Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:02.822Z] BROWSER CONSOLE [WAR]: You may test your Stripe.js integration over HTTP. However, live Stripe.js integrations must use HTTPS.
+[2025-03-07T15:59:02.886Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:03.341Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.342Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.394Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: disableLink is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.396Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: linkAuthenticationElement is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.397Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: fields is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.397Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: wallets is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.398Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: disableLink is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.399Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: linkAuthenticationElement is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.400Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: fields is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.400Z] BROWSER CONSOLE [WAR]: [Stripe.js] Unrecognized elements() parameter: wallets is not a recognized parameter. This may cause issues with your integration in the future.
+[2025-03-07T15:59:03.410Z] NETWORK REQUEST: POST https://merchant-ui-api.stripe.com/elements/wallet-config
+[2025-03-07T15:59:03.425Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.427Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.427Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.428Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.429Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.430Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:03.430Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:03.431Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:03.431Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:03.432Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.715Z] NETWORK REQUEST: GET https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.716Z] NETWORK RESPONSE: 200 https://js.stripe.com/v3/.deploy_status_henson.json
+[2025-03-07T15:59:03.910Z] NETWORK RESPONSE: 200 https://merchant-ui-api.stripe.com/elements/wallet-config
+[2025-03-07T15:59:03.915Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:04.083Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.086Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.276Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.278Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.280Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.442Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:04.443Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:04.443Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:04.648Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.649Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.650Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:04.651Z] NETWORK REQUEST: POST https://api.hcaptcha.com/checksiteconfig?v=ae0386bc7f5d79cadb9f362403599996bc5a4972&host=b.stripecdn.com&sitekey=20000000-ffff-ffff-ffff-000000000002&sc=1&swa=1&spst=1
+[2025-03-07T15:59:04.728Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:04.822Z] NETWORK RESPONSE: 200 https://api.hcaptcha.com/checksiteconfig?v=ae0386bc7f5d79cadb9f362403599996bc5a4972&host=b.stripecdn.com&sitekey=20000000-ffff-ffff-ffff-000000000002&sc=1&swa=1&spst=1
+[2025-03-07T15:59:04.838Z] NETWORK REQUEST: POST https://api.hcaptcha.com/getcaptcha/20000000-ffff-ffff-ffff-000000000002
+[2025-03-07T15:59:04.869Z] NETWORK RESPONSE: 200 https://api.hcaptcha.com/getcaptcha/20000000-ffff-ffff-ffff-000000000002
+[2025-03-07T15:59:04.872Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:04.945Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:05.086Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:05.975Z] Cookies after signup
+[
+  {
+    "name": "auth-status",
+    "value": "authenticated",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741366741.557701,
+    "size": 24,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-refresh-token",
+    "value": "ga1CikxjhL_9oJlyaMpADg",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1743955141.557619,
+    "size": 38,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-access-token",
+    "value": "eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYTUzMDY3ZS04ODJkLTRmNzEtODkxMC01ZDZkY2M3MDliZDMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzY2NzQxLCJpYXQiOjE3NDEzNjMxNDEsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzNjMxMjU5MDlAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0MTM2MzE0MX1dLCJzZXNzaW9uX2lkIjoiNjMwMjFiNzMtM2RlZC00N2RhLTllMjAtOTRhZWI3MjJjNjQ3IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.iWvjOdgp4JJ5mz7K-hGxOJlodwAuuhTxWvnDeRt27_I",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741366741.557299,
+    "size": 797,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  }
+]
+[2025-03-07T15:59:06.097Z] localStorage after signup
+{
+  "sb-duxqazuhozfejdocxiyl-auth-token": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYTUzMDY3ZS04ODJkLTRmNzEtODkxMC01ZDZkY2M3MDliZDMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzY2NzQxLCJpYXQiOjE3NDEzNjMxNDEsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzNjMxMjU5MDlAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0MTM2MzE0MX1dLCJzZXNzaW9uX2lkIjoiYWQ3MmQ2OWEtNWI4NC00MWMzLWE3N2QtMzJhZmFmYzAwZjk4IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.na61YRUMi_chN_sg6C2vLy6kKy7WYuzkn9PddRHWsj4\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1741366741,\"refresh_token\":\"sEQ-w4QJ1WB0wUrc326ynQ\",\"user\":{\"id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"test-user-1741363125909@example.com\",\"email_confirmed_at\":\"2025-03-07T15:59:01.561032Z\",\"phone\":\"\",\"confirmed_at\":\"2025-03-07T15:59:01.561032Z\",\"last_sign_in_at\":\"2025-03-07T15:59:01.97588083Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true,\"full_name\":\"Test User\"},\"identities\":[{\"identity_id\":\"65fc791e-6804-4820-a32f-2f72bbdf41e0\",\"id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"user_id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"identity_data\":{\"email\":\"test-user-1741363125909@example.com\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\"},\"provider\":\"email\",\"last_sign_in_at\":\"2025-03-07T15:59:01.557222Z\",\"created_at\":\"2025-03-07T15:59:01.557279Z\",\"updated_at\":\"2025-03-07T15:59:01.557279Z\",\"email\":\"test-user-1741363125909@example.com\"}],\"created_at\":\"2025-03-07T15:59:01.552939Z\",\"updated_at\":\"2025-03-07T15:59:01.977662Z\",\"is_anonymous\":false}}"
+}
+[2025-03-07T15:59:06.103Z] sessionStorage after signup
+{
+  "lastSignupEmail": "test-user-1741363125909@example.com",
+  "isAuthenticating": "true"
+}
+[2025-03-07T15:59:06.741Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:06.959Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:08.321Z] NETWORK REQUEST: POST https://m.stripe.com/6
+[2025-03-07T15:59:08.974Z] NETWORK RESPONSE: 200 https://m.stripe.com/6
+[2025-03-07T15:59:09.006Z] NETWORK REQUEST: POST https://m.stripe.com/6
+[2025-03-07T15:59:09.008Z] NETWORK REQUEST: POST https://m.stripe.com/6
+[2025-03-07T15:59:09.009Z] NETWORK REQUEST: POST https://m.stripe.com/6
+[2025-03-07T15:59:09.190Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:09.207Z] NETWORK RESPONSE: 200 https://m.stripe.com/6
+[2025-03-07T15:59:09.258Z] NETWORK RESPONSE: 200 https://m.stripe.com/6
+[2025-03-07T15:59:09.313Z] NETWORK RESPONSE: 200 https://m.stripe.com/6
+[2025-03-07T15:59:09.404Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:10.200Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:10.414Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:12.585Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-07T15:59:12.586Z] BROWSER CONSOLE [ERR]: Session check timed out after 10 seconds
+[2025-03-07T15:59:16.116Z] Navigation timeout waiting for redirect to checkout
+{
+  "error": "Navigation timeout of 10000 ms exceeded"
+}
+[2025-03-07T15:59:16.117Z] Already on checkout page
+[2025-03-07T15:59:16.117Z] Testing checkout page
+[2025-03-07T15:59:16.854Z] Checkout page cookies
+[
+  {
+    "name": "__stripe_sid",
+    "value": "40548464-7804-4918-9f00-57f041d8d058d0dbbe",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741364949,
+    "size": 54,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Strict",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "__stripe_mid",
+    "value": "48b67710-c4b5-487b-9af6-03f32c636ce5a0b1f4",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1772899149,
+    "size": 54,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Strict",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "auth-status",
+    "value": "authenticated",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741366741.557701,
+    "size": 24,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-refresh-token",
+    "value": "ga1CikxjhL_9oJlyaMpADg",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1743955141.557619,
+    "size": 38,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-access-token",
+    "value": "eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYTUzMDY3ZS04ODJkLTRmNzEtODkxMC01ZDZkY2M3MDliZDMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzY2NzQxLCJpYXQiOjE3NDEzNjMxNDEsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzNjMxMjU5MDlAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0MTM2MzE0MX1dLCJzZXNzaW9uX2lkIjoiNjMwMjFiNzMtM2RlZC00N2RhLTllMjAtOTRhZWI3MjJjNjQ3IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.iWvjOdgp4JJ5mz7K-hGxOJlodwAuuhTxWvnDeRt27_I",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741366741.557299,
+    "size": 797,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  }
+]
+[2025-03-07T15:59:16.991Z] Checkout page localStorage
+{
+  "sb-duxqazuhozfejdocxiyl-auth-token": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYTUzMDY3ZS04ODJkLTRmNzEtODkxMC01ZDZkY2M3MDliZDMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzY2NzQxLCJpYXQiOjE3NDEzNjMxNDEsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzNjMxMjU5MDlAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0MTM2MzE0MX1dLCJzZXNzaW9uX2lkIjoiYWQ3MmQ2OWEtNWI4NC00MWMzLWE3N2QtMzJhZmFmYzAwZjk4IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.na61YRUMi_chN_sg6C2vLy6kKy7WYuzkn9PddRHWsj4\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1741366741,\"refresh_token\":\"sEQ-w4QJ1WB0wUrc326ynQ\",\"user\":{\"id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"test-user-1741363125909@example.com\",\"email_confirmed_at\":\"2025-03-07T15:59:01.561032Z\",\"phone\":\"\",\"confirmed_at\":\"2025-03-07T15:59:01.561032Z\",\"last_sign_in_at\":\"2025-03-07T15:59:01.97588083Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true,\"full_name\":\"Test User\"},\"identities\":[{\"identity_id\":\"65fc791e-6804-4820-a32f-2f72bbdf41e0\",\"id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"user_id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"identity_data\":{\"email\":\"test-user-1741363125909@example.com\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\"},\"provider\":\"email\",\"last_sign_in_at\":\"2025-03-07T15:59:01.557222Z\",\"created_at\":\"2025-03-07T15:59:01.557279Z\",\"updated_at\":\"2025-03-07T15:59:01.557279Z\",\"email\":\"test-user-1741363125909@example.com\"}],\"created_at\":\"2025-03-07T15:59:01.552939Z\",\"updated_at\":\"2025-03-07T15:59:01.977662Z\",\"is_anonymous\":false}}"
+}
+[2025-03-07T15:59:16.996Z] Checkout page sessionStorage
+{
+  "lastSignupEmail": "test-user-1741363125909@example.com",
+  "isAuthenticating": "true"
+}
+[2025-03-07T15:59:17.221Z] Checkout page loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/checkout?products=pmu-profit-system"
+}
+[2025-03-07T15:59:17.283Z] User authentication status on checkout page
+{
+  "isAuthenticated": true
+}
+[2025-03-07T15:59:17.360Z] NETWORK REQUEST: POST http://localhost:3000/api/create-payment-intent
+[2025-03-07T15:59:17.613Z] BROWSER CONSOLE [LOG]: Authentication taking too long, clearing isAuthenticating flag
+[2025-03-07T15:59:17.736Z] Testing checkout completion
+[2025-03-07T15:59:18.156Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:18.370Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:18.401Z] NETWORK RESPONSE: 200 http://localhost:3000/api/create-payment-intent
+[2025-03-07T15:59:18.402Z] BROWSER CONSOLE [LOG]: Stored user ID in localStorage for backup: ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:18.403Z] NETWORK REQUEST: POST https://api.stripe.com/v1/payment_intents/pi_3R03IwGHt7cesuhE1v9s72f0/confirm
+[2025-03-07T15:59:18.462Z] RESPONSE BODY: http://localhost:3000/api/create-payment-intent
+{
+  "clientSecret": "pi_3R03IwGHt7cesuhE1v9s72f0_secret_KIayFnGfJUUijYCG2f58wMcv6"
+}
+[2025-03-07T15:59:19.398Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:19.399Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:19.483Z] NETWORK RESPONSE: 200 https://api.stripe.com/v1/payment_intents/pi_3R03IwGHt7cesuhE1v9s72f0/confirm
+[2025-03-07T15:59:19.485Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:19.485Z] NETWORK REQUEST: GET http://localhost:3000/checkout/success?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&_rsc=1fg79
+[2025-03-07T15:59:19.522Z] NETWORK RESPONSE: 200 http://localhost:3000/checkout/success?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&_rsc=1fg79
+[2025-03-07T15:59:19.523Z] NETWORK REQUEST: GET http://localhost:3000/checkout/success?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&_rsc=1tk73
+[2025-03-07T15:59:19.536Z] NETWORK RESPONSE: 200 http://localhost:3000/checkout/success?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&_rsc=1tk73
+[2025-03-07T15:59:19.617Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:19.618Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:19.632Z] BROWSER CONSOLE [LOG]: Verifying purchase on component mount
+[2025-03-07T15:59:19.633Z] BROWSER CONSOLE [LOG]: Verifying purchase with session ID: pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:19.634Z] NETWORK REQUEST: GET http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:19.634Z] BROWSER CONSOLE [LOG]: Verifying purchase on component mount
+[2025-03-07T15:59:19.635Z] BROWSER CONSOLE [LOG]: Verifying purchase with session ID: pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:19.636Z] NETWORK REQUEST: GET http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:19.706Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:19.751Z] Found 9 frames on the page
+[2025-03-07T15:59:19.752Z] Could not find Stripe card iframe
+[2025-03-07T15:59:19.966Z] Could not find payment button
+[2025-03-07T15:59:19.967Z] Testing success page
+[2025-03-07T15:59:20.495Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:20.498Z] NETWORK RESPONSE: 200 http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:20.499Z] BROWSER CONSOLE [LOG]: Verification response: JSHandle@object
+[2025-03-07T15:59:20.500Z] BROWSER CONSOLE [LOG]: Purchase details: JSHandle@object
+[2025-03-07T15:59:20.501Z] BROWSER CONSOLE [LOG]: Adding PMU Profit System to purchases
+[2025-03-07T15:59:20.502Z] NETWORK REQUEST: POST https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:20.558Z] Success page cookies
+[
+  {
+    "name": "__stripe_sid",
+    "value": "40548464-7804-4918-9f00-57f041d8d058d0dbbe",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741364949,
+    "size": 54,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Strict",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "__stripe_mid",
+    "value": "48b67710-c4b5-487b-9af6-03f32c636ce5a0b1f4",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1772899149,
+    "size": 54,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Strict",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "auth-status",
+    "value": "authenticated",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741366741.557701,
+    "size": 24,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-refresh-token",
+    "value": "ga1CikxjhL_9oJlyaMpADg",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1743955141.557619,
+    "size": 38,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  },
+  {
+    "name": "sb-access-token",
+    "value": "eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYTUzMDY3ZS04ODJkLTRmNzEtODkxMC01ZDZkY2M3MDliZDMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzY2NzQxLCJpYXQiOjE3NDEzNjMxNDEsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzNjMxMjU5MDlAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0MTM2MzE0MX1dLCJzZXNzaW9uX2lkIjoiNjMwMjFiNzMtM2RlZC00N2RhLTllMjAtOTRhZWI3MjJjNjQ3IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.iWvjOdgp4JJ5mz7K-hGxOJlodwAuuhTxWvnDeRt27_I",
+    "domain": "localhost",
+    "path": "/",
+    "expires": 1741366741.557299,
+    "size": 797,
+    "httpOnly": true,
+    "secure": false,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "NonSecure"
+  }
+]
+[2025-03-07T15:59:20.568Z] RESPONSE BODY: http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+{
+  "success": true,
+  "verified": true,
+  "paymentStatus": "succeeded",
+  "userId": "ba53067e-882d-4f71-8910-5d6dcc709bd3",
+  "includeAdGenerator": true,
+  "includeBlueprint": false,
+  "redirectUrl": "/dashboard?purchase_success=true&session_id=pi_3R03IwGHt7cesuhE1v9s72f0",
+  "sessionDetails": {
+    "id": "pi_3R03IwGHt7cesuhE1v9s72f0",
+    "customer_email": "test-user-1741363125909@example.com",
+    "amount_total": 64,
+    "currency": "eur",
+    "payment_status": "succeeded",
+    "status": "succeeded"
+  }
+}
+[2025-03-07T15:59:20.626Z] NETWORK RESPONSE: 201 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:20.627Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:20.642Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:20.687Z] Success page localStorage
+{
+  "sb-duxqazuhozfejdocxiyl-auth-token": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6InpMZm96UjBXYmdxVGs5YlUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R1eHFhenVob3pmZWpkb2N4aXlsLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiYTUzMDY3ZS04ODJkLTRmNzEtODkxMC01ZDZkY2M3MDliZDMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQxMzY2NzQxLCJpYXQiOjE3NDEzNjMxNDEsImVtYWlsIjoidGVzdC11c2VyLTE3NDEzNjMxMjU5MDlAZXhhbXBsZS5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmdWxsX25hbWUiOiJUZXN0IFVzZXIifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0MTM2MzE0MX1dLCJzZXNzaW9uX2lkIjoiYWQ3MmQ2OWEtNWI4NC00MWMzLWE3N2QtMzJhZmFmYzAwZjk4IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.na61YRUMi_chN_sg6C2vLy6kKy7WYuzkn9PddRHWsj4\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1741366741,\"refresh_token\":\"sEQ-w4QJ1WB0wUrc326ynQ\",\"user\":{\"id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"test-user-1741363125909@example.com\",\"email_confirmed_at\":\"2025-03-07T15:59:01.561032Z\",\"phone\":\"\",\"confirmed_at\":\"2025-03-07T15:59:01.561032Z\",\"last_sign_in_at\":\"2025-03-07T15:59:01.97588083Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true,\"full_name\":\"Test User\"},\"identities\":[{\"identity_id\":\"65fc791e-6804-4820-a32f-2f72bbdf41e0\",\"id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"user_id\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\",\"identity_data\":{\"email\":\"test-user-1741363125909@example.com\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"ba53067e-882d-4f71-8910-5d6dcc709bd3\"},\"provider\":\"email\",\"last_sign_in_at\":\"2025-03-07T15:59:01.557222Z\",\"created_at\":\"2025-03-07T15:59:01.557279Z\",\"updated_at\":\"2025-03-07T15:59:01.557279Z\",\"email\":\"test-user-1741363125909@example.com\"}],\"created_at\":\"2025-03-07T15:59:01.552939Z\",\"updated_at\":\"2025-03-07T15:59:01.977662Z\",\"is_anonymous\":false}}",
+  "checkout_user_id": "ba53067e-882d-4f71-8910-5d6dcc709bd3"
+}
+[2025-03-07T15:59:20.689Z] Success page sessionStorage
+{
+  "lastSignupEmail": "test-user-1741363125909@example.com"
+}
+[2025-03-07T15:59:20.703Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:20.704Z] BROWSER CONSOLE [LOG]: Adding Ad Generator to purchases
+[2025-03-07T15:59:20.705Z] NETWORK REQUEST: POST https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:20.706Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:20.748Z] Success page loaded
+{
+  "title": "PMU Profit System – Mini Marketing Course for PMU Specialists",
+  "url": "http://localhost:3000/checkout/success?session_id=pi_3R03IwGHt7cesuhE1v9s72f0"
+}
+[2025-03-07T15:59:20.787Z] NETWORK RESPONSE: 201 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:20.788Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:20.809Z] Success message
+{
+  "successMessage": "Order Confirmation"
+}
+[2025-03-07T15:59:20.810Z] Testing dashboard access
+[2025-03-07T15:59:20.855Z] NETWORK RESPONSE: 200 http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:20.857Z] BROWSER CONSOLE [LOG]: Verification response: JSHandle@object
+[2025-03-07T15:59:20.857Z] BROWSER CONSOLE [LOG]: Purchase details: JSHandle@object
+[2025-03-07T15:59:20.858Z] BROWSER CONSOLE [LOG]: Adding PMU Profit System to purchases
+[2025-03-07T15:59:20.858Z] NETWORK REQUEST: POST https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:20.859Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:20.871Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:20.872Z] BROWSER CONSOLE [LOG]: Auto-approving purchase for user: ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:20.873Z] NETWORK REQUEST: GET http://localhost:3000/api/auto-approve-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:20.917Z] RESPONSE BODY: http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+{
+  "success": true,
+  "verified": true,
+  "paymentStatus": "succeeded",
+  "userId": "ba53067e-882d-4f71-8910-5d6dcc709bd3",
+  "includeAdGenerator": true,
+  "includeBlueprint": false,
+  "redirectUrl": "/dashboard?purchase_success=true&session_id=pi_3R03IwGHt7cesuhE1v9s72f0",
+  "sessionDetails": {
+    "id": "pi_3R03IwGHt7cesuhE1v9s72f0",
+    "customer_email": "test-user-1741363125909@example.com",
+    "amount_total": 64,
+    "currency": "eur",
+    "payment_status": "succeeded",
+    "status": "succeeded"
+  }
+}
+[2025-03-07T15:59:20.932Z] NETWORK RESPONSE: 201 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:20.933Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:21.010Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:21.011Z] BROWSER CONSOLE [LOG]: Adding Ad Generator to purchases
+[2025-03-07T15:59:21.011Z] NETWORK REQUEST: POST https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:21.102Z] NETWORK RESPONSE: 201 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*
+[2025-03-07T15:59:21.103Z] NETWORK REQUEST: GET https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:21.179Z] NETWORK RESPONSE: 200 https://duxqazuhozfejdocxiyl.supabase.co/rest/v1/purchases?select=*&user_id=eq.ba53067e-882d-4f71-8910-5d6dcc709bd3&status=eq.completed
+[2025-03-07T15:59:21.180Z] BROWSER CONSOLE [LOG]: Auto-approving purchase for user: ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:21.181Z] NETWORK REQUEST: GET http://localhost:3000/api/auto-approve-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:22.557Z] NETWORK RESPONSE: 200 http://localhost:3000/api/auto-approve-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:22.559Z] BROWSER CONSOLE [LOG]: Auto-approval result: JSHandle@object
+[2025-03-07T15:59:22.618Z] RESPONSE BODY: http://localhost:3000/api/auto-approve-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+{
+  "success": true,
+  "message": "Purchase approved and entitlements created successfully",
+  "entitlements": [
+    {
+      "id": "58580393-280f-4fc3-ad5d-7cf161a401cf",
+      "user_id": "ba53067e-882d-4f71-8910-5d6dcc709bd3",
+      "product_id": "4a554622-d759-42b7-b830-79c9136d2f96",
+      "source_type": "purchase",
+      "source_id": "0ad2f097-2f21-47bd-bf43-2e48059be0f4",
+      "valid_from": "2025-03-07T15:59:22.326+00:00",
+      "valid_until": null,
+      "is_active": true,
+      "created_at": "2025-03-07T15:59:22.601572+00:00",
+      "updated_at": "2025-03-07T15:59:22.601572+00:00"
+    },
+    {
+      "id": "857623e4-a54c-4d0e-84c3-cc9cb2af13da",
+      "user_id": "ba53067e-882d-4f71-8910-5d6dcc709bd3",
+      "product_id": "4ba5c775-a8e4-449e-828f-19f938e3710b",
+      "source_type": "purchase",
+      "source_id": "0ad2f097-2f21-47bd-bf43-2e48059be0f4",
+      "valid_from": "2025-03-07T15:59:22.326+00:00",
+      "valid_until": null,
+      "is_active": true,
+      "created_at": "2025-03-07T15:59:22.687229+00:00",
+      "updated_at": "2025-03-07T15:59:22.687229+00:00"
+    }
+  ]
+}
+[2025-03-07T15:59:22.833Z] NETWORK REQUEST: POST https://m.stripe.com/6
+[2025-03-07T15:59:22.976Z] Looking for dashboard button
+[2025-03-07T15:59:23.032Z] Buttons and links on success page
+[
+  {
+    "type": "button",
+    "text": "Log out",
+    "id": "logout-button",
+    "className": "items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-8 rounded-md px-3 text-xs hidden md:inline-flex text-white hover:text-purple-100 hover:bg-purple-800/50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Dashboard",
+    "id": "dashboard-button",
+    "className": "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-8 rounded-md px-3 text-xs bg-white text-purple-700 hover:bg-purple-50 border-none whitespace-nowrap",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Toggle menu",
+    "id": "mobile-menu-toggle",
+    "className": "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 w-9 md:hidden text-white hover:bg-purple-800/50",
+    "href": null
+  },
+  {
+    "type": "button",
+    "text": "Go to Dashboard",
+    "id": "",
+    "className": "bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 flex items-center justify-center",
+    "href": null
+  },
+  {
+    "type": "a",
+    "text": "PMU Profit System",
+    "id": "navbar-logo",
+    "className": "flex items-center pl-6",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "nav-link-home",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "nav-link-features",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Pricing",
+    "id": "nav-link-pricing",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#pricing"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "nav-link-faq",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "Dashboard",
+    "id": "nav-link-dashboard",
+    "className": "text-sm font-medium transition-colors hover:text-purple-100 text-white/80",
+    "href": "http://localhost:3000/dashboard"
+  },
+  {
+    "type": "a",
+    "text": "Dashboard",
+    "id": "dashboard-button-link",
+    "className": "hidden md:inline-flex",
+    "href": "http://localhost:3000/dashboard"
+  },
+  {
+    "type": "a",
+    "text": "support@pmuprofitsystem.com",
+    "id": "",
+    "className": "font-medium underline",
+    "href": "mailto:support@pmuprofitsystem.com"
+  },
+  {
+    "type": "a",
+    "text": "support@pmuprofitsystem.com",
+    "id": "",
+    "className": "text-indigo-600 hover:text-indigo-500",
+    "href": "mailto:support@pmuprofitsystem.com"
+  },
+  {
+    "type": "a",
+    "text": "Facebook",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://facebook.com/"
+  },
+  {
+    "type": "a",
+    "text": "Instagram",
+    "id": "",
+    "className": "text-purple-600 hover:text-purple-700 transition-colors",
+    "href": "https://instagram.com/"
+  },
+  {
+    "type": "a",
+    "text": "Home",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/"
+  },
+  {
+    "type": "a",
+    "text": "Features",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#features"
+  },
+  {
+    "type": "a",
+    "text": "Testimonials",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#testimonials"
+  },
+  {
+    "type": "a",
+    "text": "FAQ",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/#faq"
+  },
+  {
+    "type": "a",
+    "text": "About",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/about"
+  },
+  {
+    "type": "a",
+    "text": "Contact",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/contact"
+  },
+  {
+    "type": "a",
+    "text": "Privacy",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookies",
+    "id": "",
+    "className": "text-xs text-gray-600 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  },
+  {
+    "type": "a",
+    "text": "Privacy Policy\nPrivacy",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/privacy"
+  },
+  {
+    "type": "a",
+    "text": "Terms of Service\nTerms",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/terms"
+  },
+  {
+    "type": "a",
+    "text": "Cookie Policy\nCookies",
+    "id": "",
+    "className": "text-xs text-gray-500 hover:text-purple-600 transition-colors",
+    "href": "http://localhost:3000/cookies"
+  }
+]
+[2025-03-07T15:59:23.047Z] NETWORK RESPONSE: 200 https://m.stripe.com/6
+[2025-03-07T15:59:23.292Z] Found dashboard link by href
+[2025-03-07T15:59:23.548Z] NETWORK RESPONSE: 500 http://localhost:3000/api/auto-approve-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:23.549Z] BROWSER CONSOLE [ERR]: Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+[2025-03-07T15:59:23.550Z] BROWSER CONSOLE [LOG]: Auto-approval result: JSHandle@object
+[2025-03-07T15:59:23.551Z] BROWSER CONSOLE [LOG]: Auto-approval failed: Failed to create entitlements: No entitlements were created
+[2025-03-07T15:59:23.552Z] BROWSER CONSOLE [LOG]: Trying create-entitlements API as fallback
+[2025-03-07T15:59:23.553Z] NETWORK REQUEST: GET http://localhost:3000/api/create-entitlements?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:23.553Z] Clicking dashboard button
+[2025-03-07T15:59:23.613Z] RESPONSE BODY: http://localhost:3000/api/auto-approve-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+{
+  "success": false,
+  "message": "Failed to create entitlements: No entitlements were created"
+}
+[2025-03-07T15:59:24.088Z] NETWORK REQUEST: GET http://localhost:3000/dashboard?_rsc=1d5sk
+[2025-03-07T15:59:24.089Z] NETWORK REQUEST: POST https://r.stripe.com/b
+[2025-03-07T15:59:24.090Z] NETWORK RESPONSE: 307 http://localhost:3000/dashboard?_rsc=1d5sk
+[2025-03-07T15:59:24.091Z] NETWORK REQUEST: GET http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-07T15:59:24.303Z] NETWORK RESPONSE: 200 https://r.stripe.com/b
+[2025-03-07T15:59:24.397Z] NETWORK RESPONSE: 200 http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-07T15:59:24.410Z] NETWORK REQUEST: GET http://localhost:3000/login?redirect=%2Fdashboard&_rsc=8g912
+[2025-03-07T15:59:24.426Z] NETWORK RESPONSE: 200 http://localhost:3000/login?redirect=%2Fdashboard&_rsc=8g912
+[2025-03-07T15:59:24.456Z] NETWORK RESPONSE: 200 http://localhost:3000/api/create-entitlements?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+[2025-03-07T15:59:24.457Z] BROWSER CONSOLE [LOG]: Create entitlements result: JSHandle@object
+[2025-03-07T15:59:24.458Z] BROWSER CONSOLE [LOG]: Create entitlements failed, trying verify-purchase API
+[2025-03-07T15:59:24.458Z] NETWORK REQUEST: GET http://localhost:3000/api/verify-purchase?session_id=pi_3R03IwGHt7cesuhE1v9s72f0
+[2025-03-07T15:59:24.509Z] RESPONSE BODY: http://localhost:3000/api/create-entitlements?session_id=pi_3R03IwGHt7cesuhE1v9s72f0&user_id=ba53067e-882d-4f71-8910-5d6dcc709bd3
+{
+  "success": false,
+  "message": "No entitlements were created",
+  "entitlements": []
+}
+[2025-03-07T15:59:24.579Z] BROWSER CONSOLE [LOG]: Storing redirect URL: /dashboard
+[2025-03-07T15:59:24.579Z] BROWSER CONSOLE [LOG]: Storing redirect URL: /dashboard
+[2025-03-07T15:59:24.814Z] Current URL after dashboard navigation: http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-07T15:59:24.815Z] Full user journey test completed successfully
