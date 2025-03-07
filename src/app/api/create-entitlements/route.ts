@@ -13,15 +13,20 @@ export async function GET(req: NextRequest) {
     
     if (!sessionId) {
       return NextResponse.json(
-        { success: false, message: 'Session ID is required' },
+        { success: false, message: 'Session ID or Payment Intent ID is required' },
         { status: 400 }
       );
     }
     
-    console.log(`[create-entitlements] Creating entitlements for session ${sessionId}${userId ? ` and user ${userId}` : ''}`);
+    // Determine if it's a payment intent ID or checkout session ID
+    const idType = sessionId.startsWith('pi_') ? 'payment intent' : 'checkout session';
+    console.log(`[create-entitlements] Creating entitlements for ${idType} ${sessionId}${userId ? ` and user ${userId}` : ''}`);
     
     // Call the shared utility function to create entitlements
+    // The function will automatically detect if it's a payment intent ID or checkout session ID
     const result = await createEntitlementsFromStripeSession(sessionId, userId || undefined);
+    
+    console.log(`[create-entitlements] Result: ${JSON.stringify(result)}`);
     
     // Return the result
     return NextResponse.json(result);

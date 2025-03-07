@@ -839,11 +839,11 @@ const { data: entitlement, error: entitlementError } = await supabase
   .from("user_entitlements")
   .insert({
     user_id: userId,
-    product_id: PRODUCT_IDS['pmu-profit-system'],
+    product_id: productId,
     source_type: "purchase",
     source_id: purchaseId,
-    valid_from: now,
-    is_active: true
+    valid_from: new Date().toISOString(),
+    is_active: true,
   })
   .select()
   .single();
@@ -855,262 +855,59 @@ if (entitlementError) {
 }
 ```
 
-#### Webhook Handler for Stripe Events
-
-The system includes a dedicated webhook handler for Stripe events at `/api/webhooks/stripe/route.ts`. This handler processes `checkout.session.completed` events and creates user entitlements based on successful purchases:
+The system handles both Stripe Checkout Sessions and Payment Intents for entitlement creation. The entitlement creation process automatically detects the type of ID (payment intent or checkout session) and processes it accordingly:
 
 ```typescript
-// Function to handle checkout.session.completed event
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  console.log('Processing checkout.session.completed event:', session.id);
-  
-  const supabase = getServiceSupabase();
-  
-  try {
-    // Check if we already have a purchase record for this session
-    const { data: existingPurchase, error: purchaseError } = await supabase
-      .from('purchases')
-      .select('*')
-      .eq('checkout_session_id', session.id)
-      .single();
-    
-    if (purchaseError && purchaseError.code !== 'PGRST116') {
-      // PGRST116 is "no rows returned" which is expected if no purchase exists
-      console.error('Error checking for existing purchase:', purchaseError);
-    }
-    
-    // If we already have a purchase record, check if we need to create entitlements
-    if (existingPurchase) {
-      console.log('Found existing purchase record:', existingPurchase.id);
-      
-      // Check if user already has entitlements
-      const { data: existingEntitlements, error: entitlementsError } = await supabase
-        .from('user_entitlements')
-        .select('*')
-        .eq('user_id', existingPurchase.user_id)
-        .eq('is_active', true);
-      
-      if (entitlementsError) {
-        console.error('Error checking for existing entitlements:', entitlementsError);
-      } else if (!existingEntitlements || existingEntitlements.length === 0) {
-        // No entitlements found, create them
-        console.log('No entitlements found for user, creating from webhook');
-        await createUserEntitlements(
-          existingPurchase.user_id,
-          existingPurchase.include_ad_generator,
-          existingPurchase.include_blueprint,
-          existingPurchase.id
-        );
-      } else {
-        console.log('User already has entitlements, skipping creation');
-      }
-      
-      return;
-    }
-    
-    // If we don't have a purchase record, create one
-    console.log('No purchase record found, creating from webhook');
-    
-    // Extract metadata from session
-    const metadata = session.metadata || {};
-    const email = session.customer_email || metadata.email || '';
-    const fullName = metadata.fullName || '';
-    const userId = metadata.userId || '';
-    const includeAdGenerator = metadata.includeAdGenerator === 'true';
-    const includeBlueprint = metadata.includeBlueprint === 'true';
-    
-    if (!email || !userId) {
-      console.error('Missing required data for purchase creation:', { email, userId });
-      return;
-    }
-    
-    // Create purchase record
-    const { data: newPurchase, error: createError } = await supabase
-      .from('purchases')
-      .insert({
-        email,
-        full_name: fullName,
-        include_ad_generator: includeAdGenerator,
-        include_blueprint: includeBlueprint,
-        user_id: userId,
-        checkout_session_id: session.id,
-        payment_status: session.payment_status,
-        payment_intent: session.payment_intent as string,
-        amount_total: session.amount_total ? session.amount_total / 100 : null,
-        created_at: new Date().toISOString(),
-        status: 'completed'
-      })
-      .select()
-      .single();
-    
-    if (createError) {
-      console.error('Error creating purchase record from webhook:', createError);
-      return;
-    }
-    
-    console.log('Created purchase record from webhook:', newPurchase.id);
-    
-    // Create entitlements for the user
-    await createUserEntitlements(
-      userId,
-      includeAdGenerator,
-      includeBlueprint,
-      newPurchase.id
-    );
-  } catch (error) {
-    console.error('Error handling checkout.session.completed event:', error);
-  }
+// Check if it's a payment intent ID (starts with 'pi_') or a checkout session ID (starts with 'cs_')
+if (sessionOrIntentId.startsWith('pi_')) {
+  console.log(`[entitlements] Detected payment intent ID: ${sessionOrIntentId}`);
+  return await createEntitlementsFromPaymentIntent(sessionOrIntentId, userId);
+} else {
+  console.log(`[entitlements] Detected checkout session ID: ${sessionOrIntentId}`);
+  return await createEntitlementsFromCheckoutSession(sessionOrIntentId, userId);
 }
 ```
 
-#### Verify Purchase API
-
-The system includes a `/api/verify-purchase` endpoint that verifies purchases and creates user entitlements if they don't exist. This serves as a backup mechanism in case the webhook fails:
-
-```typescript
-// Example: Verifying a purchase and creating entitlements
-export async function GET(req: NextRequest) {
-  try {
-    // Get the session ID from the query parameters
-    const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('session_id');
-    
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
-    }
-    
-    console.log('Verifying purchase for session/payment:', sessionId);
-    
-    // Retrieve the checkout session
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['payment_intent', 'line_items']
-    });
-    
-    // Check if the payment was successful
-    const paymentStatus = session.payment_status;
-    const isPaymentSuccessful = paymentStatus === 'paid';
-    
-    // Get the Supabase client
-    const supabase = getServiceSupabase();
-    
-    // Check if we have a record of this purchase in our database
-    const { data: purchaseData } = await supabase
-      .from('purchases')
-      .select('*')
-      .eq('checkout_session_id', sessionId)
-      .single();
-    
-    // If we don't have a purchase record but the payment was successful,
-    // create one and create user entitlements
-    if (!purchaseData && isPaymentSuccessful) {
-      // Create purchase record and entitlements
-      // ...
-    } else if (purchaseData && isPaymentSuccessful) {
-      // If we already have a purchase record but no entitlements, create them
-      const { data: existingEntitlements } = await supabase
-        .from('user_entitlements')
-        .select('*')
-        .eq('user_id', purchaseData.user_id)
-        .eq('is_active', true);
-      
-      if (!existingEntitlements || existingEntitlements.length === 0) {
-        // No entitlements found, create them
-        await createUserEntitlements(
-          purchaseData.user_id, 
-          purchaseData.include_ad_generator, 
-          purchaseData.include_blueprint,
-          purchaseData.id
-        );
-        
-        // Update purchase status to indicate entitlements were created
-        await supabase
-          .from('purchases')
-          .update({ status: 'completed', entitlements_created: true })
-          .eq('id', purchaseData.id);
-      }
-    }
-    
-    // Return the verification result
-    return NextResponse.json({
-      success: true,
-      verified: isPaymentSuccessful,
-      paymentStatus,
-      redirectUrl: `/dashboard?purchase_success=true&session_id=${sessionId}`,
-      // Additional details...
-    });
-  } catch (error) {
-    console.error('Error verifying purchase:', error);
-    return NextResponse.json(
-      { error: 'Failed to verify purchase' },
-      { status: 500 }
-    );
-  }
-}
-```
+This dual handling ensures that entitlements are created correctly regardless of whether the payment was processed through Stripe Checkout or a direct Payment Intent, providing flexibility in the payment flow.
 
 #### Handling User Entitlement Issues
 
-If users are unable to access content they've purchased, check the following:
+If users are experiencing issues with entitlements, follow these steps:
 
 1. **Missing User Entitlements**: Verify that entitlements exist in the `user_entitlements` table for the user's purchases.
-   ```sql
-   SELECT * FROM user_entitlements WHERE user_id = 'USER_ID';
-   ```
+
+```sql
+SELECT * FROM user_entitlements WHERE user_id = 'USER_ID';
+```
 
 2. **Inactive Entitlements**: Check if entitlements are marked as inactive.
-   ```sql
-   SELECT * FROM user_entitlements WHERE user_id = 'USER_ID' AND is_active = false;
-   ```
 
-3. **Database Cleanup**: If testing the purchase flow, you can clean up all user data and start fresh:
-   ```bash
-   node scripts/clean-database.js
-   ```
+```sql
+SELECT * FROM user_entitlements WHERE user_id = 'USER_ID' AND is_active = false;
+```
 
-4. **Webhook Failures**: Check the Stripe webhook logs for any failures in processing checkout sessions.
+3. **Check Purchase Records**: Verify that the purchase records exist and are marked as completed.
+
+```sql
+SELECT * FROM purchases WHERE user_id = 'USER_ID';
+```
+
+4. **Check Payment Status**: Verify the payment status in Stripe.
 
 5. **Verify Purchase API**: Manually trigger the verify purchase API to create missing entitlements:
-   ```
-   GET /api/verify-purchase?session_id=SESSION_ID
-   ```
 
-#### Success Page Flow and Expected Errors
+```
+GET /api/create-entitlements?session_id=SESSION_ID&user_id=USER_ID
+```
+
+Note that the `session_id` parameter can be either a Stripe Checkout Session ID (starting with `cs_`) or a Payment Intent ID (starting with `pi_`). The system will automatically detect the type and process it accordingly.
 
 The checkout success page (`src/app/checkout/success/page.tsx`) handles the verification of purchases and creation of entitlements. The flow works as follows:
 
-1. User completes payment on Stripe and is redirected to the success page
-2. The success page extracts the payment intent ID from the URL
+1. After a successful checkout, the user is redirected to the success page with a `session_id` parameter
+2. The success page retrieves the session ID from the URL
 3. It calls the `/api/verify-purchase` endpoint to verify the payment and create entitlements
-4. It attempts to store the purchase in the client-side context for UI purposes
-
-**Expected Errors:**
-
-When viewing the browser console on the success page, you may see the following errors:
-
-```
-Error adding purchase: {code: '42501', details: null, hint: null, message: 'new row violates row-level security policy for table "purchases"'}
-```
-
-This error is **expected and can be safely ignored**. It occurs because:
-
-1. The client-side Supabase client (using the anon key) doesn't have permission to insert into the `purchases` table due to RLS policies
-2. The actual purchase record is already created server-side by the Stripe webhook or verify-purchase API
-3. This client-side insertion is only for UI purposes and doesn't affect the actual purchase record or entitlements
-
-Similarly, you might see an error like:
-
-```
-Entitlement creation result: {success: false, message: 'Error: No such checkout.session: pi_3Qzk7eGHt7cesuhE1tioRJTT'}
-```
-
-This can occur when:
-1. The success page is using a payment intent ID instead of a checkout session ID
-2. The entitlements were already created by the webhook or verify-purchase API
-
-As long as the user can access their purchased content in the dashboard, these errors can be ignored. The server-side processes handle the actual creation of purchases and entitlements.
+4. If successful, it displays a success message and provides a link to the dashboard
 
 ---
 
