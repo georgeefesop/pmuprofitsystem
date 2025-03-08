@@ -273,24 +273,28 @@ export async function middleware(req: NextRequest) {
             console.error('Middleware: Error processing auth token:', tokenError);
           }
         } else {
-          // Even without a token, if auth-status is set, create a test user for debugging
-          console.log('Middleware: Creating test user from auth-status cookie');
-          
-          session = {
-            user: {
-              id: 'test-user-id',
-              email: 'test@example.com',
-              user_metadata: { name: 'Test User' },
-              app_metadata: {},
-              aud: 'authenticated',
-              created_at: new Date().toISOString(),
-            },
-            access_token: 'auth-status-token',
-            refresh_token: '',
-            expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-            expires_in: 3600,
-            token_type: 'bearer'
-          };
+          // Only create a test user if we're in development mode and explicitly want to test
+          if (process.env.NODE_ENV === 'development' && process.env.ALLOW_TEST_USER === 'true') {
+            console.log('Middleware: Creating test user from auth-status cookie');
+            
+            session = {
+              user: {
+                id: 'test-user-id',
+                email: 'test@example.com',
+                user_metadata: { name: 'Test User' },
+                app_metadata: {},
+                aud: 'authenticated',
+                created_at: new Date().toISOString(),
+              },
+              access_token: 'auth-status-token',
+              refresh_token: '',
+              expires_at: Date.now() + 3600 * 1000, // 1 hour from now
+              expires_in: 3600,
+              token_type: 'bearer'
+            };
+          } else {
+            console.log('Middleware: Auth-status cookie found but no valid token and not in test mode');
+          }
         }
       }
     }
@@ -460,13 +464,21 @@ export async function middleware(req: NextRequest) {
   console.log('Middleware: User authenticated, checking entitlements');
   
   try {
-    // Special handling for test users
-    if (session.user.email === 'test@example.com' || session.access_token === 'auth-status-token' || session.access_token.startsWith('mock-token-')) {
+    // Special handling for test users - ONLY allow specific test users to bypass entitlement check
+    // Make sure we're not treating regular users with auth-status cookie as test users
+    const isTestEmail = session.user.email === 'test@example.com' || 
+                       (process.env.NODE_ENV === 'development' && session.user.email?.includes('test'));
+    const isTestToken = session.access_token === 'auth-status-token' || 
+                       (session.access_token.startsWith('mock-token-'));
+    const isExplicitTestUser = session.user.id === 'test-user-id';
+    
+    // Only allow explicit test users to bypass entitlement check
+    if (isTestEmail || isTestToken || isExplicitTestUser) {
       console.log('Middleware: Test user detected, allowing access without entitlement check');
       return res;
     }
     
-    // Check if the user has any active entitlements
+    // For all other users, check if they have any active entitlements
     const { data: entitlements, error: entitlementsError } = await supabase
       .from('user_entitlements')
       .select('*')
@@ -528,6 +540,25 @@ export async function middleware(req: NextRequest) {
     
     // If we get here, the user has no entitlements and no recent purchases
     console.log('User has no active entitlements or recent purchases, redirecting to checkout');
+    
+    // Check if this is a new registration coming from the success page
+    const referer = req.headers.get('referer') || '';
+    const isFromSuccessPage = referer.includes('/checkout/success');
+    const isFromSignupPage = referer.includes('/signup') || referer.includes('/register');
+    
+    // If coming from success page, allow access (they've just completed payment)
+    if (isFromSuccessPage) {
+      console.log('Middleware: User coming from success page, allowing access');
+      return res;
+    }
+    
+    // If coming from signup, redirect to checkout (new registration)
+    if (isFromSignupPage) {
+      console.log('Middleware: New user registration, redirecting to checkout');
+      return NextResponse.redirect(new URL('/checkout', req.url));
+    }
+    
+    // Default redirect to checkout
     return NextResponse.redirect(new URL('/checkout', req.url));
   } catch (error) {
     console.error('Error in middleware entitlement check:', error);
