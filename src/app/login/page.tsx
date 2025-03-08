@@ -136,8 +136,11 @@ function LoginForm() {
         // Store the redirect URL in localStorage to ensure it's available after navigation
         localStorage.setItem('loginRedirectUrl', redirectUrl);
         
-        // Navigate to the redirect URL
-        router.push(redirectUrl);
+        // Add a small delay to ensure cookies are set before redirecting
+        setTimeout(() => {
+          // Navigate to the redirect URL
+          router.push(redirectUrl);
+        }, 100);
       } else {
         // Check if the error is related to connection issues
         if (error && (

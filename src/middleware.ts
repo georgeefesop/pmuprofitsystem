@@ -20,6 +20,21 @@ const AUTH_ONLY_ROUTES = [
   // Add other auth-only routes here
 ];
 
+// Define public routes that should always be accessible
+const PUBLIC_ROUTES = [
+  '/',
+  '/login',
+  '/signup',
+  '/pre-checkout',
+  '/forgot-password',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
+  '/cookies',
+  // Add other public routes here
+];
+
 // Browser error logger injection (development only)
 async function injectBrowserErrorLogger(response: NextResponse) {
   if (process.env.NODE_ENV === 'development' && response) {
@@ -339,6 +354,12 @@ export async function middleware(req: NextRequest) {
     return response;
   }
   
+  // If the path is a public route, allow access regardless of authentication
+  if (PUBLIC_ROUTES.some(route => path === route)) {
+    console.log(`Middleware: Path ${path} is a public route, allowing access`);
+    return response;
+  }
+  
   // Enhanced authentication check
   console.log('Middleware: Starting enhanced authentication check');
   
@@ -421,8 +442,8 @@ export async function middleware(req: NextRequest) {
   const sbRefreshToken = req.cookies.get('sb-refresh-token');
   
   // Special handling for login page - if user is already authenticated, redirect to dashboard
-  if (path === '/login' && session) {
-    console.log('Middleware: User is already authenticated and trying to access login page, redirecting to dashboard');
+  if ((path === '/login' || path === '/signup') && session) {
+    console.log('Middleware: User is already authenticated and trying to access login/signup page, redirecting to dashboard');
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
   

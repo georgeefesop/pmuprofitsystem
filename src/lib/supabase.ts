@@ -91,4 +91,27 @@ export const getSecureSiteUrl = () => {
   
   // Fallback for server-side when no environment variable is set
   return 'http://localhost:3000';
+};
+
+// Create a browser client with enhanced session handling
+export const createEnhancedBrowserClient = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+      },
+      cookieOptions: {
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        domain: '',
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    }
+  );
 }; 
