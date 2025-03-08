@@ -123,6 +123,8 @@ function LoginForm() {
     try {
       const { success, error, user } = await login(email, password);
       if (success) {
+        console.log('Login successful, setting up session');
+        
         // Store the user ID in localStorage for middleware
         localStorage.setItem('auth_user_id', user?.id || '');
         
@@ -136,11 +138,11 @@ function LoginForm() {
         // Store the redirect URL in localStorage to ensure it's available after navigation
         localStorage.setItem('loginRedirectUrl', redirectUrl);
         
-        // Add a longer delay to ensure cookies are set before redirecting
+        // Add a delay to ensure cookies are set before redirecting
         setTimeout(() => {
           // Force a hard navigation to ensure cookies are properly set
           window.location.href = redirectUrl;
-        }, 500);
+        }, 1000);
       } else {
         // Check if the error is related to connection issues
         if (error && (

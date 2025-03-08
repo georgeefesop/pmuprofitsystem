@@ -376,8 +376,15 @@ export async function middleware(req: NextRequest) {
   let session = null;
   let userId = null;
   
-  // SIMPLIFIED SESSION RESTORATION APPROACH
+  // IMPROVED SESSION RESTORATION APPROACH
   try {
+    console.log('Middleware: Starting auth check for path:', path);
+    console.log('Middleware: Auth cookies present:', {
+      accessToken: !!sbAccessToken,
+      refreshToken: !!sbRefreshToken,
+      authStatus: authStatusCookie?.value
+    });
+    
     // First try to get the user directly
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
@@ -398,24 +405,46 @@ export async function middleware(req: NextRequest) {
     }
     
     // If no session but we have tokens, try to restore the session
-    if (!session && sbAccessToken && sbRefreshToken) {
-      console.log('Middleware: No session found but tokens exist, attempting to restore session');
+    if (!session && (sbAccessToken || sbRefreshToken || authStatusCookie?.value === 'authenticated')) {
+      console.log('Middleware: No session found but auth indicators exist, attempting to restore session');
       
-      try {
-        const { data, error } = await supabase.auth.setSession({
-          access_token: sbAccessToken.value,
-          refresh_token: sbRefreshToken.value
-        });
-        
-        if (error) {
-          console.log('Middleware: Error restoring session from tokens:', error.message);
-        } else if (data?.session) {
-          session = data.session;
-          userId = data.session.user.id;
-          console.log(`Middleware: Successfully restored session for user: ${userId}`);
+      // If we have both tokens, try to set the session directly
+      if (sbAccessToken && sbRefreshToken) {
+        try {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: sbAccessToken.value,
+            refresh_token: sbRefreshToken.value
+          });
+          
+          if (error) {
+            console.log('Middleware: Error restoring session from tokens:', error.message);
+          } else if (data?.session) {
+            session = data.session;
+            userId = data.session.user.id;
+            console.log(`Middleware: Successfully restored session for user: ${userId}`);
+          }
+        } catch (error) {
+          console.log('Middleware: Error in session restoration:', error);
         }
-      } catch (error) {
-        console.log('Middleware: Error in session restoration:', error);
+      }
+      
+      // If still no session but we have the auth-status cookie, try to refresh the session
+      if (!session && authStatusCookie?.value === 'authenticated') {
+        console.log('Middleware: Attempting to refresh session based on auth-status cookie');
+        
+        try {
+          const { data, error } = await supabase.auth.refreshSession();
+          
+          if (error) {
+            console.log('Middleware: Error refreshing session:', error.message);
+          } else if (data?.session) {
+            session = data.session;
+            userId = data.session.user.id;
+            console.log(`Middleware: Successfully refreshed session for user: ${userId}`);
+          }
+        } catch (error) {
+          console.log('Middleware: Error in session refresh:', error);
+        }
       }
     }
   } catch (error) {
@@ -426,6 +455,18 @@ export async function middleware(req: NextRequest) {
   if ((path === '/login' || path === '/signup') && session) {
     console.log('Middleware: User is already authenticated and trying to access login/signup page, redirecting to dashboard');
     return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+  
+  // Special handling for pre-checkout page - if user is already authenticated, redirect to checkout
+  if (path === '/pre-checkout' && session) {
+    console.log('Middleware: User is already authenticated and trying to access pre-checkout, redirecting to checkout');
+    const redirectUrl = new URL('/checkout', req.url);
+    // Preserve any product parameters
+    const products = searchParams.get('products');
+    if (products) {
+      redirectUrl.searchParams.set('products', products);
+    }
+    return NextResponse.redirect(redirectUrl);
   }
   
   // If user is not authenticated and trying to access a protected route, redirect to login

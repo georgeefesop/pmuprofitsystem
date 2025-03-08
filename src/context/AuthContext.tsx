@@ -34,6 +34,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [sessionCheckFailed, setSessionCheckFailed] = useState(false);
   const router = useRouter();
 
+  // Function to clear all auth-related cookies and localStorage items
+  const clearAuthData = () => {
+    // Clear auth cookies
+    Cookies.remove('auth-status', { path: '/' });
+    Cookies.remove('sb-auth-token', { path: '/' });
+    
+    // Clear Supabase cookies
+    const cookiesToClear = [
+      'sb-access-token',
+      'sb-refresh-token',
+      'supabase-auth-token'
+    ];
+    
+    cookiesToClear.forEach(cookieName => {
+      Cookies.remove(cookieName, { path: '/' });
+    });
+    
+    // Clear localStorage items
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_user_id');
+      localStorage.removeItem('redirectTo');
+      localStorage.removeItem('loginRedirectUrl');
+      localStorage.removeItem('supabase.auth.token');
+    }
+  };
+
   useEffect(() => {
     // Check for active session on initial load
     const checkSession = async () => {
@@ -74,13 +100,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         if (session) {
-          setUser(session.user);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            full_name: session.user.user_metadata?.full_name || ''
+          });
           setSessionCheckFailed(false);
           console.log('User authenticated:', session.user?.email);
+          
+          // Set auth-status cookie to ensure middleware recognizes the user
+          Cookies.set('auth-status', 'authenticated', { 
+            expires: 7, 
+            path: '/',
+            secure: window.location.protocol === 'https:',
+            sameSite: 'strict'
+          });
+          
           return session;
         } else {
           setSessionCheckFailed(true);
           console.log('No session found');
+          clearAuthData(); // Clear any stale auth data
           return null;
         }
       } catch (error) {
@@ -91,7 +131,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     
-    checkSession();
+    checkSession().finally(() => {
+      setIsLoading(false);
+    });
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -105,6 +147,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           full_name: user.user_metadata?.full_name || ''
         });
         
+        // Set auth-status cookie
+        Cookies.set('auth-status', 'authenticated', { 
+          expires: 7, 
+          path: '/',
+          secure: window.location.protocol === 'https:',
+          sameSite: 'strict'
+        });
+        
         // Handle redirection on sign in
         if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
           console.log('User signed in, checking for redirect');
@@ -116,23 +166,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Use a small delay to ensure the auth state is fully updated
           setTimeout(() => {
-            // Use router.push instead of window.location for better Next.js integration
-            if (typeof window !== 'undefined') {
-              window.location.href = redirectTo;
-            }
-          }, 500); // Increased delay to ensure auth state is fully processed
+            router.push(redirectTo);
+          }, 500);
         }
       } else {
         setUser(null);
         
-        // Handle redirection on sign out
-        if (event === 'SIGNED_OUT' && typeof window !== 'undefined') {
-          console.log('User signed out, redirecting to login');
+        // Clear auth data on sign out
+        if (event === 'SIGNED_OUT') {
+          clearAuthData();
           
-          // Use a small delay to ensure the auth state is fully updated
-          setTimeout(() => {
-            window.location.href = '/login';
-          }, 300);
+          // Handle redirection on sign out
+          if (typeof window !== 'undefined') {
+            console.log('User signed out, redirecting to login');
+            
+            // Use a small delay to ensure the auth state is fully updated
+            setTimeout(() => {
+              router.push('/login');
+            }, 300);
+          }
         }
       }
       
@@ -142,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     setIsLoading(true);
@@ -249,25 +301,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Store auth status in a cookie for middleware with proper settings
         Cookies.set('auth-status', 'authenticated', { 
-          expires: 7, 
+          expires: 30, // Extend to 30 days
           path: '/',
           secure: window.location.protocol === 'https:',
-          sameSite: 'strict'
+          sameSite: 'lax' // Change to lax for better compatibility
         });
         
-        // Store session ID in a cookie for middleware
-        if (data.session?.access_token) {
-          Cookies.set('sb-auth-token', data.session.access_token, {
-            expires: 7,
-            path: '/',
-            secure: window.location.protocol === 'https:',
-            sameSite: 'strict'
-          });
-        }
+        // Also set a cookie directly for better compatibility with middleware
+        document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
         
         // Store user ID in localStorage as a backup
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_user_id', data.user.id);
+          
+          // Also store the session tokens in localStorage as a backup
+          if (data.session) {
+            localStorage.setItem('sb-access-token', data.session.access_token);
+            localStorage.setItem('sb-refresh-token', data.session.refresh_token);
+          }
         }
         
         return { 
@@ -312,16 +363,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear user state
       setUser(null);
       
-      // Clear auth cookies
-      Cookies.remove('auth-status', { path: '/' });
-      Cookies.remove('sb-auth-token', { path: '/' });
-      
-      // Clear localStorage items
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_user_id');
-        localStorage.removeItem('redirectTo');
-        localStorage.removeItem('loginRedirectUrl');
-      }
+      // Clear all auth data
+      clearAuthData();
       
       console.log('User logged out successfully');
       
@@ -609,16 +652,18 @@ Verification Link: ${redirectUrl}?type=signup&email=${encodeURIComponent(email)}
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isLoading, 
-      login, 
-      logout, 
-      register, 
-      updateProfile,
-      sessionCheckFailed,
-      resendVerificationEmail
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        sessionCheckFailed,
+        login,
+        logout,
+        register,
+        updateProfile,
+        resendVerificationEmail,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
