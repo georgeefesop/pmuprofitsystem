@@ -68,34 +68,64 @@ export function useEnhancedUser() {
     try {
       setIsLoading(true);
       
-      // Sign out from both clients to ensure all cookies are cleared
-      await enhancedClient.auth.signOut();
-      await supabase.auth.signOut();
-      
-      // Clear cookies manually to ensure they're removed
+      // First clear cookies manually to ensure they're removed
       document.cookie.split(';').forEach(cookie => {
         const [name] = cookie.trim().split('=');
-        if (name.includes('sb-') || name === 'auth-status') {
+        if (name) {
+          // Clear the cookie with all possible path and domain combinations
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname};`;
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${window.location.hostname};`;
         }
       });
       
-      // Clear local storage items
+      // Clear all Supabase-related local storage items
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (
+          key.includes('supabase') || 
+          key.includes('sb-') || 
+          key.includes('auth') || 
+          key.includes('redirect')
+        )) {
+          localStorage.removeItem(key);
+        }
+      }
+      
+      // Explicitly remove known items
       localStorage.removeItem('auth_user_id');
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('redirectTo');
       localStorage.removeItem('loginRedirectUrl');
       
+      // Now sign out from both clients
+      try {
+        await enhancedClient.auth.signOut({ scope: 'global' });
+      } catch (e) {
+        console.error('Error signing out from enhanced client:', e);
+      }
+      
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (e) {
+        console.error('Error signing out from regular client:', e);
+      }
+      
       setUser(null);
       
-      // Force a hard navigation to ensure all state is cleared
-      window.location.href = '/login';
+      // Add a delay to ensure everything is cleared before redirecting
+      setTimeout(() => {
+        // Force a hard navigation to ensure all state is cleared
+        window.location.href = '/login';
+      }, 500);
     } catch (err) {
       console.error('Error signing out:', err);
       setError(err instanceof Error ? err.message : 'Error signing out');
       
-      // If sign out fails, force a hard navigation to login
-      window.location.href = '/login';
+      // If sign out fails, force a hard navigation to login after a delay
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 500);
     } finally {
       setIsLoading(false);
     }

@@ -289,6 +289,15 @@ export function UserEntitlements() {
 function ProductCard({ product }: { product: ProductWithEntitlement }) {
   // Function to get the purchase link for a product
   const getPurchaseLink = (product: ProductWithEntitlement) => {
+    // Check product type and name to determine the correct sales page
+    if (product.name.toLowerCase().includes('ad generator')) {
+      return '/ad-generator'; // Purpose-built sales page for Ad Generator
+    } else if (product.name.toLowerCase().includes('consultation') || 
+               product.name.toLowerCase().includes('blueprint')) {
+      return '/blueprint'; // Purpose-built sales page for Consultation Blueprint
+    }
+    
+    // Default to the standard checkout page for other products
     return `/checkout?products=${product.id}`;
   };
 
