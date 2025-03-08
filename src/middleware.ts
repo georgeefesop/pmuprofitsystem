@@ -349,71 +349,132 @@ export async function middleware(req: NextRequest) {
   // Try to get the session
   let session = null;
   try {
-    const { data, error } = await supabase.auth.getSession();
-    session = data.session;
+    // First try to get the user directly - this is more reliable than getSession
+    const { data: userData, error: userError } = await supabase.auth.getUser();
     
-    if (error) {
-      console.error('Middleware: Error getting session:', error);
-    } else if (session) {
-      console.log(`Middleware: Found session for user: ${session.user.id}`);
-    } else {
-      console.log('Middleware: No session found in initial check, trying to refresh token');
+    if (userError) {
+      console.error('Middleware: Error getting user:', userError);
+    } else if (userData.user) {
+      console.log(`Middleware: Found user: ${userData.user.id}`);
       
-      // Try to refresh the session
-      try {
-        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-        session = refreshData.session;
+      // Now get the session
+      const { data, error } = await supabase.auth.getSession();
+      session = data.session;
+      
+      if (error) {
+        console.error('Middleware: Error getting session:', error);
+      } else if (session) {
+        console.log(`Middleware: Found session for user: ${session.user.id}`);
+      } else {
+        console.log('Middleware: User found but no session, trying to refresh token');
         
-        if (refreshError) {
+        // Try to refresh the session
+        try {
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          session = refreshData.session;
+          
+          if (refreshError) {
+            console.error('Middleware: Error refreshing session:', refreshError);
+          } else if (session) {
+            console.log(`Middleware: Refreshed session for user: ${session.user.id}`);
+          }
+        } catch (refreshError) {
           console.error('Middleware: Error refreshing session:', refreshError);
-        } else if (session) {
-          console.log(`Middleware: Refreshed session for user: ${session.user.id}`);
         }
-      } catch (refreshError) {
-        console.error('Middleware: Error refreshing session:', refreshError);
+      }
+    } else {
+      console.log('Middleware: No user found, trying to get session');
+      
+      // Try to get the session directly
+      const { data, error } = await supabase.auth.getSession();
+      session = data.session;
+      
+      if (error) {
+        console.error('Middleware: Error getting session:', error);
+      } else if (session) {
+        console.log(`Middleware: Found session for user: ${session.user.id}`);
+      } else {
+        console.log('Middleware: No session found in initial check, trying to refresh token');
+        
+        // Try to refresh the session
+        try {
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          session = refreshData.session;
+          
+          if (refreshError) {
+            console.error('Middleware: Error refreshing session:', refreshError);
+          } else if (session) {
+            console.log(`Middleware: Refreshed session for user: ${session.user.id}`);
+          }
+        } catch (refreshError) {
+          console.error('Middleware: Error refreshing session:', refreshError);
+        }
       }
     }
   } catch (error) {
     console.error('Middleware: Error checking session:', error);
   }
   
-  // Check for auth-status cookie as a fallback (for development/testing)
+  // Check for auth-status cookie as a fallback
   const authStatusCookie = req.cookies.get('auth-status');
-  const authTokenCookie = req.cookies.get('sb-auth-token');
+  const sbAccessToken = req.cookies.get('sb-access-token');
+  const sbRefreshToken = req.cookies.get('sb-refresh-token');
   
   if (!session && authStatusCookie && authStatusCookie.value === 'authenticated') {
     console.log('Middleware: Found auth-status cookie, but no valid session');
     
-    // We no longer create test users or special exceptions
-    // Instead, we'll properly enforce the authentication flow
-    
-    // If the user has the auth-status cookie but no valid session,
-    // they need to go through the proper authentication flow
-    if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
-      console.log('Middleware: User has auth-status cookie but no valid session, redirecting to login');
-      const redirectUrl = new URL('/login', req.url);
-      redirectUrl.searchParams.set('redirect', path);
-      return NextResponse.redirect(redirectUrl);
+    // Check if we have the Supabase tokens
+    if (sbAccessToken && sbRefreshToken) {
+      console.log('Middleware: Found Supabase tokens, attempting to restore session');
+      
+      try {
+        // Try to set the auth cookies and restore the session
+        const { data, error } = await supabase.auth.setSession({
+          access_token: sbAccessToken.value,
+          refresh_token: sbRefreshToken.value
+        });
+        
+        if (error) {
+          console.error('Middleware: Error setting session from cookies:', error);
+        } else if (data.session) {
+          console.log(`Middleware: Successfully restored session for user: ${data.session.user.id}`);
+          session = data.session;
+        }
+      } catch (error) {
+        console.error('Middleware: Error setting session from cookies:', error);
+      }
     }
     
-    if (AUTH_ONLY_ROUTES.some(route => path.startsWith(route))) {
-      // For checkout, redirect to pre-checkout to create an account first
-      if (path.startsWith('/checkout') && !path.includes('/success')) {
-        console.log('Middleware: User has auth-status cookie but no valid session, redirecting to pre-checkout');
-        const redirectUrl = new URL('/pre-checkout', req.url);
-        // Preserve any product parameters
-        const products = searchParams.get('products');
-        if (products) {
-          redirectUrl.searchParams.set('products', products);
-        }
+    // If we still don't have a session, handle the auth-status cookie
+    if (!session) {
+      // If the user has the auth-status cookie but no valid session,
+      // they need to go through the proper authentication flow
+      if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
+        console.log('Middleware: User has auth-status cookie but no valid session, redirecting to login');
+        const redirectUrl = new URL('/login', req.url);
+        redirectUrl.searchParams.set('redirect', path);
         return NextResponse.redirect(redirectUrl);
       }
       
-      // For other auth-only routes, redirect to login
-      console.log('Middleware: User has auth-status cookie but no valid session, redirecting to login');
-      const redirectUrl = new URL('/login', req.url);
-      redirectUrl.searchParams.set('redirect', path);
-      return NextResponse.redirect(redirectUrl);
+      if (AUTH_ONLY_ROUTES.some(route => path.startsWith(route))) {
+        // For checkout, redirect to pre-checkout to create an account first
+        if (path.startsWith('/checkout') && !path.includes('/success')) {
+          console.log('Middleware: User has auth-status cookie but no valid session, redirecting to pre-checkout');
+          const redirectUrl = new URL('/pre-checkout', req.url);
+          // Preserve any product parameters
+          const products = searchParams.get('products');
+          if (products) {
+            redirectUrl.searchParams.set('products', products);
+          }
+          return NextResponse.redirect(redirectUrl);
+        }
+        
+        // For other auth-only routes, redirect to login
+        console.log('Middleware: User has auth-status cookie but no valid session, redirecting to login');
+        const redirectUrl = new URL('/login', req.url);
+        redirectUrl.searchParams.set('redirect', path);
+        return NextResponse.redirect(redirectUrl);
+      }
     }
   }
   
