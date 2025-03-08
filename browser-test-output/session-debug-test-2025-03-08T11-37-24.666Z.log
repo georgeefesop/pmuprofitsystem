@@ -1,0 +1,218 @@
+[2025-03-08T11:37:25.712Z] Navigating to homepage
+[2025-03-08T11:37:25.759Z] Request: GET http://localhost:3000/
+[2025-03-08T11:37:31.896Z] Response: 200 GET http://localhost:3000/
+[2025-03-08T11:37:31.910Z] Request: GET http://localhost:3000/_next/image?url=%2Fimages%2Fbeautiful-young-woman-going-through-microblading-treatment.jpg&w=640&q=75
+[2025-03-08T11:37:31.914Z] Request: GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433851652
+[2025-03-08T11:37:31.919Z] Request: GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433851652
+[2025-03-08T11:37:31.923Z] Request: GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433851652
+[2025-03-08T11:37:31.926Z] Request: GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:31.929Z] Request: GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:31.933Z] Request: GET http://localhost:3000/_next/static/chunks/app/page.js
+[2025-03-08T11:37:31.937Z] Request: GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:31.940Z] Request: GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:32.220Z] Response: 200 GET http://localhost:3000/_next/image?url=%2Fimages%2Fbeautiful-young-woman-going-through-microblading-treatment.jpg&w=640&q=75
+[2025-03-08T11:37:32.224Z] Response: 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433851652
+[2025-03-08T11:37:32.228Z] Response: 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433851652
+[2025-03-08T11:37:32.490Z] Request: GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:32.495Z] Request: GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F21.jpg&w=32&q=75
+[2025-03-08T11:37:32.500Z] Request: GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F22.jpg&w=32&q=75
+[2025-03-08T11:37:32.508Z] Request: GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F23.jpg&w=32&q=75
+[2025-03-08T11:37:32.513Z] Request: GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F24.jpg&w=32&q=75
+[2025-03-08T11:37:32.517Z] Request: GET http://localhost:3000/_next/image?url=%2Fimages%2FBefore-2.jpg&w=640&q=75
+[2025-03-08T11:37:32.522Z] Request: GET http://localhost:3000/_next/image?url=%2Fimages%2FAfter-2.jpg&w=640&q=75
+[2025-03-08T11:37:32.526Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:32.534Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:32.539Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:32.544Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/page.js
+[2025-03-08T11:37:32.552Z] Response: 200 GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F21.jpg&w=32&q=75
+[2025-03-08T11:37:32.556Z] Response: 200 GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F22.jpg&w=32&q=75
+[2025-03-08T11:37:32.561Z] Response: 200 GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F23.jpg&w=32&q=75
+[2025-03-08T11:37:32.565Z] Response: 200 GET http://localhost:3000/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fwomen%2F24.jpg&w=32&q=75
+[2025-03-08T11:37:32.572Z] Response: 200 GET http://localhost:3000/_next/image?url=%2Fimages%2FBefore-2.jpg&w=640&q=75
+[2025-03-08T11:37:32.576Z] Response: 200 GET http://localhost:3000/_next/image?url=%2Fimages%2FAfter-2.jpg&w=640&q=75
+[2025-03-08T11:37:32.581Z] Response: 200 GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:32.587Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:33.017Z] Response: 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433851652
+[2025-03-08T11:37:33.195Z] Console info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-08T11:37:33.273Z] Console log: AuthContext: Using singleton Supabase client
+[2025-03-08T11:37:33.348Z] Console error: Failed to load resource: the server responded with a status of 404 (Not Found)
+[2025-03-08T11:37:33.447Z] Console log: Checking session...
+[2025-03-08T11:37:33.453Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:33.460Z] Console log: Checking session...
+[2025-03-08T11:37:33.465Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:33.486Z] Console log: Session check result: No session
+[2025-03-08T11:37:33.490Z] Console log: No session found
+[2025-03-08T11:37:33.498Z] Console log: Session check result: No session
+[2025-03-08T11:37:33.504Z] Console log: No session found
+[2025-03-08T11:37:33.509Z] Console log: Auth state changed: INITIAL_SESSION No session
+[2025-03-08T11:37:34.028Z] Console warning: Image with src "/images/Before-2.jpg" was detected as the Largest Contentful Paint (LCP). Please add the "priority" property if this image is above the fold.
+Read more: https://nextjs.org/docs/api-reference/next/image#priority
+[2025-03-08T11:37:34.894Z] Screenshot saved: C:\Users\georg\Desktop\pmucourse\pmuprofitsystem\browser-test-output\01-homepage-2025-03-08T11-37-24.666Z.png
+[2025-03-08T11:37:34.897Z] Navigating to login page
+[2025-03-08T11:37:34.904Z] Request: GET http://localhost:3000/login
+[2025-03-08T11:37:35.243Z] Console log: [Fast Refresh] rebuilding
+[2025-03-08T11:37:36.382Z] Request: GET http://localhost:3000/_next/static/webpack/2e3d38190415c795.webpack.hot-update.json
+[2025-03-08T11:37:36.395Z] Response: 200 GET http://localhost:3000/_next/static/webpack/2e3d38190415c795.webpack.hot-update.json
+[2025-03-08T11:37:36.400Z] Request: GET http://localhost:3000/_next/static/webpack/app/layout.2e3d38190415c795.hot-update.js
+[2025-03-08T11:37:36.403Z] Request: GET http://localhost:3000/_next/static/webpack/webpack.2e3d38190415c795.hot-update.js
+[2025-03-08T11:37:36.675Z] Response: 200 GET http://localhost:3000/_next/static/webpack/webpack.2e3d38190415c795.hot-update.js
+[2025-03-08T11:37:36.682Z] Response: 200 GET http://localhost:3000/_next/static/webpack/app/layout.2e3d38190415c795.hot-update.js
+[2025-03-08T11:37:36.688Z] Console log: [Fast Refresh] done in 1443ms
+[2025-03-08T11:37:36.692Z] Request: GET http://localhost:3000/_next/static/webpack/1c24ea820985ee35.webpack.hot-update.json
+[2025-03-08T11:37:36.695Z] Response: 200 GET http://localhost:3000/login
+[2025-03-08T11:37:36.702Z] Console warning: [Fast Refresh] performing full reload
+
+Fast Refresh will perform a full reload when you edit a file that's imported by modules outside of the React rendering tree.
+You might have a file which exports a React component but also exports a value that is imported by a non-React component file.
+Consider migrating the non-React component export to a separate file and importing it into both files.
+
+It is also possible the parent component of the component you edited is a class component, which disables Fast Refresh.
+Fast Refresh requires at least one parent function component in your React tree.
+[2025-03-08T11:37:36.706Z] Request: GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433856459
+[2025-03-08T11:37:36.710Z] Request: GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433856459
+[2025-03-08T11:37:36.713Z] Request: GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433856459
+[2025-03-08T11:37:36.717Z] Request: GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:36.720Z] Request: GET http://localhost:3000/_next/static/chunks/app/login/page.js
+[2025-03-08T11:37:36.724Z] Request: GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:36.728Z] Request: GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:36.733Z] Request: GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:36.741Z] Response: 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433856459
+[2025-03-08T11:37:36.745Z] Request: GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:36.749Z] Response: 200 GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:36.753Z] Response: 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433856459
+[2025-03-08T11:37:36.756Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:36.760Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:36.764Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:36.795Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:36.853Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/login/page.js
+[2025-03-08T11:37:36.984Z] Response: 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433856459
+[2025-03-08T11:37:37.141Z] Console info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-08T11:37:37.198Z] Console log: AuthContext: Using singleton Supabase client
+[2025-03-08T11:37:37.290Z] Console log: Checking session...
+[2025-03-08T11:37:37.296Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:37.299Z] Console log: Checking session...
+[2025-03-08T11:37:37.301Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:37.313Z] Console log: Session check result: No session
+[2025-03-08T11:37:37.317Z] Console log: No session found
+[2025-03-08T11:37:37.321Z] Console log: Session check result: No session
+[2025-03-08T11:37:37.324Z] Console log: No session found
+[2025-03-08T11:37:37.326Z] Console log: Auth state changed: INITIAL_SESSION No session
+[2025-03-08T11:37:37.612Z] Screenshot saved: C:\Users\georg\Desktop\pmucourse\pmuprofitsystem\browser-test-output\02-login-page-2025-03-08T11-37-24.666Z.png
+[2025-03-08T11:37:37.617Z] Filling login form
+[2025-03-08T11:37:38.036Z] Screenshot saved: C:\Users\georg\Desktop\pmucourse\pmuprofitsystem\browser-test-output\03-login-form-filled-2025-03-08T11-37-24.666Z.png
+[2025-03-08T11:37:38.039Z] Submitting login form
+[2025-03-08T11:37:38.070Z] Console log: Attempting login with: user@example.com
+[2025-03-08T11:37:38.077Z] Request: POST https://duxqazuhozfejdocxiyl.supabase.co/auth/v1/token?grant_type=password
+[2025-03-08T11:37:38.532Z] Response: 400 POST https://duxqazuhozfejdocxiyl.supabase.co/auth/v1/token?grant_type=password
+[2025-03-08T11:37:38.537Z] Console error: Failed to load resource: the server responded with a status of 400 ()
+[2025-03-08T11:37:38.543Z] Console error: Login error from Supabase: AuthApiError: Invalid login credentials
+    at handleError (webpack-internal:///(app-pages-browser)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:80:11)
+    at async _handleRequest (webpack-internal:///(app-pages-browser)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:123:9)
+    at async _request (webpack-internal:///(app-pages-browser)/./node_modules/@supabase/auth-js/dist/module/lib/fetch.js:105:18)
+    at async SupabaseAuthClient.signInWithPassword (webpack-internal:///(app-pages-browser)/./node_modules/@supabase/auth-js/dist/module/GoTrueClient.js:353:23)
+    at async login (webpack-internal:///(app-pages-browser)/./src/context/AuthContext.tsx:144:32)
+    at async handleSubmit (webpack-internal:///(app-pages-browser)/./src/app/login/page.tsx:212:46)
+[2025-03-08T11:37:38.547Z] Response body: {"code":"invalid_credentials","message":"Invalid login credentials"}
+[2025-03-08T11:37:47.303Z] Console error: Session check timed out after 10 seconds
+[2025-03-08T11:37:47.307Z] Console error: Session check timed out after 10 seconds
+[2025-03-08T11:37:48.054Z] Navigation timeout or error: page.waitForNavigation: Timeout 10000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+[2025-03-08T11:37:48.226Z] Screenshot saved: C:\Users\georg\Desktop\pmucourse\pmuprofitsystem\browser-test-output\04-after-login-2025-03-08T11-37-24.666Z.png
+[2025-03-08T11:37:48.229Z] Current URL after login attempt: http://localhost:3000/login
+[2025-03-08T11:37:48.231Z] Login appears to have failed, checking for error messages
+[2025-03-08T11:37:48.240Z] Creating a test account for debugging
+[2025-03-08T11:37:48.247Z] Request: GET http://localhost:3000/debug/session
+[2025-03-08T11:37:48.400Z] Console log: [Fast Refresh] rebuilding
+[2025-03-08T11:37:48.788Z] Request: GET http://localhost:3000/_next/static/webpack/451b1f68861a60d6.webpack.hot-update.json
+[2025-03-08T11:37:48.801Z] Response: 200 GET http://localhost:3000/_next/static/webpack/451b1f68861a60d6.webpack.hot-update.json
+[2025-03-08T11:37:48.805Z] Request: GET http://localhost:3000/_next/static/webpack/webpack.451b1f68861a60d6.hot-update.js
+[2025-03-08T11:37:48.893Z] Response: 200 GET http://localhost:3000/_next/static/webpack/webpack.451b1f68861a60d6.hot-update.js
+[2025-03-08T11:37:48.898Z] Response: 200 GET http://localhost:3000/debug/session
+[2025-03-08T11:37:48.902Z] Console log: [Fast Refresh] done in 495ms
+[2025-03-08T11:37:48.908Z] Request: GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433868824
+[2025-03-08T11:37:48.912Z] Request: GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433868824
+[2025-03-08T11:37:48.915Z] Request: GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433868824
+[2025-03-08T11:37:48.919Z] Request: GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:48.923Z] Request: GET http://localhost:3000/_next/static/chunks/app/debug/session/page.js
+[2025-03-08T11:37:48.926Z] Request: GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:48.930Z] Request: GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:48.934Z] Request: GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:48.943Z] Response: 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433868824
+[2025-03-08T11:37:48.948Z] Request: GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:48.952Z] Response: 200 GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:48.955Z] Response: 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433868824
+[2025-03-08T11:37:48.960Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:48.964Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:48.970Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:48.976Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/debug/session/page.js
+[2025-03-08T11:37:48.989Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:49.154Z] Response: 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433868824
+[2025-03-08T11:37:49.287Z] Console info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-08T11:37:49.339Z] Console log: AuthContext: Using singleton Supabase client
+[2025-03-08T11:37:49.428Z] Request: GET http://localhost:3000/api/debug/middleware
+[2025-03-08T11:37:49.433Z] Console log: Checking session...
+[2025-03-08T11:37:49.437Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:49.441Z] Request: GET http://localhost:3000/api/debug/middleware
+[2025-03-08T11:37:49.444Z] Console log: Checking session...
+[2025-03-08T11:37:49.447Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:49.451Z] Console log: Session check result: No session
+[2025-03-08T11:37:49.454Z] Console log: No session found
+[2025-03-08T11:37:49.459Z] Console log: Session check result: No session
+[2025-03-08T11:37:49.461Z] Console log: No session found
+[2025-03-08T11:37:49.467Z] Console log: Auth state changed: INITIAL_SESSION No session
+[2025-03-08T11:37:49.684Z] Screenshot saved: C:\Users\georg\Desktop\pmucourse\pmuprofitsystem\browser-test-output\05-debug-page-2025-03-08T11-37-24.666Z.png
+[2025-03-08T11:37:49.693Z] localStorage data:
+[2025-03-08T11:37:49.696Z] {}
+[2025-03-08T11:37:49.705Z] sessionStorage data:
+[2025-03-08T11:37:49.708Z] {}
+[2025-03-08T11:37:49.714Z] Cookies:
+[2025-03-08T11:37:49.716Z] []
+[2025-03-08T11:37:49.719Z] Attempting to access dashboard directly
+[2025-03-08T11:37:49.730Z] Request: GET http://localhost:3000/dashboard
+[2025-03-08T11:37:50.377Z] Response: 307 GET http://localhost:3000/dashboard
+[2025-03-08T11:37:50.381Z] Request: GET http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-08T11:37:51.166Z] Response: 200 GET http://localhost:3000/api/debug/middleware
+[2025-03-08T11:37:51.370Z] Response: 200 GET http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-08T11:37:51.379Z] Request: GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433871177
+[2025-03-08T11:37:51.383Z] Request: GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433871177
+[2025-03-08T11:37:51.386Z] Request: GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433871177
+[2025-03-08T11:37:51.389Z] Request: GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:51.391Z] Request: GET http://localhost:3000/_next/static/chunks/app/login/page.js
+[2025-03-08T11:37:51.395Z] Request: GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:51.400Z] Request: GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:51.404Z] Request: GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:51.412Z] Error getting response body: response.text: Protocol error (Network.getResponseBody): No resource with given identifier found
+[2025-03-08T11:37:51.416Z] Response: 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1741433871177
+[2025-03-08T11:37:51.420Z] Response: 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1741433871177
+[2025-03-08T11:37:51.425Z] Request: GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:51.428Z] Response: 200 GET http://localhost:3000/_next/static/media/a34f9d1faa5f3315-s.p.woff2
+[2025-03-08T11:37:51.432Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+[2025-03-08T11:37:51.436Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/error.js
+[2025-03-08T11:37:51.440Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/global-error.js
+[2025-03-08T11:37:51.515Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
+[2025-03-08T11:37:51.586Z] Response: 200 GET http://localhost:3000/_next/static/chunks/app/login/page.js
+[2025-03-08T11:37:51.713Z] Response: 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1741433871177
+[2025-03-08T11:37:51.867Z] Console info: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+[2025-03-08T11:37:51.913Z] Console log: AuthContext: Using singleton Supabase client
+[2025-03-08T11:37:52.011Z] Console log: Checking session...
+[2025-03-08T11:37:52.016Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:52.020Z] Console log: Checking session...
+[2025-03-08T11:37:52.024Z] Console log: Getting session from Supabase...
+[2025-03-08T11:37:52.036Z] Console log: Storing redirect URL: /dashboard
+[2025-03-08T11:37:52.040Z] Console log: Storing redirect URL: /dashboard
+[2025-03-08T11:37:52.047Z] Console log: Session check result: No session
+[2025-03-08T11:37:52.052Z] Console log: No session found
+[2025-03-08T11:37:52.061Z] Console log: Session check result: No session
+[2025-03-08T11:37:52.065Z] Console log: No session found
+[2025-03-08T11:37:52.068Z] Console log: Auth state changed: INITIAL_SESSION No session
+[2025-03-08T11:37:52.334Z] Screenshot saved: C:\Users\georg\Desktop\pmucourse\pmuprofitsystem\browser-test-output\06-dashboard-direct-2025-03-08T11-37-24.666Z.png
+[2025-03-08T11:37:52.338Z] Current URL after dashboard attempt: http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-08T11:37:52.341Z] Redirected from dashboard: true
+[2025-03-08T11:37:52.344Z] Redirected to: http://localhost:3000/login?redirect=%2Fdashboard
+[2025-03-08T11:37:52.347Z] Testing middleware debug endpoint
+[2025-03-08T11:37:52.358Z] Request: GET http://localhost:3000/api/debug/middleware
+[2025-03-08T11:37:52.411Z] Response: 200 GET http://localhost:3000/api/debug/middleware
+[2025-03-08T11:37:52.428Z] Response body: {"timestamp":"2025-03-08T11:37:52.409Z","cookies":{"all":{},"count":0,"names":[]},"session":{"exists":false,"user":null,"expires_at":null,"is_expired":null,"error":null},"refresh":{"success":false,"session":null,"error":{"__isAuthError":true,"name":"AuthSessionMissingError","status":400}},"entitlements":{"count":0,"data":null,"error":null},"purchases":{"count":0,"data":null,"error":null},"headers":{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","referer":null,"cookie":null}}
+[2025-03-08T11:37:52.544Z] Middleware debug response: <html><head><meta name="color-scheme" content="light dark"><meta charset="utf-8"></head><body><pre>{"timestamp":"2025-03-08T11:37:52.409Z","cookies":{"all":{},"count":0,"names":[]},"session":{"exists":false,"user":null,"expires_at":null,"is_expired":null,"error":null},"refresh":{"success":false,"session":null,"error":{"__isAuthError":true,"name":"AuthSessionMissingError","status":400}},"entitlements":{"count":0,"data":null,"error":null},"purchases":{"count":0,"data":null,"error":null},"headers":{"user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","referer":null,"cookie":null}}</pre><div class="json-formatter-container"></div></body></html>
