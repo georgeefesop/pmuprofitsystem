@@ -1,375 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/middleware';
-import { allowTestPage } from '@/lib/env-utils';
-import { PRODUCT_IDS, legacyToUuidProductId, isValidLegacyProductId } from '@/lib/product-ids';
+import { isDevelopment, allowTestPage } from '@/lib/env-utils';
+import { PRODUCT_IDS } from '@/lib/product-ids';
 
-// Helper function to create entitlements from a purchase
-async function createEntitlementsFromPurchase(purchase: any, supabase: any) {
-  if (!purchase || !purchase.user_id) {
-    console.error('Cannot create entitlements: Invalid purchase data');
-    return { error: 'Invalid purchase data' };
-  }
+// Define protected routes that require authentication and entitlements
+const PROTECTED_ROUTES = [
+  '/dashboard',
+  '/dashboard/modules',
+  '/dashboard/blueprint',
+  '/dashboard/handbook',
+  '/dashboard/profile',
+  // Add other protected routes here
+];
 
-  const userId = purchase.user_id;
-  const now = new Date().toISOString();
-  const entitlements = [];
+// Define routes that require authentication but not entitlements
+const AUTH_ONLY_ROUTES = [
+  '/checkout',
+  '/checkout/success',
+  // Add other auth-only routes here
+];
 
-  try {
-    // Check if this is a legacy purchase with product_id field
-    if (purchase.product_id) {
-      // Convert legacy product ID to UUID if needed
-      let productId = purchase.product_id;
-      
-      // If it's a legacy string ID, convert to UUID
-      if (isValidLegacyProductId(productId)) {
-        const uuidProductId = legacyToUuidProductId(productId);
-        if (uuidProductId) {
-          productId = uuidProductId;
-        } else {
-          console.error(`Could not convert legacy product ID: ${productId}`);
-          return { error: `Invalid product ID: ${productId}` };
-        }
-      }
+// Define test user patterns (for development only)
+const TEST_USER_EMAILS = [
+  'test@example.com',
+  'user@example.com',
+];
 
-      // Create the entitlement
-      const { data: entitlement, error: entitlementError } = await supabase
-        .from('user_entitlements')
-        .insert({
-          user_id: userId,
-          product_id: productId,
-          source_type: 'purchase',
-          source_id: purchase.id,
-          valid_from: now,
-          is_active: true
-        })
-        .select()
-        .single();
-
-      if (entitlementError) {
-        console.error('Error creating entitlement from legacy purchase in middleware:', entitlementError);
-      } else {
-        console.log('Created entitlement from legacy purchase in middleware:', entitlement);
-        entitlements.push(entitlement);
-      }
-      
-      return { entitlements };
-    }
-    
-    // Standard purchase with include_* fields
-    // Always create entitlement for the main product (PMU Profit System)
-    const { data: mainEntitlement, error: mainError } = await supabase
-      .from('user_entitlements')
-      .insert({
-        user_id: userId,
-        product_id: PRODUCT_IDS['pmu-profit-system'],
-        source_type: 'purchase',
-        source_id: purchase.id,
-        valid_from: now,
-        is_active: true
-      })
-      .select()
-      .single();
-
-    if (mainError) {
-      console.error('Error creating main product entitlement:', mainError);
-    } else {
-      console.log('Created main product entitlement from middleware:', mainEntitlement);
-      entitlements.push(mainEntitlement);
-    }
-
-    // Create entitlement for Ad Generator if included
-    if (purchase.include_ad_generator) {
-      const { data: adEntitlement, error: adError } = await supabase
-        .from('user_entitlements')
-        .insert({
-          user_id: userId,
-          product_id: PRODUCT_IDS['pmu-ad-generator'],
-          source_type: 'purchase',
-          source_id: purchase.id,
-          valid_from: now,
-          is_active: true
-        })
-        .select()
-        .single();
-
-      if (adError) {
-        console.error('Error creating ad generator entitlement:', adError);
-      } else {
-        console.log('Created ad generator entitlement from middleware:', adEntitlement);
-        entitlements.push(adEntitlement);
-      }
-    }
-
-    // Create entitlement for Blueprint if included
-    if (purchase.include_blueprint) {
-      const { data: blueprintEntitlement, error: blueprintError } = await supabase
-        .from('user_entitlements')
-        .insert({
-          user_id: userId,
-          product_id: PRODUCT_IDS['consultation-success-blueprint'],
-          source_type: 'purchase',
-          source_id: purchase.id,
-          valid_from: now,
-          is_active: true
-        })
-        .select()
-        .single();
-
-      if (blueprintError) {
-        console.error('Error creating blueprint entitlement:', blueprintError);
-      } else {
-        console.log('Created blueprint entitlement from middleware:', blueprintEntitlement);
-        entitlements.push(blueprintEntitlement);
-      }
-    }
-
-    // Update purchase status to indicate entitlements were created
-    const { error: updateError } = await supabase
-      .from('purchases')
-      .update({ status: 'completed', entitlements_created: true })
-      .eq('id', purchase.id);
-    
-    if (updateError) {
-      console.error('Error updating purchase status in middleware:', updateError);
-    }
-
-    return { entitlements };
-  } catch (error) {
-    console.error('Error creating entitlements in middleware:', error);
-    return { error };
-  }
+// Helper function to check if an email is from a test user
+function isTestEmail(email: string | undefined): boolean {
+  if (!email) return false;
+  return TEST_USER_EMAILS.includes(email) || email.startsWith('test-');
 }
 
-export async function middleware(req: NextRequest) {
-  // Create Supabase client for this request
-  const { supabase, response: res } = createClient(req);
-  
-  // Get the pathname of the request
-  const path = req.nextUrl.pathname;
-  
-  // Check if this is a test or diagnostic page
-  const isTestPage = 
-    path.startsWith('/diagnostics') || 
-    path.startsWith('/stripe-diagnostics') || 
-    path.startsWith('/local-diagnostics') || 
-    path.startsWith('/error-test') || 
-    path.startsWith('/logger-test') || 
-    path.startsWith('/test-auth') || 
-    path.startsWith('/test-resend') || 
-    path.startsWith('/test-connection') || 
-    path.startsWith('/api-test') || 
-    path.startsWith('/debug') ||  // Add debug pages
-    path.startsWith('/another-test');
-  
-  // Block access to test pages in production unless explicitly enabled
-  if (isTestPage && !allowTestPage()) {
-    return new NextResponse('Test and diagnostic pages are disabled in production', { status: 404 });
-  }
-  
-  // Define protected routes that require authentication
-  const isProtectedRoute = path.startsWith('/dashboard');
-  
-  // Get URL parameters for logging purposes
-  const { searchParams } = new URL(req.url);
-  const purchaseSuccess = searchParams.get('purchase_success');
-  const sessionId = searchParams.get('session_id');
-  
-  console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
-  
-  // If it's not a protected route, continue with the request
-  if (!isProtectedRoute) {
-    return res;
-  }
-  
-  // Enhanced authentication check
-  console.log('Middleware: Starting enhanced authentication check');
-  
-  // Log all cookies for debugging
-  const cookieString = req.headers.get('cookie') || '';
-  console.log('Middleware: Cookies present:', cookieString.length > 0);
-  
-  // Get the session from Supabase auth
-  let { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  
-  if (sessionError) {
-    console.error('Middleware: Error getting session:', sessionError);
-  }
-  
-  if (!session) {
-    console.log('Middleware: No session found in initial check, trying to refresh token');
-    
-    try {
-      // Try to refresh the session
-      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+// Browser error logger injection (development only) - moved outside of isTestEmail function
+async function injectBrowserErrorLogger(response: NextResponse) {
+  if (process.env.NODE_ENV === 'development' && response) {
+    // Only inject in HTML responses
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('text/html')) {
+      const html = await response.text();
       
-      if (refreshError) {
-        console.error('Middleware: Error refreshing session:', refreshError);
-      } else if (refreshData.session) {
-        console.log('Middleware: Session refreshed successfully');
-        session = refreshData.session;
-      }
-    } catch (refreshException) {
-      console.error('Middleware: Exception during session refresh:', refreshException);
-    }
-    
-    // Check for auth-status cookie as a fallback
-    if (!session) {
-      const authStatusCookie = req.cookies.get('auth-status');
-      const authTokenCookie = req.cookies.get('sb-auth-token');
-      
-      if (authStatusCookie?.value === 'authenticated') {
-        console.log('Middleware: Found auth-status cookie, attempting to use it');
-        
-        // Try to get user from auth token cookie
-        if (authTokenCookie?.value) {
-          try {
-            // Check if this is a mock token for testing
-            if (authTokenCookie.value.startsWith('mock-token-')) {
-              console.log('Middleware: Found mock token for testing');
-              
-              // Extract user ID from the token
-              const parts = authTokenCookie.value.split('-');
-              const userId = parts.length >= 3 ? parts[2] : 'test-user-id';
-              
-              console.log('Middleware: Using mock user ID:', userId);
-              
-              // Create a minimal session object with the mock user
-              session = {
-                user: {
-                  id: userId,
-                  email: 'test@example.com',
-                  user_metadata: { name: 'Test User' },
-                  app_metadata: {},
-                  aud: 'authenticated',
-                  created_at: new Date().toISOString(),
-                },
-                access_token: authTokenCookie.value,
-                refresh_token: '',
-                expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-                expires_in: 3600,
-                token_type: 'bearer'
-              };
-            } else {
-              // Regular auth token handling
-              const { data: { user }, error: userError } = await supabase.auth.getUser(authTokenCookie.value);
-              
-              if (userError) {
-                console.error('Middleware: Error getting user from token:', userError);
-              } else if (user) {
-                console.log('Middleware: Found user from token:', user.id);
-                
-                // Create a minimal session object
-                session = {
-                  user: user,
-                  access_token: authTokenCookie.value,
-                  refresh_token: '',
-                  expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-                  expires_in: 3600,
-                  token_type: 'bearer'
-                };
-              }
-            }
-          } catch (tokenError) {
-            console.error('Middleware: Error processing auth token:', tokenError);
-          }
-        } else {
-          // Only create a test user if we're in development mode and explicitly want to test
-          if (process.env.NODE_ENV === 'development' && process.env.ALLOW_TEST_USER === 'true') {
-            console.log('Middleware: Creating test user from auth-status cookie');
-            
-            session = {
-              user: {
-                id: 'test-user-id',
-                email: 'test@example.com',
-                user_metadata: { name: 'Test User' },
-                app_metadata: {},
-                aud: 'authenticated',
-                created_at: new Date().toISOString(),
-              },
-              access_token: 'auth-status-token',
-              refresh_token: '',
-              expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-              expires_in: 3600,
-              token_type: 'bearer'
-            };
-          } else {
-            console.log('Middleware: Auth-status cookie found but no valid token and not in test mode');
-          }
-        }
-      }
-    }
-
-    // After checking for auth-status cookie:
-    // Check for user ID in request headers as a last resort
-    if (!session) {
-      const userId = req.headers.get('x-user-id');
-      
-      if (userId) {
-        console.log('Middleware: Found user ID in request headers:', userId);
-        
-        try {
-          // Try to get user from Supabase
-          const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(userId);
-          
-          if (userError) {
-            console.error('Middleware: Error getting user by ID:', userError);
-          } else if (user) {
-            console.log('Middleware: Found user by ID:', user.id);
-            
-            // Create a minimal session object
-            session = {
-              user: user,
-              access_token: 'header-auth-' + Date.now(),
-              refresh_token: '',
-              expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-              expires_in: 3600,
-              token_type: 'bearer'
-            };
-          }
-        } catch (userIdError) {
-          console.error('Middleware: Error processing user ID:', userIdError);
-        }
-      }
-    }
-  }
-  
-  // If there's a session, set the user ID in the request context
-  if (session?.user?.id) {
-    console.log('Middleware: User authenticated:', session.user.id);
-    
-    // Set the user ID in a custom header that our API routes can use
-    res.headers.set('x-user-id', session.user.id);
-
-    // Set the user ID in the request context for Supabase RLS policies
-    // This will be used by the auth.uid() function in RLS policies
-    try {
-      await supabase.rpc('set_claim', {
-        uid: session.user.id,
-        claim: 'sub',
-        value: session.user.id
-      });
-      console.log('Middleware: Set claim for user:', session.user.id);
-    } catch (claimError) {
-      console.error('Middleware: Error setting claim:', claimError);
-    }
-  } else {
-    console.log('Middleware: User not authenticated, redirecting to login');
-    const url = new URL('/login', req.url);
-    url.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search);
-    
-    // Browser error logger injection (development only)
-    if (process.env.NODE_ENV === 'development') {
-      const response = NextResponse.redirect(url);
-      
-      // Only inject in HTML responses
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('text/html')) {
-        const html = await response.text();
-        
-        // Inject the error logger script
-        const modifiedHtml = html.replace(
-          '</head>',
-          `<script>
+      // Inject the error logger script
+      const modifiedHtml = html.replace(
+        '</head>',
+        `<script>
 
 // Error logger for development
 (function() {
@@ -377,12 +51,46 @@ export async function middleware(req: NextRequest) {
   const originalConsoleWarn = console.warn;
   const originalConsoleLog = console.log;
   
-  // Function to send errors to the server
-  function sendErrorToServer(type, args) {
+  // Function to get stack trace
+  function getStackTrace() {
     try {
+      throw new Error('');
+    } catch (error) {
+      return error.stack || '';
+    }
+  }
+  
+  // Function to get component name from stack trace
+  function getComponentName(stack) {
+    try {
+      // Try to extract component name from stack trace
+      const stackLines = stack.split('\n');
+      for (let i = 0; i < stackLines.length; i++) {
+        const line = stackLines[i];
+        // Look for React component names (capitalized)
+        const componentMatch = line.match(/at ([A-Z][a-zA-Z0-9]+)/);
+        if (componentMatch && componentMatch[1]) {
+          return componentMatch[1];
+        }
+      }
+      return 'Unknown Component';
+    } catch (e) {
+      return 'Unknown Component';
+    }
+  }
+  
+  // Function to send errors to the server
+  function sendErrorToServer(type, args, extraInfo = {}) {
+    try {
+      const stack = getStackTrace();
+      const componentName = getComponentName(stack);
+      
       const errorData = {
         type,
         timestamp: new Date().toISOString(),
+        component: componentName,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
         message: Array.from(args).map(arg => {
           try {
             if (arg instanceof Error) {
@@ -396,7 +104,9 @@ export async function middleware(req: NextRequest) {
           } catch (e) {
             return 'Unstringifiable object';
           }
-        })
+        }),
+        stack: stack.split('\n').slice(1, 6).join('\n'), // First 5 lines of stack
+        ...extraInfo
       };
       
       fetch('/api/dev-logger', {
@@ -433,7 +143,11 @@ export async function middleware(req: NextRequest) {
       lineno: event.lineno,
       colno: event.colno,
       error: event.error
-    }]);
+    }], {
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno
+    });
   });
   
   // Capture unhandled promise rejections
@@ -441,138 +155,454 @@ export async function middleware(req: NextRequest) {
     sendErrorToServer('unhandledrejection', [event.reason]);
   });
   
+  // Capture React errors
+  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    const originalOnErrorHandler = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning;
+    window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onErrorOrWarning = function(fiber, type, error, componentStack) {
+      if (type === 'error') {
+        sendErrorToServer('react', [error], {
+          componentStack
+        });
+      }
+      if (originalOnErrorHandler) {
+        originalOnErrorHandler.call(this, fiber, type, error, componentStack);
+      }
+    };
+  }
+  
   console.log('%c🔍 Browser error logging enabled', 'color: purple; font-weight: bold');
 })();
 
 </script></head>`
-        );
-        
-        return new NextResponse(modifiedHtml, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers
-        });
-      }
+      );
       
-      return response;
+      return new NextResponse(modifiedHtml, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+      });
     }
     
-    return NextResponse.redirect(url);
+    return response;
   }
   
-  // At this point, we know the user is authenticated and trying to access a protected route
-  console.log('Middleware: User authenticated, checking entitlements');
-  
+  return response;
+}
+
+// Helper function to create entitlements from a purchase
+async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any) {
+  if (!purchase || !purchase.user_id) {
+    console.error('Cannot create entitlements: Invalid purchase data');
+    return { error: 'Invalid purchase data' };
+  }
+
+  const userId = purchase.user_id;
+  const now = new Date().toISOString();
+  const entitlements = [];
+
   try {
-    // Special handling for test users - ONLY allow specific test users to bypass entitlement check
-    // Make sure we're not treating regular users with auth-status cookie as test users
-    const isTestEmail = session.user.email === 'test@example.com' || 
-                       (process.env.NODE_ENV === 'development' && session.user.email?.includes('test'));
-    const isTestToken = session.access_token === 'auth-status-token' || 
-                       (session.access_token.startsWith('mock-token-'));
-    const isExplicitTestUser = session.user.id === 'test-user-id';
-    
-    // Only allow explicit test users to bypass entitlement check
-    if (isTestEmail || isTestToken || isExplicitTestUser) {
-      console.log('Middleware: Test user detected, allowing access without entitlement check');
-      return res;
-    }
-    
-    // For all other users, check if they have any active entitlements
-    const { data: entitlements, error: entitlementsError } = await supabase
-      .from('user_entitlements')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('is_active', true);
-    
-    if (entitlementsError) {
-      console.error('Error checking entitlements:', entitlementsError);
-      // If there's an error, allow access to avoid blocking legitimate users
-      console.log('Allowing access despite entitlement check error');
-      return res;
-    }
-    
-    // If the user has active entitlements, allow access
-    if (entitlements && entitlements.length > 0) {
-      console.log(`Middleware: User has ${entitlements.length} active entitlements, allowing access`);
-      return res;
-    }
-    
-    // If no entitlements found, check for recent purchases as a fallback
-    console.log('Middleware: User has no entitlements, checking for recent purchases');
-    
-    const { data: purchases, error: purchasesError } = await supabase
-      .from('purchases')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('status', 'completed')
-      .order('created_at', { ascending: false })
-      .limit(1);
-    
-    if (purchasesError) {
-      console.error('Error checking recent purchases:', purchasesError);
-      // If there's an error, allow access to avoid blocking legitimate users
-      console.log('Allowing access despite purchase check error');
-      return res;
-    }
-    
-    // If recent purchase exists, create entitlements and allow access
-    if (purchases && purchases.length > 0) {
-      console.log('Found recent purchase, creating entitlements');
+    // Check if this is a legacy purchase with product_id field
+    if (purchase.product_id) {
+      // Convert legacy product ID to UUID if needed
+      let productId = purchase.product_id;
       
-      // Create entitlements asynchronously
-      createEntitlementsFromPurchase(purchases[0], supabase)
-        .then(result => {
-          if (result.error) {
-            console.error('Failed to create entitlements from purchase:', result.error);
-          } else {
-            console.log('Successfully created entitlements from purchase');
-          }
+      // Create the entitlement
+      const { data: entitlement, error: entitlementError } = await supabaseClient
+        .from('user_entitlements')
+        .insert({
+          user_id: userId,
+          product_id: productId,
+          source_type: 'purchase',
+          source_id: purchase.id,
+          valid_from: now,
+          is_active: true
         })
-        .catch(error => {
-          console.error('Error in entitlement creation process:', error);
-        });
+        .select()
+        .single();
+
+      if (entitlementError) {
+        console.error('Error creating entitlement:', entitlementError);
+      } else {
+        console.log('Created entitlement:', entitlement);
+        entitlements.push(entitlement);
+      }
+    } else {
+      // If no product_id, use the metadata or default to main product
       
-      // Allow access since we found a valid purchase
-      console.log('Allowing access based on recent purchase');
-      return res;
+      // Create entitlement for the main product (PMU Profit System)
+      const { data: mainEntitlement, error: mainError } = await supabaseClient
+        .from('user_entitlements')
+        .insert({
+          user_id: userId,
+          product_id: PRODUCT_IDS['pmu-profit-system'],
+          source_type: 'purchase',
+          source_id: purchase.id,
+          valid_from: now,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (mainError) {
+        console.error('Error creating main product entitlement:', mainError);
+      } else {
+        console.log('Created main product entitlement:', mainEntitlement);
+        entitlements.push(mainEntitlement);
+      }
+
+      // Check metadata for add-ons
+      const metadata = purchase.metadata || {};
+      
+      // Create entitlement for Ad Generator if included
+      if (metadata.include_ad_generator === true || metadata.includeAdGenerator === 'true') {
+        const { data: adEntitlement, error: adError } = await supabaseClient
+          .from('user_entitlements')
+          .insert({
+            user_id: userId,
+            product_id: PRODUCT_IDS['pmu-ad-generator'],
+            source_type: 'purchase',
+            source_id: purchase.id,
+            valid_from: now,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (adError) {
+          console.error('Error creating ad generator entitlement:', adError);
+        } else {
+          console.log('Created ad generator entitlement:', adEntitlement);
+          entitlements.push(adEntitlement);
+        }
+      }
+
+      // Create entitlement for Blueprint if included
+      if (metadata.include_blueprint === true || metadata.includeBlueprint === 'true') {
+        const { data: blueprintEntitlement, error: blueprintError } = await supabaseClient
+          .from('user_entitlements')
+          .insert({
+            user_id: userId,
+            product_id: PRODUCT_IDS['consultation-success-blueprint'],
+            source_type: 'purchase',
+            source_id: purchase.id,
+            valid_from: now,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (blueprintError) {
+          console.error('Error creating blueprint entitlement:', blueprintError);
+        } else {
+          console.log('Created blueprint entitlement:', blueprintEntitlement);
+          entitlements.push(blueprintEntitlement);
+        }
+      }
     }
+
+    // Update purchase status to indicate entitlements were created
+    const { error: updateError } = await supabaseClient
+      .from('purchases')
+      .update({ 
+        status: 'completed', 
+        entitlements_created: true,
+        updated_at: now
+      })
+      .eq('id', purchase.id);
     
-    // If we get here, the user has no entitlements and no recent purchases
-    console.log('User has no active entitlements or recent purchases, redirecting to checkout');
-    
-    // Check if this is a new registration coming from the success page
-    const referer = req.headers.get('referer') || '';
-    const isFromSuccessPage = referer.includes('/checkout/success');
-    const isFromSignupPage = referer.includes('/signup') || referer.includes('/register');
-    
-    // If coming from success page, allow access (they've just completed payment)
-    if (isFromSuccessPage) {
-      console.log('Middleware: User coming from success page, allowing access');
-      return res;
+    if (updateError) {
+      console.error('Error updating purchase status:', updateError);
     }
-    
-    // If coming from signup, redirect to checkout (new registration)
-    if (isFromSignupPage) {
-      console.log('Middleware: New user registration, redirecting to checkout');
-      return NextResponse.redirect(new URL('/checkout', req.url));
-    }
-    
-    // Default redirect to checkout
-    return NextResponse.redirect(new URL('/checkout', req.url));
+
+    return { entitlements };
   } catch (error) {
-    console.error('Error in middleware entitlement check:', error);
-    // If there's an error, allow access to avoid blocking legitimate users
-    console.log('Allowing access despite error in entitlement check process');
-    return res;
+    console.error('Error creating entitlements:', error);
+    return { error };
   }
 }
 
-// Configure the middleware to run on specific paths
+export async function middleware(req: NextRequest) {
+  // Create the response and Supabase client
+  const { supabase, response } = createClient(req);
+  
+  // Get the path from the request
+  const path = req.nextUrl.pathname;
+  
+  // Get query parameters
+  const { searchParams } = req.nextUrl;
+  const purchaseSuccess = searchParams.get('purchase_success');
+  const sessionId = searchParams.get('session_id');
+  
+  // Log the request for debugging
+  console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}`);
+  
+  // Skip middleware for static files, API routes, and other non-page routes
+  if (
+    path.startsWith('/_next') ||
+    path.startsWith('/api') ||
+    path.startsWith('/static') ||
+    path.includes('.') ||
+    path === '/favicon.ico'
+  ) {
+    // Optionally inject browser error logger for HTML responses in development
+    if (process.env.NODE_ENV === 'development') {
+      return await injectBrowserErrorLogger(response);
+    }
+    return response;
+  }
+  
+  // Enhanced authentication check
+  console.log('Middleware: Starting enhanced authentication check');
+  
+  // Check if cookies are present
+  const hasCookies = req.cookies.size > 0;
+  console.log(`Middleware: Cookies present: ${hasCookies}`);
+  
+  // Try to get the session
+  let session = null;
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    session = data.session;
+    
+    if (error) {
+      console.error('Middleware: Error getting session:', error);
+    } else if (session) {
+      console.log(`Middleware: Found session for user: ${session.user.id}`);
+    } else {
+      console.log('Middleware: No session found in initial check, trying to refresh token');
+      
+      // Try to refresh the session
+      try {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        session = refreshData.session;
+        
+        if (refreshError) {
+          console.error('Middleware: Error refreshing session:', refreshError);
+        } else if (session) {
+          console.log(`Middleware: Refreshed session for user: ${session.user.id}`);
+        }
+      } catch (refreshError) {
+        console.error('Middleware: Error refreshing session:', refreshError);
+      }
+    }
+  } catch (error) {
+    console.error('Middleware: Error checking session:', error);
+  }
+  
+  // Check for auth-status cookie as a fallback (for development/testing)
+  const authStatusCookie = req.cookies.get('auth-status');
+  const authTokenCookie = req.cookies.get('sb-auth-token');
+  
+  if (!session && authStatusCookie && authStatusCookie.value === 'authenticated') {
+    console.log('Middleware: Found auth-status cookie, attempting to use it');
+    
+    // Only create a test user in development mode
+    const isTestMode = req.cookies.get('test-mode')?.value === 'true' || isDevelopment();
+    
+    if (isTestMode && authTokenCookie) {
+      try {
+        // Try to get user from token
+        const { data, error } = await supabase.auth.getUser();
+        const user = data.user;
+        
+        if (error) {
+          console.error('Middleware: Error getting user from token:', error);
+        } else if (user) {
+          console.log(`Middleware: Found user from token: ${user.id}`);
+          
+          // Check if this is a test user
+          const isTestUser = isTestEmail(user.email) || user.id === 'test-user-id';
+          
+          if (isTestUser || isDevelopment()) {
+            console.log('Middleware: Test user detected, creating session');
+            
+            // Create a minimal session object for test users
+            session = {
+              user: user,
+              access_token: authTokenCookie.value,
+              refresh_token: '',
+              expires_at: Date.now() + 3600 * 1000, // 1 hour from now
+              expires_in: 3600,
+              token_type: 'bearer'
+            };
+          } else {
+            console.log('Middleware: Auth-status cookie found but not a test user');
+          }
+        }
+      } catch (error) {
+        console.error('Middleware: Error getting user from token:', error);
+      }
+    } else if (isDevelopment()) {
+      // For development, create a test user even without a token
+      console.log('Middleware: Creating test user from auth-status cookie');
+      
+      // Create a minimal user and session for testing
+      const testUser = {
+        id: 'test-user-id',
+        email: 'test@example.com',
+        user_metadata: {
+          full_name: 'Test User'
+        }
+      };
+      
+      session = {
+        user: testUser,
+        access_token: 'test-token',
+        refresh_token: '',
+        expires_at: Date.now() + 3600 * 1000, // 1 hour from now
+        expires_in: 3600,
+        token_type: 'bearer'
+      };
+    }
+  }
+  
+  // If user is not authenticated and trying to access a protected route, redirect to login
+  if (!session) {
+    if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
+      console.log('Middleware: User not authenticated, redirecting to login');
+      const redirectUrl = new URL('/login', req.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    if (AUTH_ONLY_ROUTES.some(route => path.startsWith(route))) {
+      // For checkout, redirect to pre-checkout to create an account first
+      if (path.startsWith('/checkout') && !path.includes('/success')) {
+        console.log('Middleware: User not authenticated, redirecting to pre-checkout');
+        const redirectUrl = new URL('/pre-checkout', req.url);
+        // Preserve any product parameters
+        const products = searchParams.get('products');
+        if (products) {
+          redirectUrl.searchParams.set('products', products);
+        }
+        return NextResponse.redirect(redirectUrl);
+      }
+      
+      // For other auth-only routes, redirect to login
+      console.log('Middleware: User not authenticated, redirecting to login');
+      const redirectUrl = new URL('/login', req.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    // For public routes, allow access
+    // Optionally inject browser error logger for HTML responses in development
+    if (process.env.NODE_ENV === 'development') {
+      return await injectBrowserErrorLogger(response);
+    }
+    return response;
+  }
+  
+  // User is authenticated, set user claim in request headers
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-user-id', session.user.id);
+  console.log(`Middleware: User authenticated: ${session.user.id}`);
+  
+  // For protected routes, check entitlements
+  if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
+    console.log('Middleware: User authenticated, checking entitlements');
+    
+    // Check if this is a test user
+    const isTestUser = isTestEmail(session.user.email) || session.user.id === 'test-user-id';
+    
+    // In development mode, allow test users to bypass entitlement check
+    if (isDevelopment() && isTestUser) {
+      console.log('Middleware: Test user detected, allowing access without entitlement check');
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+    
+    // Check if user has entitlements
+    try {
+      const { data: entitlements, error } = await supabase
+        .from('user_entitlements')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_active', true);
+      
+      if (error) {
+        console.error('Middleware: Error checking entitlements:', error);
+      } else if (entitlements && entitlements.length > 0) {
+        console.log(`Middleware: User has ${entitlements.length} active entitlements`);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      } else {
+        console.log('Middleware: User has no entitlements, checking for recent purchases');
+        
+        // Check if user has a recent purchase that might not have entitlements yet
+        const { data: purchases, error: purchasesError } = await supabase
+          .from('purchases')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .eq('status', 'completed')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (purchasesError) {
+          console.error('Middleware: Error checking purchases:', purchasesError);
+        } else if (purchases && purchases.length > 0) {
+          // User has a completed purchase, try to create entitlements
+          console.log('Middleware: User has a completed purchase, creating entitlements');
+          
+          const result = await createEntitlementsFromPurchase(purchases[0], supabase);
+          
+          if (result.entitlements && result.entitlements.length > 0) {
+            console.log('Middleware: Successfully created entitlements from purchase');
+            return NextResponse.next({
+              request: {
+                headers: requestHeaders,
+              },
+            });
+          }
+        }
+        
+        // If we get here, user has no entitlements and no recent purchases
+        console.log('User has no active entitlements or recent purchases, redirecting to checkout');
+        return NextResponse.redirect(new URL('/checkout', req.url));
+      }
+    } catch (error) {
+      console.error('Middleware: Error checking entitlements:', error);
+    }
+  }
+  
+  // For checkout success page with session_id, verify the purchase
+  if (path.startsWith('/checkout/success') && sessionId) {
+    console.log(`Middleware: Checkout success with session ID: ${sessionId}`);
+    
+    // Set the session ID in request headers
+    requestHeaders.set('x-session-id', sessionId);
+    
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+  
+  // For all other routes, allow access for authenticated users
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
+
+// Configure middleware to run on specific paths
 export const config = {
   matcher: [
-    // Match all dashboard routes
-    '/dashboard/:path*',
-    '/api/:path*',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
 }; 
