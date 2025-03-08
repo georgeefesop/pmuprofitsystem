@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { useUser } from "@/hooks/useUser";
+import { useEnhancedUser } from "@/hooks/useEnhancedUser";
 import { UserEntitlements } from "@/components/UserEntitlements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
-  const { user, isLoading, refreshUser } = useUser();
+  const { user, isLoading, refreshUser, signOut } = useEnhancedUser();
   const [isUpdating, setIsUpdating] = useState(false);
   const [fullName, setFullName] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -64,6 +64,10 @@ export default function ProfilePage() {
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   if (isLoading) {
@@ -137,9 +141,19 @@ export default function ProfilePage() {
                     </p>
                   )}
 
-                  <Button type="submit" disabled={isUpdating}>
-                    {isUpdating ? "Updating..." : "Update Profile"}
-                  </Button>
+                  <div className="flex justify-between">
+                    <Button type="submit" disabled={isUpdating}>
+                      {isUpdating ? "Updating..." : "Update Profile"}
+                    </Button>
+                    
+                    <Button 
+                      type="button" 
+                      variant="destructive" 
+                      onClick={handleSignOut}
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>
