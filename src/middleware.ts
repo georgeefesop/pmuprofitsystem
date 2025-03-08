@@ -20,19 +20,7 @@ const AUTH_ONLY_ROUTES = [
   // Add other auth-only routes here
 ];
 
-// Define test user patterns (for development only)
-const TEST_USER_EMAILS = [
-  'test@example.com',
-  'user@example.com',
-];
-
-// Helper function to check if an email is from a test user
-function isTestEmail(email: string | undefined): boolean {
-  if (!email) return false;
-  return TEST_USER_EMAILS.includes(email) || email.startsWith('test-');
-}
-
-// Browser error logger injection (development only) - moved outside of isTestEmail function
+// Browser error logger injection (development only)
 async function injectBrowserErrorLogger(response: NextResponse) {
   if (process.env.NODE_ENV === 'development' && response) {
     // Only inject in HTML responses
@@ -394,65 +382,38 @@ export async function middleware(req: NextRequest) {
   const authTokenCookie = req.cookies.get('sb-auth-token');
   
   if (!session && authStatusCookie && authStatusCookie.value === 'authenticated') {
-    console.log('Middleware: Found auth-status cookie, attempting to use it');
+    console.log('Middleware: Found auth-status cookie, but no valid session');
     
-    // Only create a test user in development mode
-    const isTestMode = req.cookies.get('test-mode')?.value === 'true' || isDevelopment();
+    // We no longer create test users or special exceptions
+    // Instead, we'll properly enforce the authentication flow
     
-    if (isTestMode && authTokenCookie) {
-      try {
-        // Try to get user from token
-        const { data, error } = await supabase.auth.getUser();
-        const user = data.user;
-        
-        if (error) {
-          console.error('Middleware: Error getting user from token:', error);
-        } else if (user) {
-          console.log(`Middleware: Found user from token: ${user.id}`);
-          
-          // Check if this is a test user
-          const isTestUser = isTestEmail(user.email) || user.id === 'test-user-id';
-          
-          if (isTestUser || isDevelopment()) {
-            console.log('Middleware: Test user detected, creating session');
-            
-            // Create a minimal session object for test users
-            session = {
-              user: user,
-              access_token: authTokenCookie.value,
-              refresh_token: '',
-              expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-              expires_in: 3600,
-              token_type: 'bearer'
-            };
-          } else {
-            console.log('Middleware: Auth-status cookie found but not a test user');
-          }
+    // If the user has the auth-status cookie but no valid session,
+    // they need to go through the proper authentication flow
+    if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
+      console.log('Middleware: User has auth-status cookie but no valid session, redirecting to login');
+      const redirectUrl = new URL('/login', req.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    if (AUTH_ONLY_ROUTES.some(route => path.startsWith(route))) {
+      // For checkout, redirect to pre-checkout to create an account first
+      if (path.startsWith('/checkout') && !path.includes('/success')) {
+        console.log('Middleware: User has auth-status cookie but no valid session, redirecting to pre-checkout');
+        const redirectUrl = new URL('/pre-checkout', req.url);
+        // Preserve any product parameters
+        const products = searchParams.get('products');
+        if (products) {
+          redirectUrl.searchParams.set('products', products);
         }
-      } catch (error) {
-        console.error('Middleware: Error getting user from token:', error);
+        return NextResponse.redirect(redirectUrl);
       }
-    } else if (isDevelopment()) {
-      // For development, create a test user even without a token
-      console.log('Middleware: Creating test user from auth-status cookie');
       
-      // Create a minimal user and session for testing
-      const testUser = {
-        id: 'test-user-id',
-        email: 'test@example.com',
-        user_metadata: {
-          full_name: 'Test User'
-        }
-      };
-      
-      session = {
-        user: testUser,
-        access_token: 'test-token',
-        refresh_token: '',
-        expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-        expires_in: 3600,
-        token_type: 'bearer'
-      };
+      // For other auth-only routes, redirect to login
+      console.log('Middleware: User has auth-status cookie but no valid session, redirecting to login');
+      const redirectUrl = new URL('/login', req.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
     }
   }
   
@@ -501,19 +462,6 @@ export async function middleware(req: NextRequest) {
   // For protected routes, check entitlements
   if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
     console.log('Middleware: User authenticated, checking entitlements');
-    
-    // Check if this is a test user
-    const isTestUser = isTestEmail(session.user.email) || session.user.id === 'test-user-id';
-    
-    // In development mode, allow test users to bypass entitlement check
-    if (isDevelopment() && isTestUser) {
-      console.log('Middleware: Test user detected, allowing access without entitlement check');
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
-    }
     
     // Check if user has entitlements
     try {
