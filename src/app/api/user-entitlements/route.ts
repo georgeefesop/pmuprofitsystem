@@ -49,11 +49,12 @@ export async function GET(req: NextRequest) {
           description,
           price,
           type,
-          currency
+          currency,
+          active,
+          metadata
         )
       `)
-      .eq("user_id", userId)
-      .eq("is_active", true);
+      .eq("user_id", userId);
     
     if (error) {
       console.error("Error fetching user entitlements:", error);
@@ -62,11 +63,40 @@ export async function GET(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Fetch user's purchases to include purchase details with entitlements
+    const { data: purchases, error: purchasesError } = await serviceClient
+      .from("purchases")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    
+    if (purchasesError) {
+      console.error("Error fetching user purchases:", purchasesError);
+    }
+    
+    // Enhance entitlements with purchase information
+    const enhancedEntitlements = entitlements?.map(entitlement => {
+      // Find the purchase associated with this entitlement
+      const purchase = purchases?.find(p => p.id === entitlement.source_id);
+      
+      return {
+        ...entitlement,
+        purchase: purchase ? {
+          id: purchase.id,
+          amount: purchase.amount,
+          currency: purchase.currency,
+          created_at: purchase.created_at,
+          status: purchase.status
+        } : null
+      };
+    });
     
     // Return the entitlements
     return NextResponse.json({
-      entitlements,
-      count: entitlements?.length || 0
+      entitlements: enhancedEntitlements,
+      count: enhancedEntitlements?.length || 0,
+      purchases: purchases || []
     });
   } catch (error) {
     console.error("Unexpected error in user-entitlements API:", error);

@@ -20,6 +20,8 @@ interface Product {
   price: number;
   type: string;
   currency?: string;
+  active?: boolean;
+  metadata?: any;
 }
 
 interface Entitlement {
@@ -34,11 +36,20 @@ interface Entitlement {
   created_at: string;
   updated_at: string;
   products: Product;
+  purchase?: {
+    id: string;
+    amount: number;
+    currency: string;
+    created_at: string;
+    status: string;
+  };
 }
 
 interface ProductWithEntitlement extends Product {
   entitlement?: Entitlement;
   isPurchased: boolean;
+  purchaseDate?: string;
+  purchaseAmount?: number;
 }
 
 export function UserEntitlements() {
@@ -71,21 +82,34 @@ export function UserEntitlements() {
       
       // Use the entitlements from the API response
       const userEntitlements = data.entitlements || [];
+      console.log('User entitlements:', userEntitlements);
       
       // Get all products
       const allProductsResult = await getProducts();
       const allProducts = allProductsResult.data || [];
       
       // Map products with entitlements
-      const productsWithEntitlements = allProducts.map((product: Product) => {
+      const productsWithEntitlements = allProducts.map((product: unknown) => {
+        // Type assertion to ensure product matches the Product interface
+        const typedProduct = product as Product;
+        
         const entitlement = userEntitlements.find(
-          (e: Entitlement) => e.product_id === product.id
+          (e: Entitlement) => e.product_id === typedProduct.id
         );
         
         return {
-          ...product,
           entitlement,
-          isPurchased: !!entitlement
+          isPurchased: !!entitlement,
+          purchaseDate: entitlement?.purchase?.created_at,
+          purchaseAmount: entitlement?.purchase?.amount,
+          id: typedProduct.id,
+          name: typedProduct.name,
+          description: typedProduct.description,
+          price: typedProduct.price,
+          type: typedProduct.type,
+          currency: typedProduct.currency,
+          active: typedProduct.active,
+          metadata: typedProduct.metadata
         };
       });
       
@@ -238,9 +262,15 @@ export function UserEntitlements() {
         </Button>
       </div>
       
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+      {products.length === 0 ? (
+        <div className="text-center p-8 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">No products available.</p>
+        </div>
+      ) : (
+        products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))
+      )}
       
       {process.env.NODE_ENV === 'development' && debugInfo && (
         <pre className="text-xs p-2 bg-gray-100 rounded overflow-auto max-h-40">
@@ -252,63 +282,85 @@ export function UserEntitlements() {
 }
 
 function ProductCard({ product }: { product: ProductWithEntitlement }) {
-  const { name, description, price, type, isPurchased, currency = 'EUR' } = product;
-  
-  // Get purchase link based on product status
+  // Function to get the purchase link for a product
   const getPurchaseLink = (product: ProductWithEntitlement) => {
-    if (isPurchased) {
-      return getProductLink(product);
-    }
-    return `/checkout?product=${product.id}`;
+    return `/checkout?products=${product.id}`;
   };
-  
+
   return (
-    <Card className="overflow-hidden">
+    <Card className={`overflow-hidden ${product.isPurchased ? 'border-green-200 bg-green-50' : ''}`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>{name}</CardTitle>
-            <CardDescription>{description}</CardDescription>
+            <CardTitle>{product.name}</CardTitle>
+            <CardDescription>{formatProductType(product.type)}</CardDescription>
           </div>
-          <Badge variant={isPurchased ? "success" : "outline"}>
-            {isPurchased ? "Purchased" : "Available"}
-          </Badge>
+          {product.isPurchased && (
+            <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">
+              Purchased
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-1">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Type:</span>
-            <span>{formatProductType(type)}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Price:</span>
-            <span>{formatPrice(price, currency)}</span>
-          </div>
-          {isPurchased && product.entitlement && (
-            <>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Purchase Type:</span>
-                <span>{formatSourceType(product.entitlement.source_type)}</span>
+        <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+        
+        {product.isPurchased && product.entitlement && (
+          <div className="bg-green-50 p-3 rounded-md text-sm space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Status:</span>
+              <span className="font-medium text-green-700">
+                {product.entitlement.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            
+            {product.purchaseDate && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Purchase Date:</span>
+                <span className="font-medium">{formatDate(product.purchaseDate)}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Purchase Date:</span>
-                <span>{formatDate(product.entitlement.valid_from)}</span>
+            )}
+            
+            {product.purchaseAmount && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Amount Paid:</span>
+                <span className="font-medium">
+                  {formatPrice(product.purchaseAmount, product.currency || 'EUR')}
+                </span>
               </div>
-            </>
-          )}
-        </div>
+            )}
+            
+            <div className="flex justify-between">
+              <span className="text-gray-600">Source:</span>
+              <span className="font-medium">
+                {formatSourceType(product.entitlement.source_type)}
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
       <CardFooter>
-        <Button 
-          className="w-full" 
-          variant={isPurchased ? "default" : "outline"}
-          asChild
-        >
-          <a href={getPurchaseLink(product)}>
-            {isPurchased ? "Access Now" : "Purchase Now"}
-          </a>
-        </Button>
+        {product.isPurchased ? (
+          <Button 
+            variant="default" 
+            className="w-full"
+            asChild
+          >
+            <Link href={getProductLink(product)}>
+              Access Content
+            </Link>
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            className="w-full"
+            asChild
+          >
+            <Link href={getPurchaseLink(product)}>
+              Purchase for {formatPrice(product.price, product.currency || 'EUR')}
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

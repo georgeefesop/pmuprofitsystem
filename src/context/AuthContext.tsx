@@ -299,39 +299,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     
     try {
-      console.log('Logging out...');
-      await supabase.auth.signOut({ scope: 'global' });
+      console.log('Logging out user...');
       
-      // Clear any potential auth cookies
-      if (typeof window !== 'undefined') {
-        // Clear localStorage items related to Supabase auth
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('supabase.auth.expires_at');
-        localStorage.removeItem('supabase.auth.refresh_token');
-        
-        // Clear cookies
-        Object.keys(Cookies.get()).forEach(cookieName => {
-          if (cookieName.includes('supabase') || cookieName.includes('sb-')) {
-            Cookies.remove(cookieName, { path: '/' });
-          }
-        });
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error signing out:', error);
+        throw error;
       }
       
-      // Ensure user state is cleared
+      // Clear user state
       setUser(null);
       
-      // Use only one navigation method to prevent conflicts
-      // Use window.location for a clean reload that ensures all state is cleared
+      // Clear auth cookies
+      Cookies.remove('auth-status', { path: '/' });
+      Cookies.remove('sb-auth-token', { path: '/' });
+      
+      // Clear localStorage items
       if (typeof window !== 'undefined') {
-        window.location.href = '/';
+        localStorage.removeItem('auth_user_id');
+        localStorage.removeItem('redirectTo');
+        localStorage.removeItem('loginRedirectUrl');
+      }
+      
+      console.log('User logged out successfully');
+      
+      // Redirect to login page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
       }
     } catch (error) {
-      console.error('Logout error:', error);
-      // Even if there's an error, try to clear everything
-      setUser(null);
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
+      console.error('Logout failed:', error);
     } finally {
       setIsLoading(false);
     }

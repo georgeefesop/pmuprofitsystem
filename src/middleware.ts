@@ -420,6 +420,13 @@ export async function middleware(req: NextRequest) {
   const sbAccessToken = req.cookies.get('sb-access-token');
   const sbRefreshToken = req.cookies.get('sb-refresh-token');
   
+  // Special handling for login page - if user is already authenticated, redirect to dashboard
+  if (path === '/login' && session) {
+    console.log('Middleware: User is already authenticated and trying to access login page, redirecting to dashboard');
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+  
+  // Handle case where user has auth-status cookie but no valid session
   if (!session && authStatusCookie && authStatusCookie.value === 'authenticated') {
     console.log('Middleware: Found auth-status cookie, but no valid session');
     
