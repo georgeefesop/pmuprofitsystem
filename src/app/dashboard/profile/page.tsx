@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { useEnhancedUser } from "@/hooks/useEnhancedUser";
@@ -14,14 +13,12 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/utils/supabase/client';
 
 export default function ProfilePage() {
   const { user, isLoading, refreshUser, signOut } = useEnhancedUser();
   const [isUpdating, setIsUpdating] = useState(false);
   const [fullName, setFullName] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
 
   // Load user data into form when available
@@ -31,64 +28,12 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Enhanced authentication check
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // First try to get the session directly
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking session:", error);
-          router.push('/login?redirect=/dashboard/profile');
-          return;
-        }
-        
-        if (!session) {
-          console.log("No session found, trying to restore from cookies");
-          
-          // Try to restore session from cookies
-          const accessToken = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('sb-access-token='))
-            ?.split('=')[1];
-            
-          const refreshToken = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('sb-refresh-token='))
-            ?.split('=')[1];
-            
-          if (accessToken && refreshToken) {
-            console.log("Found tokens in cookies, attempting to restore session");
-            
-            const { data, error: setSessionError } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
-            
-            if (setSessionError || !data.session) {
-              console.error("Error restoring session:", setSessionError);
-              router.push('/login?redirect=/dashboard/profile');
-              return;
-            }
-            
-            console.log("Session restored successfully");
-          } else {
-            console.log("No tokens found in cookies");
-            router.push('/login?redirect=/dashboard/profile');
-            return;
-          }
-        }
-        
-        setIsCheckingAuth(false);
-      } catch (error) {
-        console.error("Unexpected error checking auth:", error);
-        router.push('/login?redirect=/dashboard/profile');
-      }
-    };
-    
-    checkAuth();
-  }, [router]);
+    if (!isLoading && !user) {
+      router.push('/login?redirect=/dashboard/profile');
+    }
+  }, [isLoading, user, router]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,28 +66,10 @@ export default function ProfilePage() {
   };
 
   const handleSignOut = async () => {
-    try {
-      // First clear cookies manually to ensure they're removed
-      document.cookie.split(';').forEach(cookie => {
-        const [name] = cookie.trim().split('=');
-        if (name.includes('sb-') || name === 'auth-status') {
-          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-        }
-      });
-      
-      // Then sign out using the hook
-      await signOut();
-      
-      // Force a hard navigation to ensure all state is cleared
-      window.location.href = '/login';
-    } catch (error) {
-      console.error("Error signing out:", error);
-      // Force navigation even if there's an error
-      window.location.href = '/login';
-    }
+    await signOut();
   };
 
-  if (isLoading || isCheckingAuth) {
+  if (isLoading) {
     return (
       <DashboardLayout title="My Profile">
         <div className="space-y-6">

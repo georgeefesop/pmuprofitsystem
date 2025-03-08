@@ -5,14 +5,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { useEnhancedUser } from '@/hooks/useEnhancedUser';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface NavLink {
+  name: string;
+  href: string;
+}
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const { signOut } = useEnhancedUser();
   
   // Check if we're on a dashboard page
   const isDashboardPage = pathname.startsWith('/dashboard');
@@ -39,7 +46,7 @@ export function Navbar() {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     { name: 'Home', href: '/' },
     { name: 'Features', href: '/#features' },
     { name: 'Pricing', href: '/#pricing' },
@@ -47,14 +54,12 @@ export function Navbar() {
   ];
 
   // Links that should only be shown to non-logged in users
-  const nonLoggedInLinks = [
+  const nonLoggedInLinks: NavLink[] = [
     { name: 'Login', href: '/login' },
   ];
 
-  // Links that should only be shown to logged in users
-  const loggedInLinks = [
-    { name: 'Dashboard', href: '/dashboard' },
-  ];
+  // Empty array for logged in users - we'll use the button instead
+  const loggedInLinks: NavLink[] = [];
 
   return (
     <header
@@ -135,13 +140,13 @@ export function Navbar() {
             <div id="user-menu" className="flex items-center gap-2">
               <div id="user-actions" className="flex items-center gap-2">
                 <Button
-                  id="logout-button"
+                  id="sign-out-button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => logout()}
+                  onClick={() => signOut()}
                   className="hidden md:inline-flex text-white hover:text-purple-100 hover:bg-purple-800/50"
                 >
-                  Log out
+                  Sign Out
                 </Button>
                 {/* Only show dashboard button if not on dashboard page */}
                 {!isDashboardPage && (
@@ -258,9 +263,9 @@ export function Navbar() {
                         </Link>
                       ))}
                       <Link
-                        id="mobile-buy-now-button"
+                        id="mobile-nav-link-buy-now"
                         href="/pre-checkout"
-                        className="block w-full text-left bg-white text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-md transition-colors font-medium shadow-sm mt-2"
+                        className="mt-4 bg-white text-purple-700 hover:bg-purple-50 p-2 rounded text-center font-medium"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Buy Now
@@ -269,15 +274,15 @@ export function Navbar() {
                   )}
                   {user && (
                     <Button
-                      id="mobile-logout-button"
+                      id="mobile-sign-out-button"
                       variant="outline"
-                      className="mt-4 w-full justify-start bg-white text-purple-700 hover:bg-purple-50"
+                      className="w-full mt-4 bg-white/10 text-white hover:bg-white/20 border-white/20"
                       onClick={() => {
-                        logout();
                         setMobileMenuOpen(false);
+                        signOut();
                       }}
                     >
-                      Log out
+                      Sign Out
                     </Button>
                   )}
                 </nav>

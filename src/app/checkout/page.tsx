@@ -32,21 +32,9 @@ const appearance = {
 // Options for Stripe Elements
 const elementsOptions = {
   appearance,
+  locale: 'auto' as const,
   loader: 'auto' as const,
-  disableLink: true,
-  linkAuthenticationElement: {
-    enabled: false
-  },
-  paymentMethodCreation: 'manual' as const,
-  fields: {
-    billingDetails: {
-      address: 'never' as const
-    }
-  },
-  wallets: {
-    applePay: 'never' as const,
-    googlePay: 'never' as const
-  }
+  clientSecret: undefined, // Will be set dynamically
 };
 
 // Card element options

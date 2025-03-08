@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useEnhancedUser } from '@/hooks/useEnhancedUser';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -14,13 +14,12 @@ interface SidebarProps {
 
 export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { signOut } = useEnhancedUser();
   
-  // Handle logout with redirection
-  const handleLogout = () => {
-    logout();
-    // Redirect to home page after logout
-    window.location.href = '/';
+  // Handle sign out with redirection
+  const handleSignOut = () => {
+    if (onClose) onClose();
+    signOut();
   };
   
   // Determine which link is active
@@ -129,9 +128,10 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
             </Link>
             
             <button 
-              onClick={handleLogout}
-              className="flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 text-purple-200 hover:bg-white/10 hover:text-white mt-4"
-              title="Sign Out"
+              id="sidebar-collapsed-sign-out-button"
+              onClick={handleSignOut}
+              className={`flex items-center justify-center p-2 rounded-lg transition-all w-10 h-10 hover:bg-purple-700`}
+              aria-label="Sign Out"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -282,13 +282,14 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
           </Link>
           
           <button 
-            onClick={handleLogout}
-            className="flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full text-left"
+            id="sidebar-sign-out-button"
+            onClick={handleSignOut}
+            className={`flex items-center p-2 rounded-lg transition-all hover:bg-purple-700 w-full`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span className="whitespace-nowrap">Sign Out</span>
+            <span>Sign Out</span>
           </button>
           
           {onToggleCollapse && (

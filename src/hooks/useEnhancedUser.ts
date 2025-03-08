@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/utils/supabase/client';
-import { createEnhancedBrowserClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export interface User {
@@ -23,32 +22,20 @@ export function useEnhancedUser() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Enhanced Supabase client with better session handling
-  const enhancedClient = createEnhancedBrowserClient();
-
   // Function to refresh user data
   const refreshUser = useCallback(async () => {
     try {
       setIsLoading(true);
       
-      // First try the enhanced client
-      const { data: { user: enhancedUser }, error: enhancedError } = await enhancedClient.auth.getUser();
+      // Use the singleton client
+      const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
       
-      if (enhancedUser) {
-        setUser(enhancedUser as User);
+      if (userData) {
+        setUser(userData as User);
         setError(null);
-        return;
-      }
-      
-      // Fallback to regular client
-      const { data: { user: regularUser }, error: regularError } = await supabase.auth.getUser();
-      
-      if (regularUser) {
-        setUser(regularUser as User);
-        setError(null);
-      } else if (regularError) {
-        console.error('Error fetching user:', regularError);
-        setError(regularError.message);
+      } else if (userError) {
+        console.error('Error fetching user:', userError);
+        setError(userError.message);
         setUser(null);
       } else {
         setUser(null);
@@ -61,7 +48,7 @@ export function useEnhancedUser() {
     } finally {
       setIsLoading(false);
     }
-  }, [enhancedClient]);
+  }, []);
 
   // Function to sign out
   const signOut = useCallback(async () => {
@@ -98,17 +85,11 @@ export function useEnhancedUser() {
       localStorage.removeItem('redirectTo');
       localStorage.removeItem('loginRedirectUrl');
       
-      // Now sign out from both clients
-      try {
-        await enhancedClient.auth.signOut({ scope: 'global' });
-      } catch (e) {
-        console.error('Error signing out from enhanced client:', e);
-      }
-      
+      // Sign out using the singleton client
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (e) {
-        console.error('Error signing out from regular client:', e);
+        console.error('Error signing out:', e);
       }
       
       setUser(null);
@@ -129,7 +110,7 @@ export function useEnhancedUser() {
     } finally {
       setIsLoading(false);
     }
-  }, [enhancedClient]);
+  }, []);
 
   // Check for user on initial load
   useEffect(() => {
@@ -137,24 +118,15 @@ export function useEnhancedUser() {
       try {
         setIsLoading(true);
         
-        // First try the enhanced client
-        const { data: { user: enhancedUser }, error: enhancedError } = await enhancedClient.auth.getUser();
+        // Use the singleton client
+        const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
         
-        if (enhancedUser) {
-          setUser(enhancedUser as User);
+        if (userData) {
+          setUser(userData as User);
           setError(null);
-          return;
-        }
-        
-        // Fallback to regular client
-        const { data: { user: regularUser }, error: regularError } = await supabase.auth.getUser();
-        
-        if (regularUser) {
-          setUser(regularUser as User);
-          setError(null);
-        } else if (regularError) {
-          console.error('Error fetching user:', regularError);
-          setError(regularError.message);
+        } else if (userError) {
+          console.error('Error fetching user:', userError);
+          setError(userError.message);
           setUser(null);
         } else {
           setUser(null);
@@ -172,7 +144,7 @@ export function useEnhancedUser() {
     checkUser();
     
     // Set up auth state change listener
-    const { data: { subscription } } = enhancedClient.auth.onAuthStateChange(
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('Auth state changed:', event);
         
@@ -190,7 +162,7 @@ export function useEnhancedUser() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [enhancedClient]);
+  }, []);
 
   return {
     user,
