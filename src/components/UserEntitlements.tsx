@@ -84,9 +84,9 @@ export function UserEntitlements() {
       const userEntitlements = data.entitlements || [];
       console.log('User entitlements:', userEntitlements);
       
-      // Get all products
-      const allProductsResult = await getProducts();
-      const allProducts = allProductsResult.data || [];
+      // Use the products from the API response
+      const allProducts = data.products || [];
+      console.log('All products:', allProducts);
       
       // Map products with entitlements
       const productsWithEntitlements = allProducts.map((product: unknown) => {
@@ -117,6 +117,11 @@ export function UserEntitlements() {
     } catch (error) {
       console.error('Error fetching entitlements:', error);
       setError('Failed to load your entitlements. Please try again later.');
+      
+      // Add debug info
+      if (error instanceof Error) {
+        setDebugInfo(`Error: ${error.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
