@@ -32,14 +32,18 @@ export const createClient = (request: NextRequest) => {
         ...options,
       });
       
-      // Also set auth-status cookie for our middleware
+      // Also set auth-status cookie for our middleware with a longer expiration
       if (name === 'sb-access-token' && value) {
         response.cookies.set({
           name: 'auth-status',
           value: 'authenticated',
           ...options,
-          maxAge: 60 * 60 * 24 * 7, // 7 days
+          maxAge: 60 * 60 * 24 * 30, // 30 days
+          sameSite: 'lax',
         });
+        
+        // Log that we're setting the auth-status cookie
+        console.log('Setting auth-status cookie for authenticated user');
       }
     },
     remove(name: string, options: CookieOptions) {
@@ -62,6 +66,9 @@ export const createClient = (request: NextRequest) => {
           ...options,
           maxAge: 0,
         });
+        
+        // Log that we're removing the auth-status cookie
+        console.log('Removing auth-status cookie as user is signing out');
       }
     },
   };

@@ -126,8 +126,8 @@ function LoginForm() {
         // Store the user ID in localStorage for middleware
         localStorage.setItem('auth_user_id', user?.id || '');
         
-        // Set the auth-status cookie
-        document.cookie = `auth-status=authenticated; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Strict${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+        // Set the auth-status cookie with a long expiration
+        document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
         
         // If there's a redirect URL in the query params, go there
         const redirectUrl = searchParams.get('redirect') || '/dashboard';
@@ -136,11 +136,11 @@ function LoginForm() {
         // Store the redirect URL in localStorage to ensure it's available after navigation
         localStorage.setItem('loginRedirectUrl', redirectUrl);
         
-        // Add a small delay to ensure cookies are set before redirecting
+        // Add a longer delay to ensure cookies are set before redirecting
         setTimeout(() => {
-          // Navigate to the redirect URL
-          router.push(redirectUrl);
-        }, 100);
+          // Force a hard navigation to ensure cookies are properly set
+          window.location.href = redirectUrl;
+        }, 500);
       } else {
         // Check if the error is related to connection issues
         if (error && (

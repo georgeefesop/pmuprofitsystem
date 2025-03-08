@@ -72,7 +72,7 @@ export function useEnhancedUser() {
       await enhancedClient.auth.signOut();
       await supabase.auth.signOut();
       
-      // Clear cookies and local storage
+      // Clear cookies manually to ensure they're removed
       document.cookie.split(';').forEach(cookie => {
         const [name] = cookie.trim().split('=');
         if (name.includes('sb-') || name === 'auth-status') {
@@ -88,15 +88,18 @@ export function useEnhancedUser() {
       
       setUser(null);
       
-      // Redirect to login page
-      router.push('/login');
+      // Force a hard navigation to ensure all state is cleared
+      window.location.href = '/login';
     } catch (err) {
       console.error('Error signing out:', err);
       setError(err instanceof Error ? err.message : 'Error signing out');
+      
+      // If sign out fails, force a hard navigation to login
+      window.location.href = '/login';
     } finally {
       setIsLoading(false);
     }
-  }, [enhancedClient, router]);
+  }, [enhancedClient]);
 
   // Check for user on initial load
   useEffect(() => {
