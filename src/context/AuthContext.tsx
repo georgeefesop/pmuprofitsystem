@@ -6,8 +6,13 @@ import { supabase } from '@/utils/supabase/client';
 import { getSecureSiteUrl } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
-// Log that we're using the singleton client
-console.log('AuthContext: Using singleton Supabase client');
+// Enhanced logging for debugging
+console.log('AuthContext: Initializing with singleton Supabase client');
+console.log('AuthContext: Environment:', {
+  isDev: process.env.NODE_ENV === 'development',
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 15) + '...',
+  hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+});
 
 interface User {
   id: string;
@@ -28,6 +33,51 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to log cookies for debugging
+function logCookies(prefix: string) {
+  if (typeof document !== 'undefined') {
+    const cookieObj: Record<string, string> = {};
+    document.cookie.split(';').forEach(cookie => {
+      const [name, value] = cookie.trim().split('=');
+      if (name) {
+        cookieObj[name] = value || '';
+      }
+    });
+    
+    console.log(`${prefix} Cookies:`, {
+      'sb-access-token': cookieObj['sb-access-token'] ? '✓ Present' : '✗ Missing',
+      'sb-refresh-token': cookieObj['sb-refresh-token'] ? '✓ Present' : '✗ Missing',
+      'auth-status': cookieObj['auth-status'] || 'Missing',
+      cookieCount: Object.keys(cookieObj).length
+    });
+  }
+}
+
+// Helper function to log localStorage for debugging
+function logLocalStorage(prefix: string) {
+  if (typeof window !== 'undefined') {
+    const authItems: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.includes('supabase') || 
+        key.includes('sb-') || 
+        key.includes('auth') || 
+        key.includes('redirect')
+      )) {
+        authItems[key] = localStorage.getItem(key) || '';
+      }
+    }
+    
+    console.log(`${prefix} LocalStorage:`, {
+      'auth_user_id': localStorage.getItem('auth_user_id') || 'Missing',
+      'sb-access-token': localStorage.getItem('sb-access-token') ? '✓ Present' : '✗ Missing',
+      'sb-refresh-token': localStorage.getItem('sb-refresh-token') ? '✓ Present' : '✗ Missing',
+      authItemCount: Object.keys(authItems).length
+    });
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,6 +86,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to clear all auth-related cookies and localStorage items
   const clearAuthData = () => {
+    console.log('AuthContext: Clearing all auth data');
+    
+    // Log cookies before clearing
+    logCookies('Before clearing');
+    
     // Clear auth cookies
     Cookies.remove('auth-status', { path: '/' });
     Cookies.remove('sb-auth-token', { path: '/' });
@@ -53,27 +108,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Clear localStorage items
     if (typeof window !== 'undefined') {
+      console.log('AuthContext: Clearing localStorage items');
       localStorage.removeItem('auth_user_id');
       localStorage.removeItem('redirectTo');
       localStorage.removeItem('loginRedirectUrl');
       localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-access-token');
+      localStorage.removeItem('sb-refresh-token');
     }
+    
+    // Log cookies after clearing
+    logCookies('After clearing');
   };
 
   useEffect(() => {
     // Check for active session on initial load
     const checkSession = async () => {
-      console.log('Checking session...');
+      console.log('AuthContext: Checking session on initial load...');
+      logCookies('Initial load');
+      logLocalStorage('Initial load');
+      
       try {
         // Create a promise that will resolve with the session check result
         const sessionPromise = new Promise<any>(async (resolve, reject) => {
           try {
-            console.log('Getting session from Supabase...');
+            console.log('AuthContext: Getting session from Supabase...');
             const { data: { session } } = await supabase.auth.getSession();
-            console.log('Session check result:', session ? 'Session found' : 'No session');
+            console.log('AuthContext: Session check result:', session ? 'Session found' : 'No session');
+            if (session) {
+              console.log('AuthContext: Session details:', {
+                userId: session.user.id,
+                email: session.user.email,
+                expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+                hasAccessToken: !!session.access_token?.substring(0, 10),
+                hasRefreshToken: !!session.refresh_token?.substring(0, 10)
+              });
+            }
             resolve(session);
           } catch (error) {
-            console.error('Error getting session:', error);
+            console.error('AuthContext: Error getting session:', error);
             reject(error);
           }
         });
@@ -81,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Create a timeout promise that will reject after 10 seconds (reduced from 30)
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            console.error('Session check timed out after 10 seconds');
+            console.error('AuthContext: Session check timed out after 10 seconds');
             reject(new Error('Session check timed out after 10 seconds'));
           }, 10000);
         });
@@ -91,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           session = await Promise.race([sessionPromise, timeoutPromise]);
         } catch (error) {
-          console.error('Session check race failed:', error);
+          console.error('AuthContext: Session check race failed:', error);
           // Gracefully handle timeout by assuming no session
           setUser(null);
           setSessionCheckFailed(true);
@@ -100,31 +173,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         if (session) {
+          console.log('AuthContext: Setting user from session:', {
+            id: session.user.id,
+            email: session.user.email
+          });
+          
           setUser({
             id: session.user.id,
             email: session.user.email || '',
             full_name: session.user.user_metadata?.full_name || ''
           });
           setSessionCheckFailed(false);
-          console.log('User authenticated:', session.user?.email);
+          console.log('AuthContext: User authenticated:', session.user?.email);
           
           // Set auth-status cookie to ensure middleware recognizes the user
+          console.log('AuthContext: Setting auth-status cookie');
           Cookies.set('auth-status', 'authenticated', { 
-            expires: 7, 
+            expires: 30, // Extend to 30 days for better persistence
             path: '/',
             secure: window.location.protocol === 'https:',
-            sameSite: 'strict'
+            sameSite: 'lax' // Use lax for better compatibility
           });
+          
+          // Also store user ID in localStorage as a backup
+          localStorage.setItem('auth_user_id', session.user.id);
+          
+          // Log cookies after setting
+          logCookies('After setting auth cookies');
           
           return session;
         } else {
           setSessionCheckFailed(true);
-          console.log('No session found');
+          console.log('AuthContext: No session found, clearing any stale auth data');
           clearAuthData(); // Clear any stale auth data
           return null;
         }
       } catch (error) {
-        console.error('Session check failed:', error);
+        console.error('AuthContext: Session check failed:', error);
         setSessionCheckFailed(true);
         setIsLoading(false);
         return null;
@@ -137,10 +222,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event, session ? 'User logged in' : 'No session');
+      console.log('AuthContext: Auth state changed:', event, session ? 'User logged in' : 'No session');
       
       if (session) {
         const { user } = session;
+        console.log('AuthContext: User from auth state change:', {
+          id: user.id,
+          email: user.email,
+          metadata: user.user_metadata
+        });
+        
         setUser({
           id: user.id,
           email: user.email || '',
@@ -148,40 +239,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         
         // Set auth-status cookie
+        console.log('AuthContext: Setting auth-status cookie on auth state change');
         Cookies.set('auth-status', 'authenticated', { 
-          expires: 7, 
+          expires: 30, // Extend to 30 days
           path: '/',
           secure: window.location.protocol === 'https:',
-          sameSite: 'strict'
+          sameSite: 'lax' // Use lax for better compatibility
         });
+        
+        // Also store user ID in localStorage as a backup
+        localStorage.setItem('auth_user_id', user.id);
+        
+        // Log cookies after setting
+        logCookies('After auth state change');
         
         // Handle redirection on sign in
         if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
-          console.log('User signed in, checking for redirect');
+          console.log('AuthContext: User signed in, checking for redirect');
           const redirectTo = localStorage.getItem('redirectTo') || '/dashboard';
-          console.log('Redirecting to:', redirectTo);
+          console.log('AuthContext: Redirecting to:', redirectTo);
           
           // Clear the redirect before navigating to prevent redirect loops
           localStorage.removeItem('redirectTo');
           
           // Use a small delay to ensure the auth state is fully updated
           setTimeout(() => {
+            console.log('AuthContext: Executing redirect to', redirectTo);
             router.push(redirectTo);
           }, 500);
         }
       } else {
+        console.log('AuthContext: No user in auth state change, setting user to null');
         setUser(null);
         
         // Clear auth data on sign out
         if (event === 'SIGNED_OUT') {
+          console.log('AuthContext: SIGNED_OUT event detected, clearing auth data');
           clearAuthData();
           
           // Handle redirection on sign out
           if (typeof window !== 'undefined') {
-            console.log('User signed out, redirecting to login');
+            console.log('AuthContext: User signed out, redirecting to login');
             
             // Use a small delay to ensure the auth state is fully updated
             setTimeout(() => {
+              console.log('AuthContext: Executing redirect to login page');
               router.push('/login');
             }, 300);
           }
@@ -192,16 +294,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     return () => {
+      console.log('AuthContext: Unsubscribing from auth state changes');
       subscription.unsubscribe();
     };
   }, [router]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
+    console.log('AuthContext: Attempting login with email:', email);
     setIsLoading(true);
+    
+    // Log current auth state before login
+    logCookies('Before login');
+    logLocalStorage('Before login');
 
     try {
-      console.log('Attempting login with:', email);
-
       // Add a shorter timeout to prevent hanging
       const loginPromise = supabase.auth.signInWithPassword({
         email,
@@ -216,6 +322,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       try {
         // Race the login against the timeout
+        console.log('AuthContext: Executing login request with timeout');
         const result = await Promise.race([loginPromise, timeoutPromise]) as { 
           data: any; 
           error: any;
@@ -223,10 +330,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data = result.data;
         error = result.error;
       } catch (timeoutError) {
-        console.warn('Login timed out - attempting to recover');
+        console.warn('AuthContext: Login timed out - attempting to recover');
         
         try {
           // Try one more time with a shorter timeout
+          console.log('AuthContext: Retrying login after timeout');
           const retryResult = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -235,7 +343,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data = retryResult.data;
           error = retryResult.error;
         } catch (retryError) {
-          console.error('Login retry failed:', retryError);
+          console.error('AuthContext: Login retry failed:', retryError);
           setIsLoading(false);
           return {
             success: false,
@@ -245,7 +353,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       if (error) {
-        console.error('Login error from Supabase:', error);
+        console.error('AuthContext: Login error from Supabase:', error);
         
         // Provide more specific error messages based on the error
         if (error.message?.includes('ERR_NAME_NOT_RESOLVED') || 
@@ -274,25 +382,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       if (data?.user) {
-        console.log('Login successful, user:', data.user.id);
+        console.log('AuthContext: Login successful, user:', data.user.id);
+        console.log('AuthContext: Session data:', {
+          hasSession: !!data.session,
+          hasAccessToken: !!data.session?.access_token,
+          hasRefreshToken: !!data.session?.refresh_token,
+          expiresAt: data.session ? new Date(data.session.expires_at! * 1000).toISOString() : 'N/A'
+        });
         
         // Ensure cookies are set properly
         try {
           // Force a session refresh to ensure cookies are set
+          console.log('AuthContext: Refreshing session to ensure cookies are set');
           const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
           
           if (refreshError) {
-            console.warn('Session refresh after login failed:', refreshError);
+            console.warn('AuthContext: Session refresh after login failed:', refreshError);
             // Continue anyway since the initial login was successful
           } else if (refreshData.session) {
-            console.log('Session refreshed successfully after login');
+            console.log('AuthContext: Session refreshed successfully after login');
+            console.log('AuthContext: Refreshed session details:', {
+              userId: refreshData.session.user.id,
+              expiresAt: new Date(refreshData.session.expires_at! * 1000).toISOString(),
+              hasAccessToken: !!refreshData.session.access_token,
+              hasRefreshToken: !!refreshData.session.refresh_token
+            });
           }
         } catch (refreshError) {
-          console.warn('Exception during session refresh after login:', refreshError);
+          console.warn('AuthContext: Exception during session refresh after login:', refreshError);
           // Continue anyway since the initial login was successful
         }
         
         // Set the user in the context
+        console.log('AuthContext: Setting user in context after login');
         setUser({
           id: data.user.id,
           email: data.user.email || '',
@@ -300,6 +422,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         
         // Store auth status in a cookie for middleware with proper settings
+        console.log('AuthContext: Setting auth-status cookie after login');
         Cookies.set('auth-status', 'authenticated', { 
           expires: 30, // Extend to 30 days
           path: '/',
@@ -311,6 +434,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
         
         // Store user ID in localStorage as a backup
+        console.log('AuthContext: Storing user ID in localStorage');
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_user_id', data.user.id);
           
@@ -321,6 +445,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         
+        // Log auth state after login
+        logCookies('After login');
+        logLocalStorage('After login');
+        
         return { 
           success: true,
           user: {
@@ -330,13 +458,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         };
       } else {
+        console.error('AuthContext: Login failed - no user data returned');
         return { 
           success: false, 
           error: 'Login failed: No user data returned' 
         };
       }
     } catch (error: any) {
-      console.error('Unexpected login error:', error);
+      console.error('AuthContext: Unexpected login error:', error);
       return { 
         success: false, 
         error: `Login failed: ${error.message || 'Unexpected error'}` 
@@ -347,33 +476,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    console.log('AuthContext: Logging out user...');
     setIsLoading(true);
     
+    // Log auth state before logout
+    logCookies('Before logout');
+    logLocalStorage('Before logout');
+    
     try {
-      console.log('Logging out user...');
-      
       // Sign out from Supabase
+      console.log('AuthContext: Calling supabase.auth.signOut()');
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Error signing out:', error);
+        console.error('AuthContext: Error signing out:', error);
         throw error;
       }
       
       // Clear user state
+      console.log('AuthContext: Setting user to null');
       setUser(null);
       
       // Clear all auth data
+      console.log('AuthContext: Clearing all auth data');
       clearAuthData();
       
-      console.log('User logged out successfully');
+      console.log('AuthContext: User logged out successfully');
+      
+      // Log auth state after logout
+      logCookies('After logout');
+      logLocalStorage('After logout');
       
       // Redirect to login page
       if (typeof window !== 'undefined') {
+        console.log('AuthContext: Redirecting to login page');
         window.location.href = '/login';
       }
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('AuthContext: Logout failed:', error);
     } finally {
       setIsLoading(false);
     }

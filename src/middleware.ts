@@ -3,6 +3,9 @@ import { createClient } from '@/utils/supabase/middleware';
 import { isDevelopment, allowTestPage } from '@/lib/env-utils';
 import { PRODUCT_IDS } from '@/lib/product-ids';
 
+// Enhanced logging for debugging
+console.log('Middleware: Module loaded with product IDs:', Object.keys(PRODUCT_IDS));
+
 // Define protected routes that require authentication and entitlements
 const PROTECTED_ROUTES = [
   '/dashboard',
@@ -34,6 +37,21 @@ const PUBLIC_ROUTES = [
   '/cookies',
   // Add other public routes here
 ];
+
+// Helper function to log cookies for debugging
+function logCookies(req: NextRequest, prefix: string) {
+  const cookieObj: Record<string, string> = {};
+  req.cookies.getAll().forEach(cookie => {
+    cookieObj[cookie.name] = cookie.value || '';
+  });
+  
+  console.log(`Middleware: ${prefix} Cookies:`, {
+    'sb-access-token': cookieObj['sb-access-token'] ? '✓ Present' : '✗ Missing',
+    'sb-refresh-token': cookieObj['sb-refresh-token'] ? '✓ Present' : '✗ Missing',
+    'auth-status': cookieObj['auth-status'] || 'Missing',
+    cookieCount: Object.keys(cookieObj).length
+  });
+}
 
 // Browser error logger injection (development only)
 async function injectBrowserErrorLogger(response: NextResponse) {
@@ -194,8 +212,15 @@ async function injectBrowserErrorLogger(response: NextResponse) {
 
 // Helper function to create entitlements from a purchase
 async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any) {
+  console.log('Middleware: Creating entitlements from purchase:', {
+    purchaseId: purchase.id,
+    userId: purchase.user_id,
+    hasProductId: !!purchase.product_id,
+    hasMetadata: !!purchase.metadata
+  });
+
   if (!purchase || !purchase.user_id) {
-    console.error('Cannot create entitlements: Invalid purchase data');
+    console.error('Middleware: Cannot create entitlements: Invalid purchase data');
     return { error: 'Invalid purchase data' };
   }
 
@@ -206,10 +231,12 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
   try {
     // Check if this is a legacy purchase with product_id field
     if (purchase.product_id) {
+      console.log('Middleware: Processing legacy purchase with product_id:', purchase.product_id);
       // Convert legacy product ID to UUID if needed
       let productId = purchase.product_id;
       
       // Create the entitlement
+      console.log('Middleware: Creating entitlement for product:', productId);
       const { data: entitlement, error: entitlementError } = await supabaseClient
         .from('user_entitlements')
         .insert({
@@ -224,15 +251,17 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
         .single();
 
       if (entitlementError) {
-        console.error('Error creating entitlement:', entitlementError);
+        console.error('Middleware: Error creating entitlement:', entitlementError);
       } else {
-        console.log('Created entitlement:', entitlement);
+        console.log('Middleware: Created entitlement:', entitlement);
         entitlements.push(entitlement);
       }
     } else {
       // If no product_id, use the metadata or default to main product
+      console.log('Middleware: No product_id found, using metadata or default');
       
       // Create entitlement for the main product (PMU Profit System)
+      console.log('Middleware: Creating entitlement for main product:', PRODUCT_IDS['pmu-profit-system']);
       const { data: mainEntitlement, error: mainError } = await supabaseClient
         .from('user_entitlements')
         .insert({
@@ -247,17 +276,19 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
         .single();
 
       if (mainError) {
-        console.error('Error creating main product entitlement:', mainError);
+        console.error('Middleware: Error creating main product entitlement:', mainError);
       } else {
-        console.log('Created main product entitlement:', mainEntitlement);
+        console.log('Middleware: Created main product entitlement:', mainEntitlement);
         entitlements.push(mainEntitlement);
       }
 
       // Check metadata for add-ons
       const metadata = purchase.metadata || {};
+      console.log('Middleware: Checking metadata for add-ons:', metadata);
       
       // Create entitlement for Ad Generator if included
       if (metadata.include_ad_generator === true || metadata.includeAdGenerator === 'true') {
+        console.log('Middleware: Creating entitlement for Ad Generator');
         const { data: adEntitlement, error: adError } = await supabaseClient
           .from('user_entitlements')
           .insert({
@@ -272,15 +303,16 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
           .single();
 
         if (adError) {
-          console.error('Error creating ad generator entitlement:', adError);
+          console.error('Middleware: Error creating ad generator entitlement:', adError);
         } else {
-          console.log('Created ad generator entitlement:', adEntitlement);
+          console.log('Middleware: Created ad generator entitlement:', adEntitlement);
           entitlements.push(adEntitlement);
         }
       }
 
       // Create entitlement for Blueprint if included
       if (metadata.include_blueprint === true || metadata.includeBlueprint === 'true') {
+        console.log('Middleware: Creating entitlement for Blueprint');
         const { data: blueprintEntitlement, error: blueprintError } = await supabaseClient
           .from('user_entitlements')
           .insert({
@@ -295,15 +327,16 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
           .single();
 
         if (blueprintError) {
-          console.error('Error creating blueprint entitlement:', blueprintError);
+          console.error('Middleware: Error creating blueprint entitlement:', blueprintError);
         } else {
-          console.log('Created blueprint entitlement:', blueprintEntitlement);
+          console.log('Middleware: Created blueprint entitlement:', blueprintEntitlement);
           entitlements.push(blueprintEntitlement);
         }
       }
     }
 
     // Update purchase status to indicate entitlements were created
+    console.log('Middleware: Updating purchase status to completed');
     const { error: updateError } = await supabaseClient
       .from('purchases')
       .update({ 
@@ -314,17 +347,23 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
       .eq('id', purchase.id);
     
     if (updateError) {
-      console.error('Error updating purchase status:', updateError);
+      console.error('Middleware: Error updating purchase status:', updateError);
     }
 
+    console.log(`Middleware: Created ${entitlements.length} entitlements for user ${userId}`);
     return { entitlements };
   } catch (error) {
-    console.error('Error creating entitlements:', error);
+    console.error('Middleware: Error creating entitlements:', error);
     return { error };
   }
 }
 
 export async function middleware(req: NextRequest) {
+  console.log('Middleware: Starting middleware execution');
+  
+  // Log cookies for debugging
+  logCookies(req, 'Initial');
+  
   // Create the response and Supabase client
   const { supabase, response } = createClient(req);
   
@@ -347,6 +386,7 @@ export async function middleware(req: NextRequest) {
     path.includes('.') ||
     path === '/favicon.ico'
   ) {
+    console.log(`Middleware: Skipping middleware for non-page route: ${path}`);
     // Optionally inject browser error logger for HTML responses in development
     if (process.env.NODE_ENV === 'development') {
       return await injectBrowserErrorLogger(response);
@@ -365,12 +405,18 @@ export async function middleware(req: NextRequest) {
   
   // Check if cookies are present
   const hasCookies = req.cookies.size > 0;
-  console.log(`Middleware: Cookies present: ${hasCookies}`);
+  console.log(`Middleware: Cookies present: ${hasCookies}, count: ${req.cookies.size}`);
   
   // Get all relevant cookies
   const sbAccessToken = req.cookies.get('sb-access-token');
   const sbRefreshToken = req.cookies.get('sb-refresh-token');
   const authStatusCookie = req.cookies.get('auth-status');
+  
+  console.log('Middleware: Auth cookies:', {
+    accessToken: sbAccessToken ? '✓ Present' : '✗ Missing',
+    refreshToken: sbRefreshToken ? '✓ Present' : '✗ Missing',
+    authStatus: authStatusCookie?.value || 'Missing'
+  });
   
   // Try to get the session
   let session = null;
@@ -379,13 +425,9 @@ export async function middleware(req: NextRequest) {
   // IMPROVED SESSION RESTORATION APPROACH
   try {
     console.log('Middleware: Starting auth check for path:', path);
-    console.log('Middleware: Auth cookies present:', {
-      accessToken: !!sbAccessToken,
-      refreshToken: !!sbRefreshToken,
-      authStatus: authStatusCookie?.value
-    });
     
     // First try to get the user directly
+    console.log('Middleware: Calling supabase.auth.getUser()');
     const { data: userData, error: userError } = await supabase.auth.getUser();
     
     if (userError) {
@@ -395,13 +437,23 @@ export async function middleware(req: NextRequest) {
       console.log(`Middleware: Found user: ${userId}`);
       
       // Get the session
+      console.log('Middleware: Calling supabase.auth.getSession()');
       const { data, error } = await supabase.auth.getSession();
       if (error) {
         console.log('Middleware: Error getting session:', error.message);
       } else if (data?.session) {
         session = data.session;
         console.log(`Middleware: Found session for user: ${session.user.id}`);
+        console.log('Middleware: Session details:', {
+          expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+          hasAccessToken: !!session.access_token?.substring(0, 10),
+          hasRefreshToken: !!session.refresh_token?.substring(0, 10)
+        });
+      } else {
+        console.log('Middleware: No session found for authenticated user');
       }
+    } else {
+      console.log('Middleware: No user found from getUser()');
     }
     
     // If no session but we have tokens, try to restore the session
@@ -411,6 +463,7 @@ export async function middleware(req: NextRequest) {
       // If we have both tokens, try to set the session directly
       if (sbAccessToken && sbRefreshToken) {
         try {
+          console.log('Middleware: Attempting to restore session with tokens');
           const { data, error } = await supabase.auth.setSession({
             access_token: sbAccessToken.value,
             refresh_token: sbRefreshToken.value
@@ -422,6 +475,13 @@ export async function middleware(req: NextRequest) {
             session = data.session;
             userId = data.session.user.id;
             console.log(`Middleware: Successfully restored session for user: ${userId}`);
+            console.log('Middleware: Restored session details:', {
+              expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+              hasAccessToken: !!session.access_token?.substring(0, 10),
+              hasRefreshToken: !!session.refresh_token?.substring(0, 10)
+            });
+          } else {
+            console.log('Middleware: No session returned from setSession');
           }
         } catch (error) {
           console.log('Middleware: Error in session restoration:', error);
@@ -433,6 +493,7 @@ export async function middleware(req: NextRequest) {
         console.log('Middleware: Attempting to refresh session based on auth-status cookie');
         
         try {
+          console.log('Middleware: Calling supabase.auth.refreshSession()');
           const { data, error } = await supabase.auth.refreshSession();
           
           if (error) {
@@ -441,6 +502,13 @@ export async function middleware(req: NextRequest) {
             session = data.session;
             userId = data.session.user.id;
             console.log(`Middleware: Successfully refreshed session for user: ${userId}`);
+            console.log('Middleware: Refreshed session details:', {
+              expiresAt: new Date(session.expires_at! * 1000).toISOString(),
+              hasAccessToken: !!session.access_token?.substring(0, 10),
+              hasRefreshToken: !!session.refresh_token?.substring(0, 10)
+            });
+          } else {
+            console.log('Middleware: No session returned from refreshSession');
           }
         } catch (error) {
           console.log('Middleware: Error in session refresh:', error);
@@ -499,6 +567,7 @@ export async function middleware(req: NextRequest) {
     }
     
     // For public routes, allow access
+    console.log('Middleware: Path is public and user is not authenticated, allowing access');
     // Optionally inject browser error logger for HTML responses in development
     if (process.env.NODE_ENV === 'development') {
       return await injectBrowserErrorLogger(response);
@@ -517,6 +586,7 @@ export async function middleware(req: NextRequest) {
     
     // Check if user has entitlements
     try {
+      console.log(`Middleware: Querying user_entitlements for user: ${session.user.id}`);
       const { data: entitlements, error } = await supabase
         .from('user_entitlements')
         .select('*')
@@ -525,8 +595,21 @@ export async function middleware(req: NextRequest) {
       
       if (error) {
         console.error('Middleware: Error checking entitlements:', error);
+        console.error('Middleware: Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
       } else if (entitlements && entitlements.length > 0) {
         console.log(`Middleware: User has ${entitlements.length} active entitlements`);
+        console.log('Middleware: Entitlement details:', entitlements.map(e => ({
+          id: e.id,
+          productId: e.product_id,
+          isActive: e.is_active,
+          validFrom: e.valid_from
+        })));
+        
         return NextResponse.next({
           request: {
             headers: requestHeaders,
@@ -536,6 +619,7 @@ export async function middleware(req: NextRequest) {
         console.log('Middleware: User has no entitlements, checking for recent purchases');
         
         // Check if user has a recent purchase that might not have entitlements yet
+        console.log(`Middleware: Querying purchases for user: ${session.user.id}`);
         const { data: purchases, error: purchasesError } = await supabase
           .from('purchases')
           .select('*')
@@ -546,20 +630,42 @@ export async function middleware(req: NextRequest) {
         
         if (purchasesError) {
           console.error('Middleware: Error checking purchases:', purchasesError);
+          console.error('Middleware: Error details:', {
+            code: purchasesError.code,
+            message: purchasesError.message,
+            details: purchasesError.details,
+            hint: purchasesError.hint
+          });
         } else if (purchases && purchases.length > 0) {
           // User has a completed purchase, try to create entitlements
           console.log('Middleware: User has a completed purchase, creating entitlements');
+          console.log('Middleware: Purchase details:', {
+            id: purchases[0].id,
+            status: purchases[0].status,
+            productId: purchases[0].product_id,
+            createdAt: purchases[0].created_at
+          });
           
           const result = await createEntitlementsFromPurchase(purchases[0], supabase);
           
           if (result.entitlements && result.entitlements.length > 0) {
             console.log('Middleware: Successfully created entitlements from purchase');
+            console.log('Middleware: Created entitlements:', result.entitlements.map(e => ({
+              id: e.id,
+              productId: e.product_id,
+              isActive: e.is_active
+            })));
+            
             return NextResponse.next({
               request: {
                 headers: requestHeaders,
               },
             });
+          } else {
+            console.log('Middleware: Failed to create entitlements from purchase:', result.error);
           }
+        } else {
+          console.log('Middleware: User has no completed purchases');
         }
         
         // If we get here, user has no entitlements and no recent purchases
@@ -586,6 +692,7 @@ export async function middleware(req: NextRequest) {
   }
   
   // For all other routes, allow access for authenticated users
+  console.log(`Middleware: Allowing access to ${path} for authenticated user`);
   return NextResponse.next({
     request: {
       headers: requestHeaders,
