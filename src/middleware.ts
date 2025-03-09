@@ -584,26 +584,34 @@ export async function middleware(req: NextRequest) {
   if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
     console.log('Middleware: User authenticated, checking entitlements');
     
+    // Set the user ID in request headers for API routes
+    requestHeaders.set('x-user-id', session.user.id);
+    
     // Check if user has entitlements
     try {
-      console.log(`Middleware: Querying user_entitlements for user: ${session.user.id}`);
-      const { data: entitlements, error } = await supabase
-        .from('user_entitlements')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('is_active', true);
+      // Instead of directly querying the database, we'll make a request to our API endpoint
+      // This will use the service role client to bypass RLS
+      const apiUrl = new URL('/api/user-entitlements', req.url);
+      console.log(`Middleware: Fetching entitlements from API: ${apiUrl.toString()}`);
       
-      if (error) {
-        console.error('Middleware: Error checking entitlements:', error);
-        console.error('Middleware: Error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
-      } else if (entitlements && entitlements.length > 0) {
-        console.log(`Middleware: User has ${entitlements.length} active entitlements`);
-        console.log('Middleware: Entitlement details:', entitlements.map(e => ({
+      const apiResponse = await fetch(apiUrl, {
+        headers: {
+          'x-user-id': session.user.id,
+          'Cookie': req.headers.get('cookie') || ''
+        }
+      });
+      
+      if (!apiResponse.ok) {
+        console.error(`Middleware: API returned error: ${apiResponse.status}`);
+        throw new Error(`API returned ${apiResponse.status}`);
+      }
+      
+      const data = await apiResponse.json();
+      console.log(`Middleware: API returned ${data.entitlementCount} entitlements`);
+      
+      if (data.entitlements && data.entitlements.length > 0) {
+        console.log(`Middleware: User has ${data.entitlements.length} active entitlements`);
+        console.log('Middleware: Entitlement details:', data.entitlements.map((e: any) => ({
           id: e.id,
           productId: e.product_id,
           isActive: e.is_active,
@@ -674,6 +682,14 @@ export async function middleware(req: NextRequest) {
       }
     } catch (error) {
       console.error('Middleware: Error checking entitlements:', error);
+      // If there's an error checking entitlements, allow access to avoid blocking legitimate users
+      // This is a fallback to prevent users from being locked out due to technical issues
+      console.log('Middleware: Allowing access despite entitlement check error');
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
   }
   
