@@ -9,6 +9,7 @@
   Start each response with an random emoji.
   
   You should access the database and execute SQL commands by using the built in MCP within cursor, I've already configured the tool.
+  Be aware that the local development environment and production environment share the same Supabase database - any changes made locally will affect production data.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.

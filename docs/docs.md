@@ -934,6 +934,32 @@ To set up the local development environment:
    npm run dev
    ```
 
+#### Database Environment Configuration
+
+**Important Note**: The PMU Profit System uses a shared database architecture where both the local development environment and the production environment connect to the same Supabase database instance. This means:
+
+- The local development server connects to the production Supabase database
+- Any database changes made locally will affect the production database
+- User accounts created in either environment are accessible in both environments
+- The only difference is the application server (Next.js running locally vs. on Vercel)
+
+This architecture offers several advantages:
+- Real data for testing without needing to sync or migrate
+- Simplified configuration (one set of database credentials)
+- Ability to test with real user accounts
+
+However, it also requires careful handling:
+- Schema changes should be made with caution as they immediately affect production
+- Testing features that modify data should be done with test accounts only
+- Database migrations run against the production database
+
+When working with this setup:
+1. Use test accounts for development and testing
+2. Be cautious when modifying database schema
+3. Document all changes thoroughly
+4. Consider using database transactions for complex operations
+5. Verify changes in both environments
+
 ### Testing
 
 The PMU Profit System includes several testing utilities:
