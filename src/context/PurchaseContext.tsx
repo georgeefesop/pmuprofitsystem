@@ -60,7 +60,7 @@ export function PurchaseProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      setPurchases(data || []);
+      setPurchases((data || []) as unknown as Purchase[]);
     } catch (error) {
       console.error('Error fetching purchases:', error);
     } finally {

@@ -52,6 +52,11 @@ interface ProductWithEntitlement extends Product {
   purchaseAmount?: number;
 }
 
+// Type guard to safely check if an entitlement has a purchase property
+function hasPurchase(entitlement: Entitlement): entitlement is Entitlement & { purchase: { amount: number } } {
+  return !!entitlement && 'purchase' in entitlement && !!entitlement.purchase && 'amount' in entitlement.purchase;
+}
+
 export function UserEntitlements() {
   const { user } = useUser();
   const { 
@@ -103,12 +108,17 @@ export function UserEntitlements() {
           (e: Entitlement) => e.product_id === product.id
         );
         
+        // Use the type guard to safely access purchase amount
+        const purchaseAmount = entitlement && hasPurchase(entitlement) 
+          ? entitlement.purchase.amount 
+          : 0;
+        
         return {
           ...product,
           entitlement,
           isPurchased: !!entitlement,
           purchaseDate: entitlement?.valid_from,
-          purchaseAmount: entitlement?.purchase?.amount || 0
+          purchaseAmount
         };
       });
       

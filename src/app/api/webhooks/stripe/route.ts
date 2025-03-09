@@ -1,4 +1,4 @@
-"use server";
+// "use server";
 
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -8,6 +8,12 @@ import { stripe } from '@/lib/stripe';
 import { getServiceSupabase } from '@/lib/supabase';
 import { PRODUCT_IDS, legacyToUuidProductId, isValidLegacyProductId } from '@/lib/product-ids';
 import { createEntitlementsFromStripeSession } from '@/lib/entitlements';
+
+// Add the route segment config at the top of the file
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+// This tells Next.js to not parse the request body so we can handle it ourselves for Stripe
+export const preferredRegion = 'auto';
 
 // Initialize Stripe without specifying API version to use the latest version
 const stripeStripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
@@ -21,13 +27,6 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     persistSession: false,
   },
 });
-
-// Disable body parsing for this route to get the raw body for Stripe signature verification
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 // Helper function to create user entitlements based on purchase
 async function createUserEntitlements(userId: string, includeAdGenerator: boolean, includeBlueprint: boolean, purchaseId: string) {
