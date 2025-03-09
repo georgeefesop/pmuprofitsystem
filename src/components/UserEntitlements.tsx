@@ -368,6 +368,13 @@ function ProductCard({ product }: { product: ProductWithEntitlement }) {
               </div>
             )}
 
+            <div className="flex justify-between">
+              <span className="text-gray-600">Item Price:</span>
+              <span className="font-medium">
+                {formatPrice(product.price, product.currency || 'EUR')}
+              </span>
+            </div>
+
             {product.purchaseAmount !== undefined && product.purchaseAmount > 0 && (
               <div className="flex justify-between">
                 <span className="text-gray-600">Amount Paid:</span>
@@ -459,15 +466,16 @@ function formatPrice(price: number, currency: string): string {
 function getProductLink(product: ProductWithEntitlement): string {
   switch (product.type) {
     case 'course':
-      return '/dashboard';
+      return '/dashboard/modules';
     case 'tool':
       if (product.name.toLowerCase().includes('ad generator')) {
         return '/dashboard/ad-generator';
       }
       return '/dashboard';
     case 'resource':
-      if (product.name.toLowerCase().includes('consultation')) {
-        return '/dashboard/consultation-blueprint';
+      if (product.name.toLowerCase().includes('consultation') || 
+          product.name.toLowerCase().includes('blueprint')) {
+        return '/dashboard/blueprint';
       }
       return '/dashboard';
     default:
