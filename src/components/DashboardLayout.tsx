@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
+import { FloatingMenuButton } from './FloatingMenuButton';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
@@ -40,17 +41,8 @@ export function DashboardLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">PMU PROFIT SYSTEM</h2>
-            {/* Mobile Menu Toggle Button */}
-          <button 
-            className="text-white p-2 focus:outline-none"
-              onClick={openMobileMenu}
-              aria-label="Open navigation menu"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+            {/* Removed mobile menu toggle button from here */}
+          </div>
         </div>
       </div>
       
@@ -59,7 +51,7 @@ export function DashboardLayout({
         className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden ${
           mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-                onClick={closeMobileMenu}
+        onClick={closeMobileMenu}
       ></div>
       
       {/* Mobile Sidebar */}
@@ -69,7 +61,10 @@ export function DashboardLayout({
         }`}
       >
         <Sidebar onClose={closeMobileMenu} currentModuleId={currentModuleId} />
-        </div>
+      </div>
+      
+      {/* Floating Menu Button for Mobile */}
+      <FloatingMenuButton onClick={openMobileMenu} />
       
       <div className="flex flex-col md:flex-row flex-1">
         {/* Desktop Sidebar Container - Only visible on desktop */}
@@ -84,16 +79,7 @@ export function DashboardLayout({
           <header className="bg-white shadow-sm sticky top-0 z-10">
             <div className="py-4 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 max-w-7xl mx-auto w-full">
               <div className="flex items-center">
-                {/* Mobile Sidebar Toggle Button - Only visible on mobile */}
-                <button 
-                  className="mr-4 text-gray-700 focus:outline-none hover:text-purple-600 transition-colors md:hidden block"
-                  onClick={openMobileMenu}
-                  aria-label="Open sidebar menu"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
+                {/* Removed mobile sidebar toggle button from here */}
                 {/* Desktop Sidebar Toggle Button - Only visible on desktop */}
                 <button 
                   className="mr-4 text-gray-700 focus:outline-none hover:text-purple-600 transition-colors md:block hidden"
@@ -116,14 +102,14 @@ export function DashboardLayout({
               {/* Action Button - if provided */}
               {actionButton && (
                 <div>
-              {actionButton}
+                  {actionButton}
                 </div>
               )}
             </div>
           </header>
           
           <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-              {children}
+            {children}
           </main>
         </div>
       </div>
