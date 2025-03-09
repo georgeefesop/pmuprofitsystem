@@ -108,7 +108,7 @@ export function UserEntitlements() {
           entitlement,
           isPurchased: !!entitlement,
           purchaseDate: entitlement?.valid_from,
-          purchaseAmount: 0 // We don't have this information in the entitlement
+          purchaseAmount: entitlement?.purchase?.amount || 0
         };
       });
       
@@ -310,48 +310,167 @@ export function UserEntitlements() {
       )}
       
       {/* Products list */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="space-y-4">
         {products.map((product) => (
-          <Card key={product.id} className={product.isPurchased ? 'border-green-500' : ''}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle>{product.name}</CardTitle>
-                {product.isPurchased && (
-                  <Badge variant="outline" className="bg-green-100">
-                    Purchased
-                  </Badge>
-                )}
-              </div>
-              <CardDescription>
-                {product.type === 'course' ? 'Course' : product.type}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{product.description}</p>
-              {product.isPurchased && product.purchaseDate && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Purchased on {new Date(product.purchaseDate).toLocaleDateString()}
-                </p>
-              )}
-            </CardContent>
-            <CardFooter>
-              {product.isPurchased ? (
-                <Button asChild className="w-full">
-                  <Link href={`/dashboard/${product.type === 'course' ? 'modules' : product.type}`}>
-                    Access Content
-                  </Link>
-                </Button>
-              ) : (
-                <Button asChild variant="outline" className="w-full">
-                  <Link href={`/checkout?products=${product.id}`}>
-                    Purchase for {product.currency || '€'}{product.price}
-                  </Link>
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </div>
   );
+}
+
+function ProductCard({ product }: { product: ProductWithEntitlement }) {
+  // Function to get the purchase link for a product
+  const getPurchaseLink = (product: ProductWithEntitlement) => {
+    // Check product type and name to determine the correct sales page
+    if (product.name.toLowerCase().includes('ad generator')) {
+      return '/ad-generator'; // Purpose-built sales page for Ad Generator
+    } else if (product.name.toLowerCase().includes('consultation') || 
+               product.name.toLowerCase().includes('blueprint')) {
+      return '/blueprint'; // Purpose-built sales page for Consultation Blueprint
+    }
+    
+    // Default to the standard checkout page for other products
+    return `/checkout?products=${product.id}`;
+  };
+
+  return (
+    <Card className={`overflow-hidden ${product.isPurchased ? 'border-green-200 bg-green-50' : ''}`}>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>{product.name}</CardTitle>
+            <CardDescription>{formatProductType(product.type)}</CardDescription>
+          </div>
+          {product.isPurchased && (
+            <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">
+              Purchased
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+        
+        {product.isPurchased && product.entitlement && (
+          <div className="bg-green-50 p-3 rounded-md text-sm space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Status:</span>
+              <span className="font-medium text-green-700">
+                {product.entitlement.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+
+            {product.purchaseDate && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Purchase Date:</span>
+                <span className="font-medium">{formatDate(product.purchaseDate)}</span>
+              </div>
+            )}
+
+            {product.purchaseAmount !== undefined && product.purchaseAmount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Amount Paid:</span>
+                <span className="font-medium">
+                  {formatPrice(product.purchaseAmount, product.currency || 'EUR')}
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-between">
+              <span className="text-gray-600">Source:</span>
+              <span className="font-medium">
+                {formatSourceType(product.entitlement.source_type)}
+              </span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter>
+        {product.isPurchased ? (
+          <Button 
+            variant="default" 
+            className="w-full"
+            asChild
+          >
+            <Link href={getProductLink(product)}>
+              Access Content
+            </Link>
+          </Button>
+        ) : (
+          <Button 
+            variant="outline" 
+            className="w-full"
+            asChild
+          >
+            <Link href={getPurchaseLink(product)}>
+              Purchase for {formatPrice(product.price, product.currency || 'EUR')}
+            </Link>
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
+// Helper functions
+function formatSourceType(sourceType: string): string {
+  switch (sourceType) {
+    case 'purchase':
+      return 'Direct Purchase';
+    case 'subscription':
+      return 'Subscription';
+    case 'gift':
+      return 'Gift';
+    default:
+      return sourceType.charAt(0).toUpperCase() + sourceType.slice(1);
+  }
+}
+
+function formatProductType(type: string): string {
+  switch (type) {
+    case 'course':
+      return 'Course';
+    case 'tool':
+      return 'Tool';
+    case 'resource':
+      return 'Resource';
+    default:
+      return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(date);
+}
+
+function formatPrice(price: number, currency: string): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency
+  }).format(price);
+}
+
+function getProductLink(product: ProductWithEntitlement): string {
+  switch (product.type) {
+    case 'course':
+      return '/dashboard';
+    case 'tool':
+      if (product.name.toLowerCase().includes('ad generator')) {
+        return '/dashboard/ad-generator';
+      }
+      return '/dashboard';
+    case 'resource':
+      if (product.name.toLowerCase().includes('consultation')) {
+        return '/dashboard/consultation-blueprint';
+      }
+      return '/dashboard';
+    default:
+      return '/dashboard';
+  }
 } 
