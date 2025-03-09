@@ -324,10 +324,10 @@ function ProductCard({ product }: { product: ProductWithEntitlement }) {
   const getPurchaseLink = (product: ProductWithEntitlement) => {
     // Check product type and name to determine the correct sales page
     if (product.name.toLowerCase().includes('ad generator')) {
-      return '/ad-generator'; // Purpose-built sales page for Ad Generator
+      return '/dashboard/ad-generator/purchase'; // Correct purchase page for Ad Generator
     } else if (product.name.toLowerCase().includes('consultation') || 
                product.name.toLowerCase().includes('blueprint')) {
-      return '/blueprint'; // Purpose-built sales page for Consultation Blueprint
+      return '/dashboard/blueprint/purchase'; // Correct purchase page for Consultation Blueprint
     }
     
     // Default to the standard checkout page for other products
