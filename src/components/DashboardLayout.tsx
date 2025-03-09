@@ -25,6 +25,7 @@ export function DashboardLayout({
   
   const openMobileMenu = () => setMobileMenuOpen(true);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
   const handleLogout = () => {
@@ -64,7 +65,7 @@ export function DashboardLayout({
       </div>
       
       {/* Floating Menu Button for Mobile */}
-      <FloatingMenuButton onClick={openMobileMenu} />
+      <FloatingMenuButton onClick={toggleMobileMenu} isOpen={mobileMenuOpen} />
       
       <div className="flex flex-col md:flex-row flex-1">
         {/* Desktop Sidebar Container - Only visible on desktop */}
