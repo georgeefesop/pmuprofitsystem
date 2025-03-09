@@ -178,7 +178,7 @@ export function Navbar() {
           
           {mobileMenuOpen && (
             <div id="mobile-menu-overlay" className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
-              <div id="mobile-menu" className="fixed inset-y-0 right-0 z-50 w-full max-w-xs rounded-l-xl bg-purple-900/80 p-6 shadow-lg">
+              <div id="mobile-menu" className="fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-purple-900 p-6 shadow-lg">
                 <div id="mobile-menu-header" className="flex items-center justify-between">
                   <span className="text-lg font-semibold text-white">PMU Profit System</span>
                   <Button
@@ -273,17 +273,29 @@ export function Navbar() {
                     </>
                   )}
                   {user && (
-                    <Button
-                      id="mobile-sign-out-button"
-                      variant="outline"
-                      className="w-full mt-4 bg-white/10 text-white hover:bg-white/20 border-white/20"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        signOut();
-                      }}
-                    >
-                      Sign Out
-                    </Button>
+                    <>
+                      {!isDashboardPage && (
+                        <Link
+                          id="mobile-nav-link-dashboard"
+                          href="/dashboard"
+                          className="bg-white text-purple-700 hover:bg-purple-50 p-2 text-center font-medium"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                      )}
+                      <Button
+                        id="mobile-sign-out-button"
+                        variant="outline"
+                        className="w-full mt-4 bg-white/10 text-white hover:bg-white/20 border-white/20"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          signOut();
+                        }}
+                      >
+                        Sign Out
+                      </Button>
+                    </>
                   )}
                 </nav>
               </div>
