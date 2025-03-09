@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
-import { getProducts } from "@/utils/user-entitlements";
+import { useEntitlements } from "@/hooks/useEntitlements";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase, createUserSpecificSupabaseClient } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -54,68 +54,67 @@ interface ProductWithEntitlement extends Product {
 
 export function UserEntitlements() {
   const { user } = useUser();
+  const { 
+    entitlements, 
+    isLoading: entitlementsLoading, 
+    error: entitlementsError, 
+    hasActiveEntitlements,
+    hasPurchases,
+    purchases,
+    refetch: refetchEntitlements
+  } = useEntitlements();
+  
   const [products, setProducts] = useState<ProductWithEntitlement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [usedFallback, setUsedFallback] = useState(false);
 
-  // Function to fetch products and entitlements
-  async function fetchProductsAndEntitlements() {
-    setIsLoading(true);
-    setError(null);
-    
+  // Function to fetch all products
+  async function fetchAllProducts() {
     try {
-      // Always use the server-side API endpoint to get the most accurate data
-      const response = await fetch('/api/user-entitlements');
+      // Fetch all products from the API
+      const response = await fetch('/api/products');
       
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
       
       const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      // Use the entitlements from the API response
-      const userEntitlements = data.entitlements || [];
-      console.log('User entitlements:', userEntitlements);
-      
-      // Use the products from the API response
-      const allProducts = data.products || [];
-      console.log('All products:', allProducts);
+      return data.products || [];
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      return [];
+    }
+  }
+
+  // Function to map entitlements to products
+  async function mapEntitlementsToProducts() {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch all products
+      const allProducts = await fetchAllProducts();
       
       // Map products with entitlements
-      const productsWithEntitlements = allProducts.map((product: unknown) => {
-        // Type assertion to ensure product matches the Product interface
-        const typedProduct = product as Product;
-        
-        const entitlement = userEntitlements.find(
-          (e: Entitlement) => e.product_id === typedProduct.id
+      const productsWithEntitlements = allProducts.map((product: Product) => {
+        const entitlement = entitlements.find(
+          (e: Entitlement) => e.product_id === product.id
         );
         
         return {
+          ...product,
           entitlement,
           isPurchased: !!entitlement,
-          purchaseDate: entitlement?.purchase?.created_at,
-          purchaseAmount: entitlement?.purchase?.amount,
-          id: typedProduct.id,
-          name: typedProduct.name,
-          description: typedProduct.description,
-          price: typedProduct.price,
-          type: typedProduct.type,
-          currency: typedProduct.currency,
-          active: typedProduct.active,
-          metadata: typedProduct.metadata
+          purchaseDate: entitlement?.valid_from,
+          purchaseAmount: 0 // We don't have this information in the entitlement
         };
       });
       
       setProducts(productsWithEntitlements);
     } catch (error) {
-      console.error('Error fetching entitlements:', error);
+      console.error('Error mapping entitlements to products:', error);
       setError('Failed to load your entitlements. Please try again later.');
       
       // Add debug info
@@ -137,15 +136,23 @@ export function UserEntitlements() {
       if (response.ok) {
         const data = await response.json();
         console.log("Debug endpoint data:", data);
-        setDebugInfo(prev => `${prev}\n\nDebug API Response:\n${JSON.stringify(data, null, 2)}`);
+        setDebugInfo(prev => `${prev || ''}\n\nDebug API Response:\n${JSON.stringify(data, null, 2)}`);
       }
     } catch (error) {
       console.error("Error fetching from debug endpoint:", error);
     }
     
-    // Refresh the data
-    await fetchProductsAndEntitlements();
+    // Refresh the entitlements
+    await refetchEntitlements();
+    setIsRefreshing(false);
   };
+
+  // Update products when entitlements change
+  useEffect(() => {
+    if (!entitlementsLoading) {
+      mapEntitlementsToProducts();
+    }
+  }, [entitlements, entitlementsLoading]);
 
   // Set up real-time subscription for entitlement changes
   useEffect(() => {
@@ -165,7 +172,7 @@ export function UserEntitlements() {
         (payload) => {
           console.log('Entitlement change detected:', payload);
           // Refresh data when entitlements change
-          fetchProductsAndEntitlements();
+          refetchEntitlements();
         }
       )
       .subscribe();
@@ -174,15 +181,10 @@ export function UserEntitlements() {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [user?.id]);
-
-  // Initial fetch
-  useEffect(() => {
-    fetchProductsAndEntitlements();
-  }, [user?.id]);
+  }, [user?.id, refetchEntitlements]);
 
   // If loading, show skeleton UI
-  if (isLoading) {
+  if (isLoading || entitlementsLoading) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -212,7 +214,9 @@ export function UserEntitlements() {
   }
 
   // If error, show error message with retry button
-  if (error) {
+  if (error || entitlementsError) {
+    const errorMessage = error || entitlementsError || 'An unknown error occurred';
+    
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -231,12 +235,12 @@ export function UserEntitlements() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error}
+            {errorMessage}
             <Button 
               variant="outline" 
               size="sm" 
               className="mt-2" 
-              onClick={fetchProductsAndEntitlements}
+              onClick={refetchEntitlements}
             >
               Try Again
             </Button>
@@ -247,6 +251,34 @@ export function UserEntitlements() {
             {debugInfo}
           </pre>
         )}
+      </div>
+    );
+  }
+
+  // If no products, show message
+  if (products.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Available Products</h2>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>No Products Available</CardTitle>
+            <CardDescription>
+              There are currently no products available for purchase.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
@@ -267,177 +299,59 @@ export function UserEntitlements() {
         </Button>
       </div>
       
-      {products.length === 0 ? (
-        <div className="text-center p-8 bg-gray-50 rounded-lg">
-          <p className="text-gray-500">No products available.</p>
+      {/* Show debug info in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+          <p>User ID: {user?.id || 'Not logged in'}</p>
+          <p>Has Active Entitlements: {hasActiveEntitlements ? 'Yes' : 'No'}</p>
+          <p>Has Purchases: {hasPurchases ? 'Yes' : 'No'}</p>
+          <p>Entitlements Count: {entitlements.length}</p>
         </div>
-      ) : (
-        products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))
       )}
       
-      {process.env.NODE_ENV === 'development' && debugInfo && (
-        <pre className="text-xs p-2 bg-gray-100 rounded overflow-auto max-h-40">
-          {debugInfo}
-        </pre>
-      )}
+      {/* Products list */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {products.map((product) => (
+          <Card key={product.id} className={product.isPurchased ? 'border-green-500' : ''}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <CardTitle>{product.name}</CardTitle>
+                {product.isPurchased && (
+                  <Badge variant="outline" className="bg-green-100">
+                    Purchased
+                  </Badge>
+                )}
+              </div>
+              <CardDescription>
+                {product.type === 'course' ? 'Course' : product.type}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">{product.description}</p>
+              {product.isPurchased && product.purchaseDate && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Purchased on {new Date(product.purchaseDate).toLocaleDateString()}
+                </p>
+              )}
+            </CardContent>
+            <CardFooter>
+              {product.isPurchased ? (
+                <Button asChild className="w-full">
+                  <Link href={`/dashboard/${product.type === 'course' ? 'modules' : product.type}`}>
+                    Access Content
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={`/checkout?products=${product.id}`}>
+                    Purchase for {product.currency || '€'}{product.price}
+                  </Link>
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
     </div>
   );
-}
-
-function ProductCard({ product }: { product: ProductWithEntitlement }) {
-  // Function to get the purchase link for a product
-  const getPurchaseLink = (product: ProductWithEntitlement) => {
-    // Check product type and name to determine the correct sales page
-    if (product.name.toLowerCase().includes('ad generator')) {
-      return '/ad-generator'; // Purpose-built sales page for Ad Generator
-    } else if (product.name.toLowerCase().includes('consultation') || 
-               product.name.toLowerCase().includes('blueprint')) {
-      return '/blueprint'; // Purpose-built sales page for Consultation Blueprint
-    }
-    
-    // Default to the standard checkout page for other products
-    return `/checkout?products=${product.id}`;
-  };
-
-  return (
-    <Card className={`overflow-hidden ${product.isPurchased ? 'border-green-200 bg-green-50' : ''}`}>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{product.name}</CardTitle>
-            <CardDescription>{formatProductType(product.type)}</CardDescription>
-          </div>
-          {product.isPurchased && (
-            <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">
-              Purchased
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-600 mb-4">{product.description}</p>
-        
-        {product.isPurchased && product.entitlement && (
-          <div className="bg-green-50 p-3 rounded-md text-sm space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Status:</span>
-              <span className="font-medium text-green-700">
-                {product.entitlement.is_active ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-            
-            {product.purchaseDate && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">Purchase Date:</span>
-                <span className="font-medium">{formatDate(product.purchaseDate)}</span>
-              </div>
-            )}
-            
-            {product.purchaseAmount && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">Amount Paid:</span>
-                <span className="font-medium">
-                  {formatPrice(product.purchaseAmount, product.currency || 'EUR')}
-                </span>
-              </div>
-            )}
-            
-            <div className="flex justify-between">
-              <span className="text-gray-600">Source:</span>
-              <span className="font-medium">
-                {formatSourceType(product.entitlement.source_type)}
-              </span>
-            </div>
-          </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        {product.isPurchased ? (
-          <Button 
-            variant="default" 
-            className="w-full"
-            asChild
-          >
-            <Link href={getProductLink(product)}>
-              Access Content
-            </Link>
-          </Button>
-        ) : (
-          <Button 
-            variant="outline" 
-            className="w-full"
-            asChild
-          >
-            <Link href={getPurchaseLink(product)}>
-              Purchase for {formatPrice(product.price, product.currency || 'EUR')}
-            </Link>
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
-  );
-}
-
-// Helper functions
-function formatSourceType(sourceType: string): string {
-  switch (sourceType) {
-    case 'purchase':
-      return 'Direct Purchase';
-    case 'subscription':
-      return 'Subscription';
-    case 'gift':
-      return 'Gift';
-    default:
-      return sourceType.charAt(0).toUpperCase() + sourceType.slice(1);
-  }
-}
-
-function formatProductType(type: string): string {
-  switch (type) {
-    case 'course':
-      return 'Course';
-    case 'tool':
-      return 'Tool';
-    case 'resource':
-      return 'Resource';
-    default:
-      return type.charAt(0).toUpperCase() + type.slice(1);
-  }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(date);
-}
-
-function formatPrice(price: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency
-  }).format(price);
-}
-
-function getProductLink(product: ProductWithEntitlement): string {
-  switch (product.type) {
-    case 'course':
-      return '/dashboard';
-    case 'tool':
-      if (product.name.toLowerCase().includes('ad generator')) {
-        return '/dashboard/ad-generator';
-      }
-      return '/dashboard';
-    case 'resource':
-      if (product.name.toLowerCase().includes('consultation')) {
-        return '/dashboard/consultation-blueprint';
-      }
-      return '/dashboard';
-    default:
-      return '/dashboard';
-  }
 } 

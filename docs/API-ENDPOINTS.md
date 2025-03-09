@@ -1,92 +1,112 @@
-# PMU Profit System API Endpoints
+# API Endpoints Documentation
 
-This document provides a comprehensive list of all API endpoints available in the PMU Profit System. Use this as a reference when working with the application's backend services.
+This document provides a comprehensive list of all API endpoints in the PMU Profit System, including request/response examples.
 
 ## Table of Contents
 
-- [Authentication](#authentication)
-- [User Management](#user-management)
-- [Payments and Purchases](#payments-and-purchases)
-- [Entitlements](#entitlements)
-- [Webhooks](#webhooks)
-- [Admin](#admin)
-- [Testing and Debugging](#testing-and-debugging)
+1. [Authentication API](#authentication-api)
+2. [User Data API](#user-data-api)
+3. [Payment API](#payment-api)
+4. [Entitlements API](#entitlements-api)
+5. [Products API](#products-api)
+6. [Ad Generator API](#ad-generator-api)
 
-## Authentication
+---
 
-### `/api/auth/*`
+## Authentication API
 
-Authentication endpoints powered by Supabase Auth.
+### POST /api/auth/signup
 
-**Note**: These endpoints are managed by Supabase and follow their API patterns.
+Creates a new user account.
 
-## User Management
-
-### `/api/user`
-
-Endpoints for managing user data.
-
-#### GET `/api/user`
-
-Retrieves the current authenticated user's information.
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "full_name": "John Doe"
+}
+```
 
 **Response:**
 ```json
 {
-  "id": "user-uuid",
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "email": "user@example.com",
+    "full_name": "John Doe"
+  },
+  "session": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+### POST /api/auth/signin
+
+Signs in an existing user.
+
+**Request:**
+```json
+{
   "email": "user@example.com",
-  "full_name": "User Name",
+  "password": "securepassword"
+}
+```
+
+**Response:**
+```json
+{
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "email": "user@example.com",
+    "full_name": "John Doe"
+  },
+  "session": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+### POST /api/auth/signout
+
+Signs out the current user.
+
+**Response:**
+```json
+{
+  "success": true
+}
+```
+
+---
+
+## User Data API
+
+### GET /api/user/profile
+
+Gets the current user's profile information.
+
+**Response:**
+```json
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "email": "user@example.com",
+  "full_name": "John Doe",
   "created_at": "2023-01-01T00:00:00Z"
 }
 ```
 
-### `/api/check-user-details`
+### POST /api/user/profile
 
-#### GET `/api/check-user-details`
+Updates the current user's profile information.
 
-Checks if a user exists and returns their details.
-
-**Query Parameters:**
-- `email`: User's email address
-
-**Response:**
+**Request:**
 ```json
 {
-  "exists": true,
-  "user": {
-    "id": "user-uuid",
-    "email": "user@example.com"
-  }
-}
-```
-
-### `/api/check-verification-status`
-
-#### GET `/api/check-verification-status`
-
-Checks the email verification status of a user.
-
-**Query Parameters:**
-- `email`: User's email address
-
-**Response:**
-```json
-{
-  "verified": true,
-  "message": "Email is verified"
-}
-```
-
-### `/api/unban-user`
-
-#### POST `/api/unban-user`
-
-Unbans a user who was previously banned.
-
-**Request Body:**
-```json
-{
-  "userId": "user-uuid"
+  "full_name": "John Smith"
 }
 ```
 
@@ -94,244 +114,47 @@ Unbans a user who was previously banned.
 ```json
 {
   "success": true,
-  "message": "User unbanned successfully"
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "email": "user@example.com",
+    "full_name": "John Smith",
+    "created_at": "2023-01-01T00:00:00Z"
+  }
 }
 ```
 
-## Payments and Purchases
+---
 
-### `/api/create-checkout`
+## Payment API
 
-#### POST `/api/create-checkout`
+### POST /api/checkout/create-session
 
 Creates a Stripe checkout session for purchasing products.
 
-**Request Body:**
+**Request:**
 ```json
 {
-  "includeAdGenerator": true,
-  "includeBlueprint": false,
-  "userId": "user-uuid",
-  "email": "user@example.com"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "url": "https://checkout.stripe.com/..."
-}
-```
-
-### `/api/create-payment-intent`
-
-#### POST `/api/create-payment-intent`
-
-Creates a Stripe payment intent for custom payment flows.
-
-**Request Body:**
-```json
-{
-  "amount": 3700,
-  "currency": "usd",
-  "userId": "user-uuid",
-  "includeAdGenerator": false,
-  "includeBlueprint": true
-}
-```
-
-**Response:**
-```json
-{
-  "clientSecret": "pi_..._secret_...",
-  "paymentIntentId": "pi_..."
-}
-```
-
-### `/api/verify-payment-intent`
-
-#### GET `/api/verify-payment-intent`
-
-Verifies a payment intent's status.
-
-**Query Parameters:**
-- `payment_intent_id`: The Stripe payment intent ID
-
-**Response:**
-```json
-{
-  "success": true,
-  "verified": true,
-  "paymentStatus": "succeeded"
-}
-```
-
-### `/api/verify-purchase`
-
-#### GET `/api/verify-purchase`
-
-Verifies a purchase using a checkout session ID or payment intent ID.
-
-**Query Parameters:**
-- `session_id`: The Stripe checkout session ID or payment intent ID
-
-**Response:**
-```json
-{
-  "success": true,
-  "verified": true,
-  "paymentStatus": "paid",
-  "userId": "user-uuid",
-  "includeAdGenerator": false,
-  "includeBlueprint": true,
-  "sessionDetails": {
-    "id": "cs_...",
-    "customer_email": "user@example.com",
-    "amount_total": 70,
-    "currency": "usd"
+  "email": "user@example.com",
+  "products": ["pmu-profit-system"],
+  "metadata": {
+    "includeAdGenerator": true
   }
 }
 ```
 
-### `/api/auto-approve-purchase`
-
-#### GET `/api/auto-approve-purchase`
-
-Automatically approves a purchase and creates entitlements.
-
-**Query Parameters:**
-- `session_id`: The Stripe checkout session ID or payment intent ID
-- `user_id`: The user's UUID
-
 **Response:**
 ```json
 {
-  "success": true,
-  "message": "Purchase approved and entitlements created successfully",
-  "entitlements": [...]
+  "sessionId": "cs_test_a1b2c3d4e5f6g7h8i9j0",
+  "url": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0"
 }
 ```
 
-### `/api/create-payment`
+### POST /api/webhook/stripe
 
-#### POST `/api/create-payment`
+Processes Stripe webhook events.
 
-Creates a payment record in the database.
-
-**Request Body:**
-```json
-{
-  "userId": "user-uuid",
-  "productId": "product-uuid",
-  "amount": 37.00
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "paymentId": "payment-uuid"
-}
-```
-
-## Entitlements
-
-### `/api/create-entitlements`
-
-#### GET `/api/create-entitlements`
-
-Creates entitlements for a user based on a Stripe checkout session.
-
-**Query Parameters:**
-- `session_id`: The Stripe checkout session ID
-- `user_id`: The user's UUID
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Entitlements created successfully",
-  "entitlements": [...]
-}
-```
-
-### `/api/create-entitlements-direct`
-
-#### POST `/api/create-entitlements-direct`
-
-Creates entitlements directly without requiring a Stripe session.
-
-**Request Body:**
-```json
-{
-  "userId": "user-uuid",
-  "productIds": ["product-uuid-1", "product-uuid-2"]
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "entitlements": [...]
-}
-```
-
-### `/api/user-entitlements`
-
-#### GET `/api/user-entitlements`
-
-Retrieves all entitlements for the current user.
-
-**Response:**
-```json
-{
-  "entitlements": [
-    {
-      "id": "entitlement-uuid",
-      "product_id": "product-uuid",
-      "valid_from": "2023-01-01T00:00:00Z",
-      "valid_to": null,
-      "is_active": true
-    }
-  ]
-}
-```
-
-### `/api/fix-user-purchases`
-
-#### POST `/api/fix-user-purchases`
-
-Fixes user purchases that may have issues with entitlements.
-
-**Request Body:**
-```json
-{
-  "userId": "user-uuid"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "User purchases fixed",
-  "fixedCount": 2
-}
-```
-
-## Webhooks
-
-### `/api/webhooks/stripe`
-
-#### POST `/api/webhooks/stripe`
-
-Handles Stripe webhook events.
-
-**Request Body:**
-Stripe webhook event object
+**Request:** Stripe webhook event payload
 
 **Response:**
 ```json
@@ -340,106 +163,177 @@ Stripe webhook event object
 }
 ```
 
-## Admin
+---
 
-### `/api/admin/*`
+## Entitlements API
 
-Various admin endpoints for managing the application.
+### GET /api/user-entitlements
 
-#### GET `/api/admin/users`
+Gets the current user's entitlements. This endpoint uses the service role client to bypass RLS policies, ensuring reliable access to entitlement data.
 
-Retrieves a list of all users (admin only).
+**Request Headers:**
+- `x-user-id`: (Optional) The user's ID
 
-**Response:**
-```json
-{
-  "users": [...]
-}
-```
-
-## Testing and Debugging
-
-### `/api/debug/auth-state`
-
-#### GET `/api/debug/auth-state`
-
-Checks the current authentication state.
+**Query Parameters:**
+- `userId`: (Optional) The user's ID
 
 **Response:**
 ```json
 {
   "authenticated": true,
-  "user": {
-    "id": "user-uuid",
-    "email": "user@example.com"
+  "userId": "123e4567-e89b-12d3-a456-426614174000",
+  "entitlements": [
+    {
+      "id": "456e7890-e12b-34d5-a678-426614174000",
+      "user_id": "123e4567-e89b-12d3-a456-426614174000",
+      "product_id": "4a554622-d759-42b7-b830-79c9136d2f96",
+      "source_type": "purchase",
+      "source_id": "789e0123-e45b-67d8-a901-426614174000",
+      "valid_from": "2023-01-01T00:00:00Z",
+      "valid_until": null,
+      "is_active": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z",
+      "products": {
+        "id": "4a554622-d759-42b7-b830-79c9136d2f96",
+        "name": "PMU Profit System",
+        "description": "Complete PMU business system",
+        "price": 37.00,
+        "type": "course",
+        "currency": "EUR",
+        "active": true
+      }
+    }
+  ],
+  "entitlementCount": 1
+}
+```
+
+### POST /api/create-entitlements-from-purchases
+
+Creates entitlements for a user based on their completed purchases. This endpoint is called asynchronously when a user has purchases but no entitlements.
+
+**Request Headers:**
+- `x-user-id`: (Optional) The user's ID
+
+**Query Parameters:**
+- `userId`: (Optional) The user's ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "entitlements": [
+    {
+      "id": "456e7890-e12b-34d5-a678-426614174000",
+      "user_id": "123e4567-e89b-12d3-a456-426614174000",
+      "product_id": "4a554622-d759-42b7-b830-79c9136d2f96",
+      "source_type": "purchase",
+      "source_id": "789e0123-e45b-67d8-a901-426614174000",
+      "valid_from": "2023-01-01T00:00:00Z",
+      "valid_until": null,
+      "is_active": true,
+      "created_at": "2023-01-01T00:00:00Z",
+      "updated_at": "2023-01-01T00:00:00Z"
+    }
+  ],
+  "entitlementCount": 1
+}
+```
+
+---
+
+## Products API
+
+### GET /api/products
+
+Gets all active products. This endpoint uses the service role client to bypass RLS policies, ensuring reliable access to product data.
+
+**Response:**
+```json
+{
+  "products": [
+    {
+      "id": "4a554622-d759-42b7-b830-79c9136d2f96",
+      "name": "PMU Profit System",
+      "description": "Complete PMU business system",
+      "price": 37.00,
+      "type": "course",
+      "currency": "EUR",
+      "active": true,
+      "metadata": {
+        "features": ["Video lessons", "Worksheets", "Community access"]
+      }
+    },
+    {
+      "id": "4ba5c775-a8e4-449e-828f-19f938e3710b",
+      "name": "PMU Ad Generator",
+      "description": "AI-powered ad creation tool for PMU professionals",
+      "price": 27.00,
+      "type": "tool",
+      "currency": "EUR",
+      "active": true,
+      "metadata": {
+        "features": ["AI-generated ads", "Customizable templates", "Export options"]
+      }
+    }
+  ],
+  "count": 2
+}
+```
+
+---
+
+## Ad Generator API
+
+### POST /api/ad-generator/generate
+
+Generates ad copy using AI.
+
+**Request:**
+```json
+{
+  "prompt": "PMU services for brides",
+  "options": {
+    "tone": "professional",
+    "length": "medium"
   }
 }
 ```
 
-### `/api/debug/stripe`
-
-#### GET `/api/debug/stripe`
-
-Provides diagnostic information about the Stripe configuration.
-
 **Response:**
 ```json
 {
-  "configured": true,
-  "mode": "test",
-  "webhooksConfigured": true
+  "ads": [
+    {
+      "id": "ad_123456",
+      "headline": "Perfect Brows for Your Perfect Day",
+      "body": "Look your absolute best on your wedding day with our premium PMU services. Book your consultation today!",
+      "cta": "Book Now"
+    },
+    {
+      "id": "ad_234567",
+      "headline": "Bridal Beauty That Lasts",
+      "body": "Wake up wedding-ready with permanent makeup that stays flawless through tears of joy and dancing all night.",
+      "cta": "Learn More"
+    }
+  ]
 }
 ```
 
-### `/api/stripe-diagnostics`
+### POST /api/ad-generator/save
 
-#### GET `/api/stripe-diagnostics`
+Saves generated ad copy.
 
-Runs diagnostics on the Stripe integration.
-
-**Response:**
+**Request:**
 ```json
 {
-  "apiKeyConfigured": true,
-  "webhookSecretConfigured": true,
-  "testConnection": "success"
-}
-```
-
-### `/api/dev-logger`
-
-#### POST `/api/dev-logger`
-
-Logs messages from the client for debugging purposes.
-
-**Request Body:**
-```json
-{
-  "level": "error",
-  "message": "Error message",
-  "data": { "additional": "context" }
-}
-```
-
-**Response:**
-```json
-{
-  "logged": true
-}
-```
-
-### `/api/send-email`
-
-#### POST `/api/send-email`
-
-Sends an email using the application's email service.
-
-**Request Body:**
-```json
-{
-  "to": "recipient@example.com",
-  "subject": "Email Subject",
-  "html": "<p>Email content</p>"
+  "adId": "ad_123456",
+  "content": {
+    "headline": "Perfect Brows for Your Perfect Day",
+    "body": "Look your absolute best on your wedding day with our premium PMU services. Book your consultation today!",
+    "cta": "Book Now"
+  }
 }
 ```
 
@@ -447,25 +341,15 @@ Sends an email using the application's email service.
 ```json
 {
   "success": true,
-  "messageId": "email-id"
+  "savedAd": {
+    "id": "saved_ad_789012",
+    "adId": "ad_123456",
+    "content": {
+      "headline": "Perfect Brows for Your Perfect Day",
+      "body": "Look your absolute best on your wedding day with our premium PMU services. Book your consultation today!",
+      "cta": "Book Now"
+    },
+    "created_at": "2023-01-01T00:00:00Z"
+  }
 }
 ```
-
----
-
-## How to Use This Document
-
-1. **Finding Endpoints**: Use the Table of Contents to navigate to the relevant section
-2. **Understanding Endpoints**: Each endpoint includes its path, HTTP method, description, and example request/response
-3. **Implementation**: Refer to the actual implementation in the codebase for detailed logic
-
-## Contributing to This Document
-
-When adding new API endpoints to the application, please update this document with:
-
-1. The endpoint path and HTTP method
-2. A brief description of what the endpoint does
-3. Required parameters or request body structure
-4. Example response format
-
-This will help maintain a comprehensive reference for all developers working on the project. 
