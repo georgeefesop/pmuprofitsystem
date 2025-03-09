@@ -592,6 +592,7 @@ export async function middleware(req: NextRequest) {
       // Instead of directly querying the database, we'll make a request to our API endpoint
       // This will use the service role client to bypass RLS
       const apiUrl = new URL('/api/user-entitlements', req.url);
+      apiUrl.searchParams.set('userId', session.user.id);
       console.log(`Middleware: Fetching entitlements from API: ${apiUrl.toString()}`);
       
       const apiResponse = await fetch(apiUrl, {
@@ -603,87 +604,58 @@ export async function middleware(req: NextRequest) {
       
       if (!apiResponse.ok) {
         console.error(`Middleware: API returned error: ${apiResponse.status}`);
-        throw new Error(`API returned ${apiResponse.status}`);
+        // If the API returns an error, allow access to avoid blocking legitimate users
+        // This is a fallback to prevent users from being locked out due to technical issues
+        console.log('Middleware: Allowing access despite API error');
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
       }
       
       const data = await apiResponse.json();
-      console.log(`Middleware: API returned ${data.entitlementCount} entitlements`);
+      console.log(`Middleware: API returned ${data.entitlementCount || 0} entitlements`);
       
+      // If user has active entitlements, allow access
       if (data.entitlements && data.entitlements.length > 0) {
         console.log(`Middleware: User has ${data.entitlements.length} active entitlements`);
-        console.log('Middleware: Entitlement details:', data.entitlements.map((e: any) => ({
-          id: e.id,
-          productId: e.product_id,
-          isActive: e.is_active,
-          validFrom: e.valid_from
-        })));
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+      
+      // If user has purchases but no entitlements, they might need entitlements created
+      if (data.purchases && data.purchases.length > 0) {
+        console.log(`Middleware: User has ${data.purchases.length} purchases but no entitlements`);
+        console.log('Middleware: Allowing access and will create entitlements asynchronously');
+        
+        // Allow access but trigger entitlement creation asynchronously
+        // This ensures users aren't blocked while entitlements are being created
+        fetch(`${req.nextUrl.origin}/api/create-entitlements-from-purchases?userId=${session.user.id}`, {
+          method: 'POST',
+          headers: {
+            'x-user-id': session.user.id
+          }
+        }).catch(error => {
+          console.error('Middleware: Error triggering entitlement creation:', error);
+        });
         
         return NextResponse.next({
           request: {
             headers: requestHeaders,
           },
         });
-      } else {
-        console.log('Middleware: User has no entitlements, checking for recent purchases');
-        
-        // Check if user has a recent purchase that might not have entitlements yet
-        console.log(`Middleware: Querying purchases for user: ${session.user.id}`);
-        const { data: purchases, error: purchasesError } = await supabase
-          .from('purchases')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .eq('status', 'completed')
-          .order('created_at', { ascending: false })
-          .limit(1);
-        
-        if (purchasesError) {
-          console.error('Middleware: Error checking purchases:', purchasesError);
-          console.error('Middleware: Error details:', {
-            code: purchasesError.code,
-            message: purchasesError.message,
-            details: purchasesError.details,
-            hint: purchasesError.hint
-          });
-        } else if (purchases && purchases.length > 0) {
-          // User has a completed purchase, try to create entitlements
-          console.log('Middleware: User has a completed purchase, creating entitlements');
-          console.log('Middleware: Purchase details:', {
-            id: purchases[0].id,
-            status: purchases[0].status,
-            productId: purchases[0].product_id,
-            createdAt: purchases[0].created_at
-          });
-          
-          const result = await createEntitlementsFromPurchase(purchases[0], supabase);
-          
-          if (result.entitlements && result.entitlements.length > 0) {
-            console.log('Middleware: Successfully created entitlements from purchase');
-            console.log('Middleware: Created entitlements:', result.entitlements.map(e => ({
-              id: e.id,
-              productId: e.product_id,
-              isActive: e.is_active
-            })));
-            
-            return NextResponse.next({
-              request: {
-                headers: requestHeaders,
-              },
-            });
-          } else {
-            console.log('Middleware: Failed to create entitlements from purchase:', result.error);
-          }
-        } else {
-          console.log('Middleware: User has no completed purchases');
-        }
-        
-        // If we get here, user has no entitlements and no recent purchases
-        console.log('User has no active entitlements or recent purchases, redirecting to checkout');
-        return NextResponse.redirect(new URL('/checkout', req.url));
       }
+      
+      // If user has no entitlements and no purchases, redirect to checkout
+      console.log('Middleware: User has no active entitlements or purchases, redirecting to checkout');
+      return NextResponse.redirect(new URL('/checkout', req.url));
     } catch (error) {
       console.error('Middleware: Error checking entitlements:', error);
       // If there's an error checking entitlements, allow access to avoid blocking legitimate users
-      // This is a fallback to prevent users from being locked out due to technical issues
       console.log('Middleware: Allowing access despite entitlement check error');
       return NextResponse.next({
         request: {

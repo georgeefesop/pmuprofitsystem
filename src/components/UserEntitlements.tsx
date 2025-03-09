@@ -19,8 +19,8 @@ interface Product {
   description: string;
   price: number;
   type: string;
-  currency?: string;
-  active?: boolean;
+  currency: string;
+  active: boolean;
   metadata?: any;
 }
 
@@ -52,11 +52,6 @@ interface ProductWithEntitlement extends Product {
   purchaseAmount?: number;
 }
 
-// Type guard to safely check if an entitlement has a purchase property
-function hasPurchase(entitlement: Entitlement): entitlement is Entitlement & { purchase: { amount: number } } {
-  return !!entitlement && 'purchase' in entitlement && !!entitlement.purchase && 'amount' in entitlement.purchase;
-}
-
 export function UserEntitlements() {
   const { user } = useUser();
   const { 
@@ -78,6 +73,7 @@ export function UserEntitlements() {
   // Function to fetch all products
   async function fetchAllProducts() {
     try {
+      console.log("Fetching all products...");
       // Fetch all products from the API
       const response = await fetch('/api/products');
       
@@ -86,9 +82,11 @@ export function UserEntitlements() {
       }
       
       const data = await response.json();
+      console.log(`Fetched ${data.products?.length || 0} products`);
       return data.products || [];
     } catch (error) {
       console.error('Error fetching products:', error);
+      setDebugInfo(prev => `${prev || ''}\nError fetching products: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -102,26 +100,48 @@ export function UserEntitlements() {
       // Fetch all products
       const allProducts = await fetchAllProducts();
       
+      if (!allProducts || allProducts.length === 0) {
+        console.warn("No products returned from API");
+        setDebugInfo(prev => `${prev || ''}\nNo products returned from API`);
+      }
+      
+      // Log entitlements for debugging
+      console.log(`Mapping ${entitlements?.length || 0} entitlements to ${allProducts?.length || 0} products`);
+      if (entitlements?.length > 0) {
+        console.log("First entitlement:", {
+          id: entitlements[0].id,
+          productId: entitlements[0].product_id,
+          isActive: entitlements[0].is_active,
+          hasProduct: !!entitlements[0].products
+        });
+      }
+      
       // Map products with entitlements
       const productsWithEntitlements = allProducts.map((product: Product) => {
+        // Find matching entitlement for this product
         const entitlement = entitlements.find(
           (e: Entitlement) => e.product_id === product.id
         );
         
-        // Use the type guard to safely access purchase amount
-        const purchaseAmount = entitlement && hasPurchase(entitlement) 
-          ? entitlement.purchase.amount 
-          : 0;
+        // If found, log for debugging
+        if (entitlement) {
+          console.log(`Found entitlement for product ${product.name} (${product.id}):`, {
+            entitlementId: entitlement.id,
+            isActive: entitlement.is_active,
+            validFrom: entitlement.valid_from
+          });
+        }
         
         return {
           ...product,
           entitlement,
           isPurchased: !!entitlement,
           purchaseDate: entitlement?.valid_from,
-          purchaseAmount
+          purchaseAmount: product.price
         };
       });
       
+      console.log(`Mapped ${productsWithEntitlements.length} products with entitlements`);
       setProducts(productsWithEntitlements);
     } catch (error) {
       console.error('Error mapping entitlements to products:', error);
@@ -139,6 +159,7 @@ export function UserEntitlements() {
   // Function to manually refresh data
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setDebugInfo("Starting refresh...");
     
     try {
       // Try to fetch from debug endpoint first for more detailed information
@@ -147,19 +168,31 @@ export function UserEntitlements() {
         const data = await response.json();
         console.log("Debug endpoint data:", data);
         setDebugInfo(prev => `${prev || ''}\n\nDebug API Response:\n${JSON.stringify(data, null, 2)}`);
+      } else {
+        console.warn("Debug endpoint returned error:", response.status);
+        setDebugInfo(prev => `${prev || ''}\nDebug endpoint error: ${response.status}`);
       }
     } catch (error) {
       console.error("Error fetching from debug endpoint:", error);
+      setDebugInfo(prev => `${prev || ''}\nError fetching from debug endpoint: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     // Refresh the entitlements
-    await refetchEntitlements();
+    try {
+      await refetchEntitlements();
+      setDebugInfo(prev => `${prev || ''}\nEntitlements refreshed successfully`);
+    } catch (error) {
+      console.error("Error refreshing entitlements:", error);
+      setDebugInfo(prev => `${prev || ''}\nError refreshing entitlements: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    
     setIsRefreshing(false);
   };
 
   // Update products when entitlements change
   useEffect(() => {
     if (!entitlementsLoading) {
+      console.log("Entitlements loaded, mapping to products");
       mapEntitlementsToProducts();
     }
   }, [entitlements, entitlementsLoading]);
@@ -167,6 +200,8 @@ export function UserEntitlements() {
   // Set up real-time subscription for entitlement changes
   useEffect(() => {
     if (!user?.id) return;
+    
+    console.log(`Setting up real-time subscription for user ${user.id}`);
     
     // Subscribe to changes in user_entitlements table for this user
     const subscription = supabase
@@ -189,6 +224,7 @@ export function UserEntitlements() {
     
     // Clean up subscription on unmount
     return () => {
+      console.log("Cleaning up Supabase subscription");
       supabase.removeChannel(subscription);
     };
   }, [user?.id, refetchEntitlements]);
@@ -316,6 +352,22 @@ export function UserEntitlements() {
           <p>Has Active Entitlements: {hasActiveEntitlements ? 'Yes' : 'No'}</p>
           <p>Has Purchases: {hasPurchases ? 'Yes' : 'No'}</p>
           <p>Entitlements Count: {entitlements.length}</p>
+          <p>Products Count: {products.length}</p>
+          {entitlements.length > 0 && (
+            <details>
+              <summary>Entitlements Details</summary>
+              <pre className="mt-2 overflow-auto max-h-40">
+                {JSON.stringify(entitlements.map(e => ({
+                  id: e.id,
+                  product_id: e.product_id,
+                  source_type: e.source_type,
+                  is_active: e.is_active,
+                  valid_from: e.valid_from,
+                  product_name: e.products?.name || 'Unknown'
+                })), null, 2)}
+              </pre>
+            </details>
+          )}
         </div>
       )}
       

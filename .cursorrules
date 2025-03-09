@@ -5,7 +5,8 @@
 
   npm run dev has been modified to monitor the browser console for errors and then display them in the terminal.
   
-  If you want to update the live site just push to github and it will automatically push to vercel.
+  When you will update a file, tell me exactly what you intend to do in that file before you do it.
+  Start each response with an random emoji.
   
   You should access the database and execute SQL commands by using the built in MCP within cursor, I've already configured the tool.
   
@@ -56,7 +57,7 @@
   - Note any known issues that still need to be addressed
   
   Documentation Maintenance
-- When making significant changes to the codebase, update the docs/PMU-PROFIT-SYSTEM-DOCUMENTATION.md file
+- When making significant changes to the codebase, update the docs/docs.md file
 - Add new features, API endpoints, database schema changes, or workflow modifications to the relevant sections
 - Keep the documentation in sync with the actual implementation to avoid confusion
 - Include code examples when appropriate to illustrate usage

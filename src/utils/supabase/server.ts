@@ -32,21 +32,27 @@ export const createClient = (cookieStore: ReturnType<typeof cookies>) => {
 };
 
 // Create a service role client for admin operations
-export const createServiceClient = () => {
+export const createServiceClient = async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
   if (!supabaseServiceKey) {
+    console.error('SUPABASE_SERVICE_ROLE_KEY is not defined');
     throw new Error('SUPABASE_SERVICE_ROLE_KEY is not defined');
   }
   
-  // Import dynamically to avoid bundling on the client
-  return import('@supabase/supabase-js').then(({ createClient }) => 
-    createClient(supabaseUrl, supabaseServiceKey, {
+  try {
+    // Import dynamically to avoid bundling on the client
+    const { createClient } = await import('@supabase/supabase-js');
+    
+    return createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
-    })
-  );
+    });
+  } catch (error) {
+    console.error('Error creating service client:', error);
+    throw new Error('Failed to create service client');
+  }
 }; 

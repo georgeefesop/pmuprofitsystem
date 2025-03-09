@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import SignupForm from "./signup-form";
 
 // Metadata must be in a server component, not in a client component
@@ -10,11 +10,12 @@ import SignupForm from "./signup-form";
 //   description: "Create a new account for the PMU Profit System",
 // };
 
-// Create a client component that uses useSearchParams
+// Component that uses useSearchParams wrapped in its own component
 function SignupContent() {
   const router = useRouter();
+  const { useSearchParams } = require('next/navigation');
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/checkout';
+  const redirectTo = searchParams?.get('redirect') || '/checkout';
   
   // Store the redirect URL in localStorage so we can use it after signup
   useEffect(() => {
@@ -23,40 +24,41 @@ function SignupContent() {
   }, [redirectTo]);
   
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {redirectTo === '/checkout' 
-              ? 'To complete your purchase, please create an account first.'
-              : 'Join the PMU Profit System and grow your business.'}
-          </p>
-        </div>
-        
-        <SignupForm />
+    <div className="w-full max-w-md space-y-8">
+      <div>
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+          Create your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          {redirectTo === '/checkout' 
+            ? 'To complete your purchase, please create an account first.'
+            : 'Join the PMU Profit System and grow your business.'}
+        </p>
       </div>
+      
+      <SignupForm />
     </div>
   );
 }
 
-// Wrap the component that uses useSearchParams in a Suspense boundary
+// Main component with Suspense boundary
 export default function SignupPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <Suspense fallback={
         <div className="w-full max-w-md space-y-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-              Loading...
+              Create your account
             </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Loading...
+            </p>
           </div>
         </div>
-      </div>
-    }>
-      <SignupContent />
-    </Suspense>
+      }>
+        <SignupContent />
+      </Suspense>
+    </div>
   );
 } 

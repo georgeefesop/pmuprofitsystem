@@ -264,11 +264,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   
   try {
     // Use the createEntitlementsFromStripeSession function from lib/entitlements
-    const result = await createEntitlementsFromStripeSession(session.id);
+    const result = await createEntitlementsFromStripeSession(session);
     return result;
   } catch (error) {
     console.error('Error handling checkout.session.completed event:', error);
-    return { success: false, message: String(error) };
+    return { error };
   }
 }
 
@@ -305,10 +305,10 @@ export async function POST(req: NextRequest) {
         // Handle the completed checkout session
         const result = await handleCheckoutSessionCompleted(session);
         
-        if (!result.success) {
-          console.error('Error processing checkout session:', result.message);
+        if (result.error) {
+          console.error('Error processing checkout session:', result.error);
           return NextResponse.json(
-            { error: `Error processing checkout session: ${result.message}` },
+            { error: `Error processing checkout session: ${result.error}` },
             { status: 500 }
           );
         }
