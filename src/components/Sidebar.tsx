@@ -284,12 +284,12 @@ export function Sidebar({ onClose, currentModuleId, collapsed = false, onToggleC
           <button 
             id="sidebar-sign-out-button"
             onClick={handleSignOut}
-            className={`flex items-center p-2 rounded-lg transition-all hover:bg-purple-700 w-full`}
+            className={`flex items-center py-2.5 px-4 rounded-lg transition-all text-purple-100 hover:bg-white/10 hover:text-white w-full`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span>Sign Out</span>
+            <span className="whitespace-nowrap">Sign Out</span>
           </button>
           
           {onToggleCollapse && (
