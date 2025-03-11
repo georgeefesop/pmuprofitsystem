@@ -220,83 +220,83 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkSession().finally(() => {
       setIsLoading(false);
     });
+  }, []);
+
+  // Set up auth state change listener
+  useEffect(() => {
+    console.log('AuthContext: Setting up auth state change listener');
     
-    // Set up auth state change listener
-    useEffect(() => {
-      console.log('AuthContext: Setting up auth state change listener');
-      
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          console.log(`AuthContext: Auth state changed: ${event}`, {
-            hasSession: !!session,
-            userId: session?.user?.id || 'none',
-            event
-          });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log(`AuthContext: Auth state changed: ${event}`, {
+          hasSession: !!session,
+          userId: session?.user?.id || 'none',
+          event
+        });
+        
+        if (event === 'SIGNED_IN') {
+          console.log('AuthContext: SIGNED_IN event detected');
           
-          if (event === 'SIGNED_IN') {
-            console.log('AuthContext: SIGNED_IN event detected');
+          if (session?.user) {
+            console.log('AuthContext: Setting user from SIGNED_IN event:', {
+              id: session.user.id,
+              email: session.user.email
+            });
             
-            if (session?.user) {
-              console.log('AuthContext: Setting user from SIGNED_IN event:', {
-                id: session.user.id,
-                email: session.user.email
-              });
-              
-              setUser({
-                id: session.user.id,
-                email: session.user.email || '',
-                full_name: session.user.user_metadata?.full_name || ''
-              });
-              
-              // Set auth-status cookie
-              console.log('AuthContext: Setting auth-status cookie from SIGNED_IN event');
-              Cookies.set('auth-status', 'authenticated', { 
-                expires: 30,
-                path: '/',
-                secure: window.location.protocol === 'https:',
-                sameSite: 'lax'
-              });
-              
-              // Also set a cookie directly for better compatibility with middleware
-              document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
-              
-              // Store user ID in localStorage
-              localStorage.setItem('auth_user_id', session.user.id);
-              
-              // Check for redirect URL in localStorage
-              const redirectTo = localStorage.getItem('loginRedirectUrl') || '/dashboard';
-              console.log('AuthContext: Checking for redirect URL:', redirectTo);
-              
-              // Clear the redirect URL from localStorage
-              localStorage.removeItem('loginRedirectUrl');
-              
-              // Add a delay to ensure cookies are set before redirect
-              setTimeout(() => {
-                console.log('AuthContext: Executing redirect to:', redirectTo);
-                try {
-                  // Use replace instead of href to prevent back button issues
-                  window.location.replace(redirectTo);
-                } catch (redirectError) {
-                  console.error('AuthContext: Error during redirect:', redirectError);
-                  // Fallback to href if replace fails
-                  window.location.href = redirectTo;
-                }
-              }, 1000);
-            }
-          } else if (event === 'SIGNED_OUT') {
-            console.log('AuthContext: SIGNED_OUT event detected');
-            setUser(null);
-            clearAuthData();
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              full_name: session.user.user_metadata?.full_name || ''
+            });
+            
+            // Set auth-status cookie
+            console.log('AuthContext: Setting auth-status cookie from SIGNED_IN event');
+            Cookies.set('auth-status', 'authenticated', { 
+              expires: 30,
+              path: '/',
+              secure: window.location.protocol === 'https:',
+              sameSite: 'lax'
+            });
+            
+            // Also set a cookie directly for better compatibility with middleware
+            document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+            
+            // Store user ID in localStorage
+            localStorage.setItem('auth_user_id', session.user.id);
+            
+            // Check for redirect URL in localStorage
+            const redirectTo = localStorage.getItem('loginRedirectUrl') || '/dashboard';
+            console.log('AuthContext: Checking for redirect URL:', redirectTo);
+            
+            // Clear the redirect URL from localStorage
+            localStorage.removeItem('loginRedirectUrl');
+            
+            // Add a delay to ensure cookies are set before redirect
+            setTimeout(() => {
+              console.log('AuthContext: Executing redirect to:', redirectTo);
+              try {
+                // Force a hard navigation to ensure cookies are properly set
+                window.location.href = redirectTo;
+              } catch (redirectError) {
+                console.error('AuthContext: Error during redirect:', redirectError);
+                // Fallback to href if replace fails
+                window.location.href = redirectTo;
+              }
+            }, 1500);
           }
+        } else if (event === 'SIGNED_OUT') {
+          console.log('AuthContext: SIGNED_OUT event detected');
+          setUser(null);
+          clearAuthData();
         }
-      );
-      
-      return () => {
-        console.log('AuthContext: Cleaning up auth state change listener');
-        subscription.unsubscribe();
-      };
-    }, []);
-  }, [router]);
+      }
+    );
+    
+    return () => {
+      console.log('AuthContext: Cleaning up auth state change listener');
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     console.log('AuthContext: Attempting login with email:', email);

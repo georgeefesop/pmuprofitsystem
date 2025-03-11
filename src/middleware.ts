@@ -409,19 +409,37 @@ export async function middleware(req: NextRequest) {
       
       // If we have the auth cookie, we can consider the user authenticated for most routes
       if (hasAuthCookie) {
-        // Also check for user ID in cookies or query params as a secondary verification
-        const hasUserIdCookie = req.cookies.has('auth_user_id') && req.cookies.get('auth_user_id')?.value;
-        const hasUserIdParam = searchParams.has('auth_user_id') && searchParams.get('auth_user_id');
-        
-        console.log('Middleware: User ID verification:', {
-          fromCookie: hasUserIdCookie ? 'Present' : 'Missing',
-          fromParam: hasUserIdParam ? 'Present' : 'Missing'
-        });
-        
-        // If we have either user ID source, consider authenticated
-        if (hasUserIdCookie || hasUserIdParam) {
-          return true;
-        }
+        console.log('Middleware: Auth cookie found, considering user authenticated');
+        return true;
+      }
+      
+      // Check for user ID in cookies or query params as a secondary verification
+      const hasUserIdCookie = req.cookies.has('auth_user_id') && req.cookies.get('auth_user_id')?.value;
+      const hasUserIdParam = searchParams.has('auth_user_id') && searchParams.get('auth_user_id');
+      
+      console.log('Middleware: User ID verification:', {
+        fromCookie: hasUserIdCookie ? 'Present' : 'Missing',
+        fromParam: hasUserIdParam ? 'Present' : 'Missing'
+      });
+      
+      // If we have either user ID source, consider authenticated
+      if (hasUserIdCookie || hasUserIdParam) {
+        console.log('Middleware: User ID found, considering user authenticated');
+        return true;
+      }
+      
+      // Check for Supabase tokens
+      const hasAccessToken = req.cookies.has('sb-access-token');
+      const hasRefreshToken = req.cookies.has('sb-refresh-token');
+      
+      console.log('Middleware: Supabase tokens check:', {
+        accessToken: hasAccessToken ? 'Present' : 'Missing',
+        refreshToken: hasRefreshToken ? 'Present' : 'Missing'
+      });
+      
+      if (hasAccessToken || hasRefreshToken) {
+        console.log('Middleware: Supabase tokens found, considering user authenticated');
+        return true;
       }
       
       // If no auth cookie or user ID, try to get the session from Supabase
