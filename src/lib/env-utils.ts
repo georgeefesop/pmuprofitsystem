@@ -37,4 +37,31 @@ export function enableTestFeatures(): boolean {
  */
 export function allowTestPage(): boolean {
   return enableTestFeatures();
+}
+
+/**
+ * Determines the current environment based on the hostname
+ * @returns 'local' for localhost, 'production' for pmuprofitsystem.com
+ */
+export function getCurrentEnvironment(): 'local' | 'production' {
+  if (typeof window === 'undefined') {
+    // Server-side - use environment variables
+    return process.env.NODE_ENV === 'development' ? 'local' : 'production';
+  }
+  
+  // Client-side - use hostname
+  const hostname = window.location.hostname;
+  return hostname.includes('localhost') || hostname.includes('127.0.0.1') 
+    ? 'local' 
+    : 'production';
+}
+
+/**
+ * Gets the environment name for display purposes
+ * @returns A user-friendly environment name
+ */
+export function getEnvironmentName(): string {
+  return getCurrentEnvironment() === 'local' 
+    ? 'Local Development' 
+    : 'Production';
 } 

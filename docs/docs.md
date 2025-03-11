@@ -936,29 +936,30 @@ To set up the local development environment:
 
 #### Database Environment Configuration
 
-**Important Note**: The PMU Profit System uses a shared database architecture where both the local development environment and the production environment connect to the same Supabase database instance. This means:
+### Shared Database Architecture
 
-- The local development server connects to the production Supabase database
-- Any database changes made locally will affect the production database
-- User accounts created in either environment are accessible in both environments
-- The only difference is the application server (Next.js running locally vs. on Vercel)
+The PMU Profit System uses a shared database architecture where both the local development environment and the production environment connect to the same Supabase database. This means that any changes made to the database schema or data in the local environment will affect the production environment as well.
 
-This architecture offers several advantages:
-- Real data for testing without needing to sync or migrate
-- Simplified configuration (one set of database credentials)
-- Ability to test with real user accounts
+### Environment-Specific User Accounts
 
-However, it also requires careful handling:
-- Schema changes should be made with caution as they immediately affect production
-- Testing features that modify data should be done with test accounts only
-- Database migrations run against the production database
+To prevent confusion and authentication issues, user accounts are environment-specific. This means:
+
+1. **User Creation**: When a user is created, the system records which environment (local or production) the account was created in.
+2. **Login Restrictions**: Users can only log in from the same environment where their account was created.
+3. **Error Handling**: If a user tries to log in from a different environment, they will see a friendly error message explaining the situation.
+
+This approach ensures that:
+- Development testing doesn't interfere with production users
+- There's no confusion about which environment a user should use
+- Authentication tokens remain valid for the environment they were created in
+
+### Best Practices
 
 When working with this setup:
-1. Use test accounts for development and testing
-2. Be cautious when modifying database schema
-3. Document all changes thoroughly
-4. Consider using database transactions for complex operations
-5. Verify changes in both environments
+
+1. **Create test accounts** specifically for local development
+2. **Don't try to use production accounts** in the local environment
+3. **Document which accounts** are used for which environment
 
 ### Testing
 

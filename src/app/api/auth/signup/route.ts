@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, fullName } = await req.json();
+    const { email, password, fullName, environment } = await req.json();
 
     // Validate input
     if (!email || !password || !fullName) {
@@ -20,6 +20,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Determine environment if not provided
+    const userEnvironment = environment || (
+      req.headers.get('host')?.includes('localhost') ? 'local' : 'production'
+    );
 
     // Initialize Supabase service client
     const supabase = await createServiceClient();
@@ -46,6 +51,10 @@ export async function POST(req: NextRequest) {
       user_metadata: {
         full_name: fullName,
       },
+      app_metadata: {
+        environment: userEnvironment,
+        created_at: new Date().toISOString()
+      }
     });
 
     if (signUpError) {

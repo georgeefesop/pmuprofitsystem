@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { supabase } from '@/utils/supabase/client';
 import { getSecureSiteUrl } from '@/lib/utils';
+import { getCurrentEnvironment, getEnvironmentName } from '@/lib/env-utils';
 import { useRouter } from 'next/navigation';
 
 // Enhanced logging for debugging
@@ -308,6 +309,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logLocalStorage('Before login');
 
     try {
+      // Get current environment
+      const currentEnvironment = getCurrentEnvironment();
+      console.log('AuthContext: Current environment:', currentEnvironment);
+
       // Add a shorter timeout to prevent hanging
       const loginPromise = supabase.auth.signInWithPassword({
         email,
@@ -389,6 +394,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hasRefreshToken: !!data.session?.refresh_token,
           expiresAt: data.session ? new Date(data.session.expires_at! * 1000).toISOString() : 'N/A'
         });
+        
+        // Check if the user was created in the current environment
+        const userEnvironment = data.user.app_metadata?.environment;
+        console.log('AuthContext: User environment:', userEnvironment);
+        
+        if (userEnvironment && userEnvironment !== currentEnvironment) {
+          console.warn(`AuthContext: User was created in ${userEnvironment} environment but trying to log in from ${currentEnvironment} environment`);
+          
+          // Sign out the user to clear the session
+          await supabase.auth.signOut();
+          
+          // Return a friendly error message
+          const currentEnvName = getEnvironmentName();
+          const userEnvName = userEnvironment === 'local' ? 'Local Development' : 'Production';
+          
+          return {
+            success: false,
+            error: `This account was created in the ${userEnvName} environment and cannot be accessed from the ${currentEnvName} environment. Please use the same environment where you created your account.`
+          };
+        }
+        
+        // If no environment is set, update the user's metadata with the current environment
+        if (!userEnvironment) {
+          console.log('AuthContext: User has no environment set, updating with current environment');
+          try {
+            await supabase.auth.updateUser({
+              data: {
+                environment: currentEnvironment
+              }
+            });
+          } catch (updateError) {
+            console.error('AuthContext: Error updating user environment:', updateError);
+            // Continue with login even if update fails
+          }
+        }
         
         // Ensure cookies are set properly
         try {
@@ -561,6 +601,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const redirectUrl = `${getSecureSiteUrl()}/auth/callback`;
       console.log('Using redirect URL for registration:', redirectUrl);
       
+      // Get current environment
+      const environment = getCurrentEnvironment();
+      console.log('Registering user in environment:', environment);
+      
       // Proceed with registration
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -568,6 +612,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         options: {
           data: {
             full_name: name,
+            environment: environment, // Add environment to user metadata
           },
           // Explicitly set emailRedirectTo to ensure proper redirect after email verification
           emailRedirectTo: redirectUrl,
