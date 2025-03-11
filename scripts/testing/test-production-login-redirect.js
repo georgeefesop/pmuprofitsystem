@@ -91,13 +91,13 @@ function normalizeUrl(url) {
     // Create a URL object to parse the URL
     const parsedUrl = new URL(url);
     
-    // Remove www. from hostname if present
+    // Add www. to hostname if not present
     let hostname = parsedUrl.hostname;
-    if (hostname.startsWith('www.')) {
-      hostname = hostname.substring(4);
+    if (!hostname.startsWith('www.') && !hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+      hostname = 'www.' + hostname;
     }
     
-    // Reconstruct the URL without www
+    // Reconstruct the URL with www
     return `${parsedUrl.protocol}//${hostname}${parsedUrl.pathname}${parsedUrl.search}`;
   } catch (error) {
     console.error('Error normalizing URL:', error);
