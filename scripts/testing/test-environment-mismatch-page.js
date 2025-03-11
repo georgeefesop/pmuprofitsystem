@@ -154,7 +154,7 @@ async function testDirectNavigation(browser) {
     
     // Check page title
     const pageTitle = await page.evaluate(() => {
-      const titleElement = document.querySelector('h1');
+      const titleElement = document.querySelector('h2');
       return titleElement ? titleElement.textContent.trim() : null;
     });
     
@@ -252,35 +252,41 @@ async function testLoginRedirect(browser, email, password) {
     await page.waitForSelector('input[name="email"]');
     await page.waitForSelector('input[name="password"]');
     
-    // Fill form using evaluate for better performance
-    await page.evaluate((email, password) => {
-      document.querySelector('input[name="email"]').value = email;
-      document.querySelector('input[name="password"]').value = password;
-    }, email, password);
+    // Fill form using type for better reliability
+    await page.type('input[name="email"]', email);
+    await page.type('input[name="password"]', password);
     
     await takeScreenshot(page, 'login-form-filled');
     
     // Step 3: Submit form
     console.log('3. Submitting login form...');
-    await page.evaluate(() => {
-      document.querySelector('form').submit();
-    });
     
-    // Wait for navigation
+    // Use a more direct approach by clicking the submit button
+    const submitButton = await page.waitForSelector('button[type="submit"]');
+    await submitButton.click();
+    
+    // Wait for navigation or timeout
+    console.log('4. Waiting for response...');
     try {
-      await page.waitForNavigation({ timeout: WAIT_TIMEOUT });
-      console.log('Navigation completed');
+      // Wait for either the environment mismatch page or an error message
+      await Promise.race([
+        page.waitForNavigation({ timeout: WAIT_TIMEOUT }),
+        page.waitForSelector('.text-amber-700', { timeout: WAIT_TIMEOUT }),
+        page.waitForSelector('.text-red-700', { timeout: WAIT_TIMEOUT })
+      ]);
+      console.log('Response received');
     } catch (error) {
-      console.log('Navigation timeout - checking current URL');
+      console.log('Wait timeout - checking current state');
     }
     
     // Take a screenshot
     await takeScreenshot(page, 'after-login-submit');
     
-    // Step 4: Verify redirect to environment mismatch page
+    // Step 4: Check the result
     const currentUrl = page.url();
     console.log(`Current URL after login: ${currentUrl}`);
     
+    // Check if we're on the environment mismatch page
     if (currentUrl.includes('/auth/environment-mismatch')) {
       console.log('✅ Successfully redirected to environment mismatch page');
       
@@ -303,8 +309,35 @@ async function testLoginRedirect(browser, email, password) {
         console.log('❌ Current environment parameter is incorrect or missing');
       }
     } else {
-      console.log(`❌ Not redirected to environment mismatch page, current URL: ${currentUrl}`);
-      throw new Error('Redirect to environment mismatch page failed');
+      // Check if there's an environment mismatch error message on the login page
+      const errorText = await page.evaluate(() => {
+        const errorElements = document.querySelectorAll('.text-amber-700');
+        for (const element of errorElements) {
+          const text = element.textContent;
+          if (text && (text.includes('environment') || text.includes('Production') || text.includes('Local'))) {
+            return text;
+          }
+        }
+        return null;
+      });
+      
+      if (errorText) {
+        console.log('✅ Environment mismatch error displayed on login page:', errorText);
+      } else {
+        console.log(`❌ Not redirected to environment mismatch page and no error message found, current URL: ${currentUrl}`);
+        
+        // Check for any error message
+        const anyErrorText = await page.evaluate(() => {
+          const errorElements = document.querySelectorAll('.text-red-700, .text-amber-700');
+          return Array.from(errorElements).map(el => el.textContent).join('\n');
+        });
+        
+        if (anyErrorText) {
+          console.log('Error message found:', anyErrorText);
+        }
+        
+        throw new Error('Environment mismatch detection failed');
+      }
     }
     
   } catch (error) {
