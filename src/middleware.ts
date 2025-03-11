@@ -405,8 +405,12 @@ export async function middleware(req: NextRequest) {
   }
   
   // If the path is a public route, allow access regardless of authentication
-  if (PUBLIC_ROUTES.some(route => path === route)) {
+  if (PUBLIC_ROUTES.some(route => path.startsWith(route) && route !== '/login' && route !== '/signup' && route !== '/pre-checkout')) {
     console.log(`Middleware: Path ${path} is a public route, allowing access`);
+    // Optionally inject browser error logger for HTML responses in development
+    if (process.env.NODE_ENV === 'development') {
+      return await injectBrowserErrorLogger(response);
+    }
     return response;
   }
   
@@ -667,6 +671,15 @@ export async function middleware(req: NextRequest) {
   
   // For all other routes, allow access for authenticated users
   console.log(`Middleware: Allowing access to ${path} for authenticated user`);
+  // Optionally inject browser error logger for HTML responses in development
+  if (process.env.NODE_ENV === 'development') {
+    const nextResponse = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    return await injectBrowserErrorLogger(nextResponse);
+  }
   return NextResponse.next({
     request: {
       headers: requestHeaders,
