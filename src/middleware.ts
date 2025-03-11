@@ -361,17 +361,26 @@ async function createEntitlementsFromPurchase(purchase: any, supabaseClient: any
 export async function middleware(req: NextRequest) {
   console.log('Middleware: Starting middleware execution');
   
+  // Get the pathname from the URL
+  const { pathname, searchParams } = new URL(req.url);
+  const path = pathname;
+  
+  // Handle www to non-www redirect for all environments
+  const hostname = req.headers.get('host') || '';
+  if (hostname.startsWith('www.')) {
+    console.log('Middleware: Redirecting from www to non-www domain');
+    const newUrl = new URL(req.url);
+    newUrl.host = hostname.replace(/^www\./, '');
+    return NextResponse.redirect(newUrl, { status: 301 });
+  }
+  
   // Log cookies for debugging
-  logCookies(req, 'Initial');
+  logCookies(req, 'Request');
   
   // Create the response and Supabase client
   const { supabase, response } = createClient(req);
   
-  // Get the path from the request
-  const path = req.nextUrl.pathname;
-  
   // Get query parameters
-  const { searchParams } = req.nextUrl;
   const purchaseSuccess = searchParams.get('purchase_success');
   const sessionId = searchParams.get('session_id');
   

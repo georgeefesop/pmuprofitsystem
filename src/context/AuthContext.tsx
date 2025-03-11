@@ -276,13 +276,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.log('AuthContext: Executing redirect to:', redirectTo);
               try {
                 // Force a hard navigation to ensure cookies are properly set
-                window.location.href = redirectTo;
+                window.location.replace(redirectTo);
               } catch (redirectError) {
                 console.error('AuthContext: Error during redirect:', redirectError);
                 // Fallback to href if replace fails
                 window.location.href = redirectTo;
               }
-            }, 1500);
+            }, 1000);
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('AuthContext: SIGNED_OUT event detected');

@@ -199,18 +199,23 @@ function LoginForm() {
         // Store the redirect URL in localStorage for the auth state change listener
         localStorage.setItem('loginRedirectUrl', redirectUrl);
         
+        // Force a hard navigation to ensure cookies are properly set
+        console.log('Login successful, setting up session');
+        console.log('Redirecting to:', redirectUrl);
+        
         // Add a delay to ensure cookies are set before redirect
         setTimeout(() => {
           console.log('Executing redirect to:', redirectUrl);
           try {
             // Force a hard navigation to ensure cookies are properly set
-            window.location.href = redirectUrl;
+            // Use replace instead of href to prevent back button issues
+            window.location.replace(redirectUrl);
           } catch (redirectError) {
             console.error('Error during redirect:', redirectError);
             // Fallback to href if replace fails
             window.location.href = redirectUrl;
           }
-        }, 1500);
+        }, 1000);
       }
     } catch (err) {
       console.error('Unexpected error during login:', err);
