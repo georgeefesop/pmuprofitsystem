@@ -158,62 +158,63 @@ function LoginForm() {
     }
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
-    setConnectionError(false);
+    setError('');
 
     try {
       const { success, error, user } = await login(email, password);
-      if (success) {
-        console.log('Login successful, setting up session');
+      
+      if (!success) {
+        console.error('Login error:', error);
+        setError(error || 'Invalid login credentials');
+        setIsLoading(false);
+        return;
+      }
+
+      if (user) {
+        console.log('Login successful, user:', user.id);
         
-        // Store the user ID in localStorage for middleware
-        localStorage.setItem('auth_user_id', user?.id || '');
+        // Set auth-status cookie
+        document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
         
-        // Set the auth-status cookie with a long expiration
-        document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+        // Store user ID in localStorage
+        localStorage.setItem('auth_user_id', user.id);
         
-        // If there's a redirect URL in the query params, go there
-        const redirectUrl = searchParams.get('redirect') || '/dashboard';
-        console.log('Redirecting to:', redirectUrl);
+        // Get redirect URL from query params or default to dashboard
+        const params = new URLSearchParams(window.location.search);
+        const redirectParam = params.get('redirect');
+        console.log('Redirect param from URL:', redirectParam);
         
-        // Store the redirect URL in localStorage to ensure it's available after navigation
-        localStorage.setItem('loginRedirectUrl', redirectUrl);
-        
-        // Add a delay to ensure cookies are set before redirecting
-        setTimeout(() => {
-          // Force a hard navigation to ensure cookies are properly set
-          window.location.href = redirectUrl;
-        }, 1000);
-      } else {
-        // Check if the error is related to connection issues
-        if (error && (
-          error.includes('connect to authentication service') || 
-          error.includes('network connection') ||
-          error.includes('ERR_NAME_NOT_RESOLVED') ||
-          error.includes('timed out')
-        )) {
-          setConnectionError(true);
+        let redirectUrl = '/dashboard';
+        if (redirectParam) {
+          // Decode the redirect parameter if it's URL encoded
+          redirectUrl = decodeURIComponent(redirectParam);
+          console.log('Decoded redirect URL:', redirectUrl);
         }
         
-        setError(error || 'Invalid login credentials');
+        console.log('Will redirect to:', redirectUrl);
+        
+        // Store the redirect URL in localStorage for the auth state change listener
+        localStorage.setItem('loginRedirectUrl', redirectUrl);
+        
+        // Add a delay to ensure cookies are set before redirect
+        setTimeout(() => {
+          console.log('Executing redirect to:', redirectUrl);
+          try {
+            // Use replace instead of href to prevent back button issues
+            window.location.replace(redirectUrl);
+          } catch (redirectError) {
+            console.error('Error during redirect:', redirectError);
+            // Fallback to href if replace fails
+            window.location.href = redirectUrl;
+          }
+        }, 1000);
       }
     } catch (err) {
-      setError('An error occurred during login');
-      console.error(err);
-      
-      // Check if the error is related to connection issues
-      if (err instanceof Error && (
-        err.message.includes('connect to authentication service') || 
-        err.message.includes('network connection') ||
-        err.message.includes('ERR_NAME_NOT_RESOLVED') ||
-        err.message.includes('timed out')
-      )) {
-        setConnectionError(true);
-      }
-    } finally {
+      console.error('Unexpected error during login:', err);
+      setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
   };

@@ -401,132 +401,89 @@ export async function middleware(req: NextRequest) {
   }
   
   // Enhanced authentication check
-  console.log('Middleware: Starting enhanced authentication check');
-  
-  // Check if cookies are present
-  const hasCookies = req.cookies.size > 0;
-  console.log(`Middleware: Cookies present: ${hasCookies}, count: ${req.cookies.size}`);
-  
-  // Get all relevant cookies
-  const sbAccessToken = req.cookies.get('sb-access-token');
-  const sbRefreshToken = req.cookies.get('sb-refresh-token');
-  const authStatusCookie = req.cookies.get('auth-status');
-  
-  console.log('Middleware: Auth cookies:', {
-    accessToken: sbAccessToken ? '✓ Present' : '✗ Missing',
-    refreshToken: sbRefreshToken ? '✓ Present' : '✗ Missing',
-    authStatus: authStatusCookie?.value || 'Missing'
-  });
-  
-  // Try to get the session
-  let session = null;
-  let userId = null;
-  
-  // IMPROVED SESSION RESTORATION APPROACH
-  try {
-    console.log('Middleware: Starting auth check for path:', path);
-    
-    // First try to get the user directly
-    console.log('Middleware: Calling supabase.auth.getUser()');
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    
-    if (userError) {
-      console.log('Middleware: Error getting user:', userError.message);
-    } else if (userData?.user) {
-      userId = userData.user.id;
-      console.log(`Middleware: Found user: ${userId}`);
+  const enhancedAuthCheck = async (): Promise<boolean> => {
+    try {
+      // Check for auth-status cookie first (faster)
+      const hasAuthCookie = req.cookies.has('auth-status') && req.cookies.get('auth-status')?.value === 'authenticated';
+      console.log('Middleware: Auth cookie check:', hasAuthCookie ? 'Present' : 'Missing');
       
-      // Get the session
-      console.log('Middleware: Calling supabase.auth.getSession()');
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        console.log('Middleware: Error getting session:', error.message);
-      } else if (data?.session) {
-        session = data.session;
-        console.log(`Middleware: Found session for user: ${session.user.id}`);
-        console.log('Middleware: Session details:', {
-          expiresAt: new Date(session.expires_at! * 1000).toISOString(),
-          hasAccessToken: !!session.access_token?.substring(0, 10),
-          hasRefreshToken: !!session.refresh_token?.substring(0, 10)
-        });
-      } else {
-        console.log('Middleware: No session found for authenticated user');
-      }
-    } else {
-      console.log('Middleware: No user found from getUser()');
-    }
-    
-    // If no session but we have tokens, try to restore the session
-    if (!session && (sbAccessToken || sbRefreshToken || authStatusCookie?.value === 'authenticated')) {
-      console.log('Middleware: No session found but auth indicators exist, attempting to restore session');
-      
-      // If we have both tokens, try to set the session directly
-      if (sbAccessToken && sbRefreshToken) {
-        try {
-          console.log('Middleware: Attempting to restore session with tokens');
-          const { data, error } = await supabase.auth.setSession({
-            access_token: sbAccessToken.value,
-            refresh_token: sbRefreshToken.value
-          });
-          
-          if (error) {
-            console.log('Middleware: Error restoring session from tokens:', error.message);
-          } else if (data?.session) {
-            session = data.session;
-            userId = data.session.user.id;
-            console.log(`Middleware: Successfully restored session for user: ${userId}`);
-            console.log('Middleware: Restored session details:', {
-              expiresAt: new Date(session.expires_at! * 1000).toISOString(),
-              hasAccessToken: !!session.access_token?.substring(0, 10),
-              hasRefreshToken: !!session.refresh_token?.substring(0, 10)
-            });
-          } else {
-            console.log('Middleware: No session returned from setSession');
-          }
-        } catch (error) {
-          console.log('Middleware: Error in session restoration:', error);
-        }
-      }
-      
-      // If still no session but we have the auth-status cookie, try to refresh the session
-      if (!session && authStatusCookie?.value === 'authenticated') {
-        console.log('Middleware: Attempting to refresh session based on auth-status cookie');
+      // If we have the auth cookie, we can consider the user authenticated for most routes
+      if (hasAuthCookie) {
+        // Also check for user ID in cookies or query params as a secondary verification
+        const hasUserIdCookie = req.cookies.has('auth_user_id') && req.cookies.get('auth_user_id')?.value;
+        const hasUserIdParam = searchParams.has('auth_user_id') && searchParams.get('auth_user_id');
         
-        try {
-          console.log('Middleware: Calling supabase.auth.refreshSession()');
-          const { data, error } = await supabase.auth.refreshSession();
-          
-          if (error) {
-            console.log('Middleware: Error refreshing session:', error.message);
-          } else if (data?.session) {
-            session = data.session;
-            userId = data.session.user.id;
-            console.log(`Middleware: Successfully refreshed session for user: ${userId}`);
-            console.log('Middleware: Refreshed session details:', {
-              expiresAt: new Date(session.expires_at! * 1000).toISOString(),
-              hasAccessToken: !!session.access_token?.substring(0, 10),
-              hasRefreshToken: !!session.refresh_token?.substring(0, 10)
-            });
-          } else {
-            console.log('Middleware: No session returned from refreshSession');
-          }
-        } catch (error) {
-          console.log('Middleware: Error in session refresh:', error);
+        console.log('Middleware: User ID verification:', {
+          fromCookie: hasUserIdCookie ? 'Present' : 'Missing',
+          fromParam: hasUserIdParam ? 'Present' : 'Missing'
+        });
+        
+        // If we have either user ID source, consider authenticated
+        if (hasUserIdCookie || hasUserIdParam) {
+          return true;
         }
       }
+      
+      // If no auth cookie or user ID, try to get the session from Supabase
+      console.log('Middleware: Checking Supabase session');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Middleware: Error fetching session:', sessionError.message);
+        return false;
+      }
+      
+      if (session) {
+        console.log('Middleware: Valid Supabase session found');
+        return true;
+      }
+      
+      // Try to restore session from tokens if available
+      if (req.cookies.has('sb-access-token') && req.cookies.has('sb-refresh-token')) {
+        console.log('Middleware: Attempting to restore session from tokens');
+        try {
+          const accessToken = req.cookies.get('sb-access-token')?.value;
+          const refreshToken = req.cookies.get('sb-refresh-token')?.value;
+          
+          if (accessToken && refreshToken) {
+            const { data: { session: restoredSession }, error: restoreError } = 
+              await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              });
+            
+            if (restoreError) {
+              console.error('Middleware: Error restoring session:', restoreError.message);
+              return false;
+            }
+            
+            if (restoredSession) {
+              console.log('Middleware: Session restored successfully');
+              return true;
+            }
+          }
+        } catch (error) {
+          console.error('Middleware: Exception during session restoration:', error);
+          return false;
+        }
+      }
+      
+      console.log('Middleware: No valid authentication found');
+      return false;
+    } catch (error) {
+      console.error('Middleware: Unexpected error in enhancedAuthCheck:', error);
+      return false;
     }
-  } catch (error) {
-    console.log('Middleware: Unexpected error in auth check:', error);
-  }
+  };
   
   // Special handling for login page - if user is already authenticated, redirect to dashboard
-  if ((path === '/login' || path === '/signup') && session) {
+  if ((path === '/login' || path === '/signup') && await enhancedAuthCheck()) {
     console.log('Middleware: User is already authenticated and trying to access login/signup page, redirecting to dashboard');
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
   
   // Special handling for pre-checkout page - if user is already authenticated, redirect to checkout
-  if (path === '/pre-checkout' && session) {
+  if (path === '/pre-checkout' && await enhancedAuthCheck()) {
     console.log('Middleware: User is already authenticated and trying to access pre-checkout, redirecting to checkout');
     const redirectUrl = new URL('/checkout', req.url);
     // Preserve any product parameters
@@ -538,11 +495,12 @@ export async function middleware(req: NextRequest) {
   }
   
   // If user is not authenticated and trying to access a protected route, redirect to login
-  if (!session) {
+  if (!(await enhancedAuthCheck())) {
     if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
       console.log('Middleware: User not authenticated, redirecting to login');
       const redirectUrl = new URL('/login', req.url);
       redirectUrl.searchParams.set('redirect', path);
+      console.log(`Middleware: Redirecting to ${redirectUrl.toString()} with redirect param: ${path}`);
       return NextResponse.redirect(redirectUrl);
     }
     
@@ -577,27 +535,27 @@ export async function middleware(req: NextRequest) {
   
   // User is authenticated, set user claim in request headers
   const requestHeaders = new Headers(req.headers);
-  requestHeaders.set('x-user-id', session.user.id);
-  console.log(`Middleware: User authenticated: ${session.user.id}`);
+  requestHeaders.set('x-user-id', req.cookies.get('auth_user_id')?.value || req.cookies.get('sb-access-token')?.value || req.cookies.get('sb-refresh-token')?.value || '');
+  console.log(`Middleware: User authenticated: ${requestHeaders.get('x-user-id')}`);
   
   // For protected routes, check entitlements
   if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
     console.log('Middleware: User authenticated, checking entitlements');
     
     // Set the user ID in request headers for API routes
-    requestHeaders.set('x-user-id', session.user.id);
+    requestHeaders.set('x-user-id', requestHeaders.get('x-user-id') || '');
     
     // Check if user has entitlements
     try {
       // Instead of directly querying the database, we'll make a request to our API endpoint
       // This will use the service role client to bypass RLS
       const apiUrl = new URL('/api/user-entitlements', req.url);
-      apiUrl.searchParams.set('userId', session.user.id);
+      apiUrl.searchParams.set('userId', requestHeaders.get('x-user-id') || '');
       console.log(`Middleware: Fetching entitlements from API: ${apiUrl.toString()}`);
       
       const apiResponse = await fetch(apiUrl, {
         headers: {
-          'x-user-id': session.user.id,
+          'x-user-id': requestHeaders.get('x-user-id') || '',
           'Cookie': req.headers.get('cookie') || ''
         }
       });
@@ -634,10 +592,10 @@ export async function middleware(req: NextRequest) {
         
         // Allow access but trigger entitlement creation asynchronously
         // This ensures users aren't blocked while entitlements are being created
-        fetch(`${req.nextUrl.origin}/api/create-entitlements-from-purchases?userId=${session.user.id}`, {
+        fetch(`${req.nextUrl.origin}/api/create-entitlements-from-purchases?userId=${requestHeaders.get('x-user-id') || ''}`, {
           method: 'POST',
           headers: {
-            'x-user-id': session.user.id
+            'x-user-id': requestHeaders.get('x-user-id') || ''
           }
         }).catch(error => {
           console.error('Middleware: Error triggering entitlement creation:', error);

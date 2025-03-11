@@ -222,82 +222,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('AuthContext: Auth state changed:', event, session ? 'User logged in' : 'No session');
+    useEffect(() => {
+      console.log('AuthContext: Setting up auth state change listener');
       
-      if (session) {
-        const { user } = session;
-        console.log('AuthContext: User from auth state change:', {
-          id: user.id,
-          email: user.email,
-          metadata: user.user_metadata
-        });
-        
-        setUser({
-          id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || ''
-        });
-        
-        // Set auth-status cookie
-        console.log('AuthContext: Setting auth-status cookie on auth state change');
-        Cookies.set('auth-status', 'authenticated', { 
-          expires: 30, // Extend to 30 days
-          path: '/',
-          secure: window.location.protocol === 'https:',
-          sameSite: 'lax' // Use lax for better compatibility
-        });
-        
-        // Also store user ID in localStorage as a backup
-        localStorage.setItem('auth_user_id', user.id);
-        
-        // Log cookies after setting
-        logCookies('After auth state change');
-        
-        // Handle redirection on sign in
-        if (event === 'SIGNED_IN' && typeof window !== 'undefined') {
-          console.log('AuthContext: User signed in, checking for redirect');
-          const redirectTo = localStorage.getItem('redirectTo') || '/dashboard';
-          console.log('AuthContext: Redirecting to:', redirectTo);
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log(`AuthContext: Auth state changed: ${event}`, {
+            hasSession: !!session,
+            userId: session?.user?.id || 'none',
+            event
+          });
           
-          // Clear the redirect before navigating to prevent redirect loops
-          localStorage.removeItem('redirectTo');
-          
-          // Use a small delay to ensure the auth state is fully updated
-          setTimeout(() => {
-            console.log('AuthContext: Executing redirect to', redirectTo);
-            router.push(redirectTo);
-          }, 500);
-        }
-      } else {
-        console.log('AuthContext: No user in auth state change, setting user to null');
-        setUser(null);
-        
-        // Clear auth data on sign out
-        if (event === 'SIGNED_OUT') {
-          console.log('AuthContext: SIGNED_OUT event detected, clearing auth data');
-          clearAuthData();
-          
-          // Handle redirection on sign out
-          if (typeof window !== 'undefined') {
-            console.log('AuthContext: User signed out, redirecting to login');
+          if (event === 'SIGNED_IN') {
+            console.log('AuthContext: SIGNED_IN event detected');
             
-            // Use a small delay to ensure the auth state is fully updated
-            setTimeout(() => {
-              console.log('AuthContext: Executing redirect to login page');
-              router.push('/login');
-            }, 300);
+            if (session?.user) {
+              console.log('AuthContext: Setting user from SIGNED_IN event:', {
+                id: session.user.id,
+                email: session.user.email
+              });
+              
+              setUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                full_name: session.user.user_metadata?.full_name || ''
+              });
+              
+              // Set auth-status cookie
+              console.log('AuthContext: Setting auth-status cookie from SIGNED_IN event');
+              Cookies.set('auth-status', 'authenticated', { 
+                expires: 30,
+                path: '/',
+                secure: window.location.protocol === 'https:',
+                sameSite: 'lax'
+              });
+              
+              // Also set a cookie directly for better compatibility with middleware
+              document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
+              
+              // Store user ID in localStorage
+              localStorage.setItem('auth_user_id', session.user.id);
+              
+              // Check for redirect URL in localStorage
+              const redirectTo = localStorage.getItem('loginRedirectUrl') || '/dashboard';
+              console.log('AuthContext: Checking for redirect URL:', redirectTo);
+              
+              // Clear the redirect URL from localStorage
+              localStorage.removeItem('loginRedirectUrl');
+              
+              // Add a delay to ensure cookies are set before redirect
+              setTimeout(() => {
+                console.log('AuthContext: Executing redirect to:', redirectTo);
+                try {
+                  // Use replace instead of href to prevent back button issues
+                  window.location.replace(redirectTo);
+                } catch (redirectError) {
+                  console.error('AuthContext: Error during redirect:', redirectError);
+                  // Fallback to href if replace fails
+                  window.location.href = redirectTo;
+                }
+              }, 1000);
+            }
+          } else if (event === 'SIGNED_OUT') {
+            console.log('AuthContext: SIGNED_OUT event detected');
+            setUser(null);
+            clearAuthData();
           }
         }
-      }
+      );
       
-      setIsLoading(false);
-    });
-    
-    return () => {
-      console.log('AuthContext: Unsubscribing from auth state changes');
-      subscription.unsubscribe();
-    };
+      return () => {
+        console.log('AuthContext: Cleaning up auth state change listener');
+        subscription.unsubscribe();
+      };
+    }, []);
   }, [router]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
@@ -490,6 +488,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem('sb-access-token', data.session.access_token);
             localStorage.setItem('sb-refresh-token', data.session.refresh_token);
           }
+          
+          // Get redirect URL from query params or default to dashboard
+          const params = new URLSearchParams(window.location.search);
+          const redirectParam = params.get('redirect');
+          console.log('AuthContext: Redirect param from URL:', redirectParam);
+          
+          let redirectUrl = '/dashboard';
+          if (redirectParam) {
+            // Decode the redirect parameter if it's URL encoded
+            redirectUrl = decodeURIComponent(redirectParam);
+            console.log('AuthContext: Decoded redirect URL:', redirectUrl);
+          }
+          
+          // Store the redirect URL in localStorage for the auth state change listener
+          console.log('AuthContext: Storing redirect URL in localStorage:', redirectUrl);
+          localStorage.setItem('loginRedirectUrl', redirectUrl);
         }
         
         // Log auth state after login
