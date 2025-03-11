@@ -131,3 +131,63 @@ If the tests fail, check the following:
 3. **Redirect Logic**: Verify that the redirect from pre-checkout to checkout is working.
 4. **Authentication State**: Check if the authentication state is being properly maintained between pages.
 5. **Timeouts**: If the checkout page is stuck loading, check for timeouts or race conditions in the authentication flow. 
+
+## Puppeteer Test Template
+
+A template for creating new Puppeteer tests is available in this directory:
+
+```bash
+scripts/testing/puppeteer-test-template.js
+```
+
+This template follows the best practices outlined in the `.cursorrules` file and provides a structured approach to creating new tests.
+
+### Template Features
+
+- **Environment Detection**: Automatically detects and configures for local or production environments
+- **Test User Management**: Creates and cleans up test users with proper environment tagging
+- **Screenshot Management**: Includes helper functions for taking and organizing screenshots
+- **Error Handling**: Comprehensive error handling with error screenshots
+- **Console Logging**: Captures and displays browser console logs
+- **Cleanup**: Automatically cleans up resources after tests complete
+
+### Using the Template
+
+1. Copy the template file to create a new test:
+   ```bash
+   cp scripts/testing/puppeteer-test-template.js scripts/testing/your-new-test.js
+   ```
+
+2. Modify the test description, scenarios, and assertions to match your testing needs
+
+3. Run your test:
+   ```bash
+   node scripts/testing/your-new-test.js
+   ```
+
+4. To see the browser during test execution, set the HEADLESS environment variable:
+   ```bash
+   HEADLESS=false node scripts/testing/your-new-test.js
+   ```
+
+### Best Practices for Puppeteer Tests
+
+1. **Test Structure**:
+   - Keep tests focused on a single feature or flow
+   - Break complex tests into multiple scenario functions
+   - Use descriptive function and variable names
+
+2. **Performance**:
+   - Use `page.evaluate()` for form filling instead of `type()` when possible
+   - Use `waitForSelector()` instead of arbitrary timeouts
+   - Minimize the number of screenshots to essential steps
+
+3. **Reliability**:
+   - Add proper error handling for all async operations
+   - Use try/finally blocks to ensure cleanup happens
+   - Include detailed logging for debugging
+
+4. **Maintainability**:
+   - Use helper functions for common operations
+   - Keep selectors in a centralized location for easy updates
+   - Document test coverage at the top of each file 

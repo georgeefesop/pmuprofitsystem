@@ -63,3 +63,17 @@
 - Keep the documentation in sync with the actual implementation to avoid confusion
 - Include code examples when appropriate to illustrate usage
 - When adding Supabase schema changes, include the SQL in the documentation
+
+Automated Testing
+- Use Puppeteer for automated browser testing whenever possible
+- Create test scripts in the scripts/testing directory
+- Structure test scripts with clear, descriptive function names
+- Include proper error handling and logging in test scripts
+- Test both happy paths and error scenarios
+- For environment-specific tests, ensure tests can run in both local and production environments
+- Add detailed console logging to track test progress
+- Use async/await patterns for all Puppeteer operations
+- Include cleanup operations to remove test data after tests complete
+- Document test coverage in comments at the top of each test file
+- When testing forms, prefer programmatic form submission over UI interaction when possible for speed
+- Add screenshots for critical test failures to aid debugging

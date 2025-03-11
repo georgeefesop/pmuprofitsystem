@@ -74,7 +74,11 @@ export default function EnvironmentMismatchPage() {
                 <div className="flex">
                   <div className="ml-3">
                     <p className="text-sm text-amber-700">
-                      {error || `This account was created in the ${getUserEnvName(userEnv)} environment and cannot be accessed from the ${getCurrentEnvName(currentEnv)} environment.`}
+                      {error || `This account was created in the `}
+                      <span data-test="user-environment">{getUserEnvName(userEnv)}</span>
+                      {` environment and cannot be accessed from the `}
+                      <span data-test="current-environment">{getCurrentEnvName(currentEnv)}</span>
+                      {` environment.`}
                     </p>
                     <p className="mt-2 text-sm text-amber-700">
                       <strong>Why is this happening?</strong> Your account exists in our database, but you're trying to access it from a different environment than where it was created.
