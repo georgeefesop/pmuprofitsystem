@@ -113,4 +113,7 @@ export async function GET(req: NextRequest) {
       cookie: req.headers.get('cookie'),
     },
   });
-} 
+}
+
+// Force this route to be dynamic since it uses cookies
+export const dynamic = 'force-dynamic'; 

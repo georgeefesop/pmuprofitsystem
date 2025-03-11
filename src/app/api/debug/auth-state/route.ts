@@ -3,6 +3,9 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { getServiceSupabase } from "@/lib/supabase";
 
+// Force this route to be dynamic since it uses cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const cookieStore = cookies();

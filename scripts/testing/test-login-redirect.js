@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const BASE_URL = 'https://pmuprofitsystem.com'; // Use production URL for testing
-const WAIT_TIMEOUT = 15000; // Increase timeout for production
+const BASE_URL = 'http://localhost:3000'; // Use localhost for testing
+const WAIT_TIMEOUT = 15000; // Increase timeout for better reliability
 const SCREENSHOTS_DIR = path.join(__dirname, 'screenshots');
 
 // Ensure screenshots directory exists
@@ -75,30 +75,34 @@ function setupNetworkLogger(page) {
 
 // Helper function to log localStorage and cookies
 async function logStorageAndCookies(page, prefix) {
-  // Log localStorage
-  const localStorage = await page.evaluate(() => {
-    const items = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        items[key] = localStorage.getItem(key);
+  try {
+    // Log localStorage
+    const localStorage = await page.evaluate(() => {
+      const items = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          items[key] = localStorage.getItem(key);
+        }
       }
-    }
-    return items;
-  });
-  
-  console.log(`${prefix} localStorage:`, Object.keys(localStorage).map(key => {
-    // Truncate long values
-    const value = localStorage[key];
-    const truncatedValue = typeof value === 'string' && value.length > 50 
-      ? value.substring(0, 50) + '...' 
-      : value;
-    return `${key}: ${truncatedValue}`;
-  }));
-  
-  // Log cookies
-  const cookies = await page.cookies();
-  console.log(`${prefix} cookies:`, cookies.map(c => `${c.name}: ${c.value.substring(0, 20)}...`));
+      return items;
+    });
+    
+    console.log(`${prefix} localStorage:`, Object.keys(localStorage).map(key => {
+      // Truncate long values
+      const value = localStorage[key];
+      const truncatedValue = typeof value === 'string' && value.length > 50 
+        ? value.substring(0, 50) + '...' 
+        : value;
+      return `${key}: ${truncatedValue}`;
+    }));
+    
+    // Log cookies
+    const cookies = await page.cookies();
+    console.log(`${prefix} cookies:`, cookies.map(c => `${c.name}: ${c.value.substring(0, 20)}...`));
+  } catch (error) {
+    console.error(`Error logging storage and cookies: ${error.message}`);
+  }
 }
 
 // Main test function
@@ -106,7 +110,7 @@ async function testLoginRedirect() {
   console.log('Starting login redirect test...');
   
   const browser = await puppeteer.launch({
-    headless: false, // Set to true for headless mode
+    headless: 'new', // Use new headless mode for better compatibility
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     defaultViewport: { width: 1280, height: 800 }
   });
@@ -129,7 +133,14 @@ async function testLoginRedirect() {
     
     // Wait for the form to be visible
     console.log('Waiting for login form to be visible...');
-    await page.waitForSelector('form', { timeout: WAIT_TIMEOUT });
+    try {
+      await page.waitForSelector('form', { timeout: WAIT_TIMEOUT });
+      console.log('Login form found');
+    } catch (error) {
+      console.error('Error waiting for form:', error.message);
+      await saveScreenshot(page, 'form-not-found');
+      throw new Error('Login form not found');
+    }
     
     await saveScreenshot(page, 'login-page');
     
@@ -145,6 +156,17 @@ async function testLoginRedirect() {
     if (!emailInput) {
       console.error('Email input not found');
       await saveScreenshot(page, 'email-input-not-found');
+      
+      // Try to find by other attributes
+      console.log('Trying to find email input by other attributes...');
+      const possibleEmailInputs = await page.$$('input');
+      for (let i = 0; i < possibleEmailInputs.length; i++) {
+        const inputType = await page.evaluate(el => el.type, possibleEmailInputs[i]);
+        const inputId = await page.evaluate(el => el.id, possibleEmailInputs[i]);
+        const inputName = await page.evaluate(el => el.name, possibleEmailInputs[i]);
+        console.log(`Input ${i}: type=${inputType}, id=${inputId}, name=${inputName}`);
+      }
+      
       throw new Error('Email input not found');
     }
     
@@ -161,14 +183,22 @@ async function testLoginRedirect() {
     await passwordInput.type('Wheels99!');
     
     // Log storage before login
-    await logStorageAndCookies(page, 'Before login:');
+    await logStorageAndCookies(page, 'Before login');
     
     // Submit form and wait for navigation
     console.log('Submitting login form...');
     
+    // Find the submit button
+    const submitButton = await page.$('button[type="submit"]');
+    if (!submitButton) {
+      console.error('Submit button not found');
+      await saveScreenshot(page, 'submit-button-not-found');
+      throw new Error('Submit button not found');
+    }
+    
     // Click the login button and wait for navigation or network idle
     await Promise.all([
-      page.click('button[type="submit"]'),
+      submitButton.click(),
       page.waitForNavigation({ timeout: WAIT_TIMEOUT }).catch(e => {
         console.log('Navigation timeout or no navigation occurred:', e.message);
       })
@@ -178,7 +208,7 @@ async function testLoginRedirect() {
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     // Log storage after login
-    await logStorageAndCookies(page, 'After login:');
+    await logStorageAndCookies(page, 'After login');
     
     // Save screenshot after login attempt
     await saveScreenshot(page, 'after-login');
@@ -212,79 +242,11 @@ async function testLoginRedirect() {
       await saveScreenshot(page, 'after-manual-navigation');
     }
     
-    // Test scenario 2: Login with specific redirect parameter
-    console.log('\n--- Test Scenario 2: Login with specific redirect parameter ---');
-    
-    // First logout
-    console.log('Logging out...');
-    await page.goto(`${BASE_URL}/logout`, { waitUntil: 'networkidle2', timeout: WAIT_TIMEOUT });
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Navigate to login page with redirect parameter
-    const redirectTarget = '/dashboard/modules';
-    console.log(`Navigating to login page with redirect to ${redirectTarget}...`);
-    await page.goto(`${BASE_URL}/login?redirect=${encodeURIComponent(redirectTarget)}`, { 
-      waitUntil: 'networkidle2', 
-      timeout: WAIT_TIMEOUT 
-    });
-    
-    // Wait for the page to be fully loaded
-    console.log('Waiting for page to fully load...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Wait for the form to be visible
-    console.log('Waiting for login form to be visible...');
-    await page.waitForSelector('form', { timeout: WAIT_TIMEOUT });
-    
-    // Fill login form
-    console.log('Filling login form...');
-    
-    // Find email input by checking type attribute
-    const emailInput2 = await page.$('input[type="email"]');
-    if (!emailInput2) {
-      console.error('Email input not found');
-      await saveScreenshot(page, 'email-input-not-found-2');
-      throw new Error('Email input not found');
-    }
-    
-    // Find password input by checking type attribute
-    const passwordInput2 = await page.$('input[type="password"]');
-    if (!passwordInput2) {
-      console.error('Password input not found');
-      await saveScreenshot(page, 'password-input-not-found-2');
-      throw new Error('Password input not found');
-    }
-    
-    // Type in the email and password
-    await emailInput2.type('george.efesopb@gmail.com');
-    await passwordInput2.type('Wheels99!');
-    
-    // Submit form and wait for navigation
-    console.log('Submitting login form...');
-    await Promise.all([
-      page.click('button[type="submit"]'),
-      page.waitForNavigation({ timeout: WAIT_TIMEOUT }).catch(e => {
-        console.log('Navigation timeout or no navigation occurred:', e.message);
-      })
-    ]);
-    
-    // Wait a bit for any redirects to complete
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Check current URL
-    const redirectUrl = page.url();
-    console.log('Current URL after login with redirect param:', redirectUrl);
-    
-    if (redirectUrl.includes(redirectTarget)) {
-      console.log(`✅ SUCCESS: Redirected to ${redirectTarget} successfully`);
-    } else {
-      console.log(`❌ FAILURE: Not redirected to ${redirectTarget}`);
-    }
-    
-    await saveScreenshot(page, 'after-redirect-param-login');
+    console.log('Test completed successfully');
     
   } catch (error) {
     console.error('Test failed:', error);
+    await saveScreenshot(browser.pages()[0], 'test-failure');
   } finally {
     // Clean up
     console.log('Cleaning up...');

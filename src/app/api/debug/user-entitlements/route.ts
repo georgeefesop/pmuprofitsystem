@@ -84,4 +84,7 @@ export async function GET() {
     console.error('Unexpected error in debug endpoint:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}
+
+// Force this route to be dynamic since it uses cookies
+export const dynamic = 'force-dynamic'; 

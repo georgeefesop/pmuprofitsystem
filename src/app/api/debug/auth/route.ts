@@ -68,4 +68,7 @@ export async function GET(req: NextRequest) {
     headers,
     localStorage: 'Not available on server',
   });
-} 
+}
+
+// Force this route to be dynamic since it uses cookies
+export const dynamic = 'force-dynamic'; 

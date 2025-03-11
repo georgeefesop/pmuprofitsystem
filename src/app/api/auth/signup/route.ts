@@ -133,4 +133,7 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
+
+// Force this route to be dynamic since it uses cookies
+export const dynamic = 'force-dynamic'; 

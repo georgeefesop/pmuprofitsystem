@@ -22,4 +22,7 @@ export async function GET(request: Request) {
 
   // If there's no code or an error occurred, redirect to the login page
   return NextResponse.redirect(new URL('/login', requestUrl.origin));
-} 
+}
+
+// Force this route to be dynamic since it uses cookies
+export const dynamic = 'force-dynamic'; 

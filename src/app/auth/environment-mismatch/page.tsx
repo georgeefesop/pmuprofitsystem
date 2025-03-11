@@ -1,13 +1,30 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 
-export default function EnvironmentMismatchPage() {
+// Loading fallback component
+function EnvironmentMismatchLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center">
+          <AlertTriangle className="h-12 w-12 text-amber-500" />
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Loading...
+        </h2>
+      </div>
+    </div>
+  );
+}
+
+// Main content component that uses searchParams
+function EnvironmentMismatchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [userEnv, setUserEnv] = useState<string | null>(null);
@@ -108,5 +125,14 @@ export default function EnvironmentMismatchPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function EnvironmentMismatchPage() {
+  return (
+    <Suspense fallback={<EnvironmentMismatchLoading />}>
+      <EnvironmentMismatchContent />
+    </Suspense>
   );
 } 
