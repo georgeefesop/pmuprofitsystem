@@ -373,31 +373,61 @@ Supabase RLS policies ensure users can only access their own data:
 
 #### Environment Mismatch Protection
 
-The PMU Profit System implements environment-specific authentication to ensure users can only log in from the environment where their account was created:
+The PMU Profit System implements environment isolation to prevent users from accessing their accounts from different environments than where they were created. This is a security feature that helps maintain separation between development and production environments.
 
-- Each user account is tagged with the environment it was created in (local, development, production)
-- When a user attempts to log in, the system checks if the current environment matches the user's creation environment
-- If there's a mismatch (e.g., a production user trying to log in on a local environment), the login is rejected
-- This prevents accidental data manipulation across environments and maintains separation between development and production
+### How It Works
 
-Implementation details:
-- The environment check is performed in the `AuthContext` after successful Supabase authentication
-- If a mismatch is detected, the user is automatically signed out and shown a friendly error message
-- The system uses environment utility functions from `src/lib/env-utils.ts` to determine the current environment
-- A test script (`scripts/testing/test-environment-mismatch.js`) verifies this functionality
+1. **Environment Detection**: The system determines the current environment based on the hostname:
+   - `localhost` or `127.0.0.1` is considered the 'local' environment
+   - `pmuprofitsystem.com` is considered the 'production' environment
 
-```typescript
-// Example environment check in AuthContext
-if (user && user.user_metadata?.environment && user.user_metadata.environment !== getCurrentEnvironment()) {
-  console.warn(`Environment mismatch: User created in ${user.user_metadata.environment} environment, but trying to log in from ${getCurrentEnvironment()} environment`);
-  await supabase.auth.signOut();
-  setAuthError({
-    type: "environment_mismatch",
-    message: `You cannot access your account from this environment. Your account was created in the ${getFriendlyEnvironmentName(user.user_metadata.environment)} environment.`
-  });
-  return;
-}
+2. **User Environment Tagging**: When a user is created, their account is tagged with the environment where it was created:
+   ```javascript
+   await supabase.auth.admin.createUser({
+     email: email,
+     password: password,
+     email_confirm: true,
+     app_metadata: {
+       environment: getCurrentEnvironment(),
+       environment_updated_at: new Date().toISOString()
+     }
+   });
+   ```
+
+3. **Login Verification**: During login, the system checks if the user's environment matches the current environment:
+   ```javascript
+   const userEnvironment = user.app_metadata?.environment;
+   const currentEnvironment = getCurrentEnvironment();
+   
+   if (userEnvironment && userEnvironment !== currentEnvironment) {
+     // Environment mismatch detected
+     // Redirect to environment mismatch page
+   }
+   ```
+
+4. **Environment Mismatch Page**: If a mismatch is detected, the user is redirected to a dedicated page that explains the issue and provides guidance.
+
+### Testing Environment Mismatch
+
+The environment mismatch functionality can be tested using the following scripts:
+
+- `scripts/testing/test-environment-mismatch.js`: Tests environment mismatch detection in the local environment
+- `scripts/testing/test-production-environment.js`: Tests environment mismatch detection in the production environment
+
+### Updating User Environments
+
+For legacy users without an environment tag, the system provides a script to update their environment:
+
+- `scripts/database/update-user-environments.js`: Updates users without an environment tag to the specified environment
+
+Usage:
+```bash
+node scripts/database/update-user-environments.js [environment] [force]
 ```
+
+Where:
+- `environment` is either 'local' or 'production'
+- `force` is a boolean flag to force update all users regardless of their current environment
 
 ### Authentication Flow
 

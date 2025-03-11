@@ -409,6 +409,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const currentEnvName = getEnvironmentName();
           const userEnvName = userEnvironment === 'local' ? 'Local Development' : 'Production';
           
+          // Redirect to the environment mismatch page
+          if (typeof window !== 'undefined') {
+            const errorMessage = `This account was created in the ${userEnvName} environment and cannot be accessed from the ${currentEnvName} environment.`;
+            const encodedError = encodeURIComponent(errorMessage);
+            window.location.href = `/auth/environment-mismatch?userEnv=${userEnvironment}&currentEnv=${currentEnvironment}&error=${encodedError}`;
+          }
+          
           return {
             success: false,
             error: `This account was created in the ${userEnvName} environment and cannot be accessed from the ${currentEnvName} environment. Please use the same environment where you created your account.`
