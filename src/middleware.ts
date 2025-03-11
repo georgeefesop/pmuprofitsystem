@@ -365,12 +365,13 @@ export async function middleware(req: NextRequest) {
   const { pathname, searchParams } = new URL(req.url);
   const path = pathname;
   
-  // Handle www to non-www redirect for all environments
+  // Handle domain redirects to align with Vercel's configuration
   const hostname = req.headers.get('host') || '';
-  if (hostname.startsWith('www.')) {
-    console.log('Middleware: Redirecting from www to non-www domain');
+  // Redirect from non-www to www instead of the other way around
+  if (hostname && !hostname.startsWith('www.') && !hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+    console.log('Middleware: Redirecting from non-www to www domain');
     const newUrl = new URL(req.url);
-    newUrl.host = hostname.replace(/^www\./, '');
+    newUrl.host = 'www.' + hostname;
     return NextResponse.redirect(newUrl, { status: 301 });
   }
   
