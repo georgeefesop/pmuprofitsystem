@@ -7,9 +7,10 @@
  * 3. Update them with the specified environment (local or production)
  * 
  * Usage:
- * node scripts/database/update-user-environments.js [environment]
+ * node scripts/database/update-user-environments.js [environment] [force]
  * 
  * Where [environment] is either 'local' or 'production' (defaults to 'local')
+ * And [force] is either 'true' or 'false' (defaults to 'false')
  */
 
 require('dotenv').config();
@@ -21,6 +22,10 @@ if (!['local', 'production'].includes(environment)) {
   console.error('Error: Environment must be either "local" or "production"');
   process.exit(1);
 }
+
+// Get force parameter from command line args or default to false
+const force = process.argv[3] === 'true';
+console.log(`Force update: ${force ? 'Yes' : 'No'}`);
 
 // Create Supabase client with service role key
 const supabase = createClient(
@@ -47,12 +52,12 @@ async function updateUserEnvironments() {
     
     console.log(`Found ${users.users.length} total users`);
     
-    // Filter users that don't have environment information
-    const usersToUpdate = users.users.filter(user => {
-      return !user.app_metadata?.environment;
-    });
+    // Filter users that don't have environment information or force update all
+    const usersToUpdate = force 
+      ? users.users 
+      : users.users.filter(user => !user.app_metadata?.environment);
     
-    console.log(`Found ${usersToUpdate.length} users without environment information`);
+    console.log(`Found ${usersToUpdate.length} users to update`);
     
     // Update each user
     let successCount = 0;
@@ -88,7 +93,7 @@ async function updateUserEnvironments() {
     
     console.log('\nUpdate Summary:');
     console.log(`- Total users: ${users.users.length}`);
-    console.log(`- Users without environment: ${usersToUpdate.length}`);
+    console.log(`- Users to update: ${usersToUpdate.length}`);
     console.log(`- Successfully updated: ${successCount}`);
     console.log(`- Failed to update: ${errorCount}`);
     
