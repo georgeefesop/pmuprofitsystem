@@ -371,6 +371,34 @@ Supabase RLS policies ensure users can only access their own data:
 - Users can only access content they've purchased
 - Admin users have additional permissions
 
+#### Environment Mismatch Protection
+
+The PMU Profit System implements environment-specific authentication to ensure users can only log in from the environment where their account was created:
+
+- Each user account is tagged with the environment it was created in (local, development, production)
+- When a user attempts to log in, the system checks if the current environment matches the user's creation environment
+- If there's a mismatch (e.g., a production user trying to log in on a local environment), the login is rejected
+- This prevents accidental data manipulation across environments and maintains separation between development and production
+
+Implementation details:
+- The environment check is performed in the `AuthContext` after successful Supabase authentication
+- If a mismatch is detected, the user is automatically signed out and shown a friendly error message
+- The system uses environment utility functions from `src/lib/env-utils.ts` to determine the current environment
+- A test script (`scripts/testing/test-environment-mismatch.js`) verifies this functionality
+
+```typescript
+// Example environment check in AuthContext
+if (user && user.user_metadata?.environment && user.user_metadata.environment !== getCurrentEnvironment()) {
+  console.warn(`Environment mismatch: User created in ${user.user_metadata.environment} environment, but trying to log in from ${getCurrentEnvironment()} environment`);
+  await supabase.auth.signOut();
+  setAuthError({
+    type: "environment_mismatch",
+    message: `You cannot access your account from this environment. Your account was created in the ${getFriendlyEnvironmentName(user.user_metadata.environment)} environment.`
+  });
+  return;
+}
+```
+
 ### Authentication Flow
 
 The authentication flow in the PMU Profit System works as follows:
@@ -1157,6 +1185,19 @@ After deploying, verify the following:
    - User exists in auth.users but not in public.users table
    - The application should automatically create a profile if missing
    - Check database for user profile
+
+4. **Environment Mismatch Error**
+   - User receives an error message stating they cannot access their account from this environment
+   - This occurs when a user tries to log in from an environment different from where their account was created
+   - **Cause**: The system enforces environment separation to prevent accidental data manipulation
+   - **Solution for Users**: Direct the user to log in from the correct environment (e.g., production website instead of local development)
+   - **Solution for Developers**: If testing is needed, create test users specifically in the development/local environment
+   - **Debugging**: Check the user's metadata in Supabase to verify their creation environment:
+     ```sql
+     SELECT id, email, raw_user_meta_data 
+     FROM auth.users 
+     WHERE email = 'user@example.com';
+     ```
 
 #### Middleware Authentication and Entitlement Checking
 
