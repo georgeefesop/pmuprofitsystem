@@ -8,5 +8,11 @@
  */
 
 import { middleware, config } from './middleware/implementation';
+import { isCustomMiddlewareEnabled } from './middleware/config';
 
-export { middleware, config };
+// Only export the middleware if it's enabled
+// This replaces the experimental.middleware: true setting
+export const enabledMiddleware = isCustomMiddlewareEnabled() ? middleware : null;
+
+// Export the middleware with the correct name
+export { enabledMiddleware as middleware, config };
