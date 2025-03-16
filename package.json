@@ -17,7 +17,7 @@
     "setup:error-logger": "node scripts/development/browser-error-logger.js",
     "prebuild": "node scripts/utils/check-image-domains.js",
     "build": "npm install --force && next build",
-    "build:vercel": "node scripts/utils/vercel-build.js",
+    "build:vercel": "npm install --force --include=dev && next build",
     "start": "next start",
     "lint": "next lint",
     "check-errors": "node scripts/utils/check-build-errors.js",
