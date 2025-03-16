@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, safeStripeOperation } from '@/lib/stripe';
 import { getServiceSupabase } from '@/lib/supabase';
-import { PRODUCT_IDS, legacyToUuidProductId, isValidLegacyProductId } from '@/lib/product-ids';
+import { PRODUCT_IDS, legacyToUuidProductId, isValidLegacyProductId, uuidToLegacyProductId, normalizeProductId } from '@/lib/product-ids';
+import { findPurchaseByPaymentIntent } from "@/lib/purchases";
 
-// Force this route to be dynamic since it uses request.url
+// Force this route to be dynamic
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Function to create user entitlements based on purchase
-async function createUserEntitlements(userId: string, includeAdGenerator: boolean, includeBlueprint: boolean, purchaseId: string) {
+async function createUserEntitlements(userId: string, includeAdGenerator: boolean, includeBlueprint: boolean, purchaseId: string, specificProductId?: string) {
   if (!userId) {
     console.error('Cannot create entitlements: No user ID provided');
     return { error: 'No user ID provided' };
@@ -18,6 +20,45 @@ async function createUserEntitlements(userId: string, includeAdGenerator: boolea
   const entitlements = [];
 
   try {
+    // If a specific product ID is provided, only create an entitlement for that product
+    if (specificProductId) {
+      console.log(`Creating entitlement for specific product: ${specificProductId}`);
+      const normalizedProductId = normalizeProductId(specificProductId);
+      
+      const { data: specificEntitlement, error: specificError } = await supabase
+        .from('user_entitlements')
+        .insert({
+          user_id: userId,
+          product_id: normalizedProductId,
+          source_type: 'purchase',
+          source_id: purchaseId,
+          valid_from: now,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (specificError) {
+        console.error('Error creating specific product entitlement:', specificError);
+      } else {
+        console.log('Created specific product entitlement:', specificEntitlement);
+        entitlements.push(specificEntitlement);
+      }
+      
+      // Update the purchase record to mark entitlements as created
+      const { error: updateError } = await supabase
+        .from('purchases')
+        .update({ entitlements_created: true })
+        .eq('id', purchaseId);
+        
+      if (updateError) {
+        console.error('Error updating purchase record:', updateError);
+      }
+      
+      return { entitlements };
+    }
+
+    // Otherwise, create entitlements based on the includeAdGenerator and includeBlueprint flags
     // Always create entitlement for the main product (PMU Profit System)
     const { data: mainEntitlement, error: mainError } = await supabase
       .from('user_entitlements')
@@ -83,6 +124,16 @@ async function createUserEntitlements(userId: string, includeAdGenerator: boolea
         console.log('Created blueprint entitlement:', blueprintEntitlement);
         entitlements.push(blueprintEntitlement);
       }
+    }
+    
+    // Update the purchase record to mark entitlements as created
+    const { error: updateError } = await supabase
+      .from('purchases')
+      .update({ entitlements_created: true })
+      .eq('id', purchaseId);
+      
+    if (updateError) {
+      console.error('Error updating purchase record:', updateError);
     }
 
     return { entitlements };
@@ -228,276 +279,144 @@ async function createEntitlementsFromLegacyPurchase(purchase: any) {
   }
 }
 
+/**
+ * API route to verify a purchase by payment intent ID
+ * @param req The request object
+ * @returns A JSON response with the result of the verification
+ */
 export async function GET(req: NextRequest) {
   try {
-    // Get the session ID from the query parameters
-    const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('session_id');
+    // Get the product and payment intent ID from the query parameters
+    const url = new URL(req.url);
+    const product = url.searchParams.get('product');
+    const paymentIntentId = url.searchParams.get('payment_intent_id');
+    const purchaseId = url.searchParams.get('purchase_id');
     
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
+    console.log(`API: Verifying purchase for product ${product}, payment intent ${paymentIntentId}, purchase ID ${purchaseId}`);
+    
+    // Validate the required parameters
+    if (!paymentIntentId && !purchaseId) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Either payment intent ID or purchase ID is required' 
+      }, { status: 400 });
     }
     
-    console.log('Verifying purchase for session/payment:', sessionId);
+    let result;
     
-    // Determine if this is a checkout session ID or payment intent ID
-    const isPaymentIntent = sessionId.startsWith('pi_');
-    
-    // Get the Stripe session or payment intent
-    let session;
-    let paymentIntent;
-    
-    if (isPaymentIntent) {
-      // Retrieve the payment intent
-      paymentIntent = await safeStripeOperation(() => 
-        stripe.paymentIntents.retrieve(sessionId, {
-          expand: ['customer', 'invoice']
-        })
-      );
-      
-      if (!paymentIntent) {
-        return NextResponse.json(
-          { error: 'Payment intent not found' },
-          { status: 404 }
-        );
-      }
-      
-      // Check if the payment was successful
-      const paymentStatus = paymentIntent.status;
-      const isPaymentSuccessful = paymentStatus === 'succeeded';
-      
-      // Extract user ID from metadata
-      const metadata = paymentIntent.metadata || {};
-      const userId = metadata.userId || '';
-      
-      console.log('Payment intent metadata:', metadata);
-      console.log('Extracted user ID from payment intent:', userId);
-      
-      // Return the verification result for payment intent with redirect URL
-      return NextResponse.json({
-        success: true,
-        verified: isPaymentSuccessful,
-        paymentStatus,
-        userId,
-        includeAdGenerator: metadata.includeAdGenerator === 'true',
-        includeBlueprint: metadata.includeBlueprint === 'true',
-        redirectUrl: `/dashboard?purchase_success=true&session_id=${sessionId}`,
-        sessionDetails: {
-          id: paymentIntent.id,
-          customer_email: paymentIntent.receipt_email || '',
-          amount_total: paymentIntent.amount ? paymentIntent.amount / 100 : null,
-          currency: paymentIntent.currency,
-          payment_status: paymentStatus,
-          status: paymentStatus,
-        }
-      });
-    } else {
-      // Retrieve the checkout session
-      session = await safeStripeOperation(() => 
-        stripe.checkout.sessions.retrieve(sessionId, {
-          expand: ['payment_intent', 'line_items']
-        })
-      );
-      
-      if (!session) {
-        return NextResponse.json(
-          { error: 'Session not found' },
-          { status: 404 }
-        );
-      }
-      
-      // Check if the payment was successful
-      const paymentStatus = session.payment_status;
-      const isPaymentSuccessful = paymentStatus === 'paid';
-      
-      // Get the Supabase client
+    // If we have a purchase ID, use that to find the purchase
+    if (purchaseId) {
       const supabase = getServiceSupabase();
-      
-      // Check if we have a record of this purchase in our database
-      const { data: purchaseData, error: purchaseError } = await supabase
+      const { data: purchase, error } = await supabase
         .from('purchases')
         .select('*')
-        .eq('checkout_session_id', sessionId)
+        .eq('id', purchaseId)
         .single();
-      
-      // Check if we have a pending purchase record
-      const { data: pendingPurchase, error: pendingError } = await supabase
-        .from('pending_purchases')
-        .select('*')
-        .eq('checkout_session_id', sessionId)
-        .single();
-      
-      // If we don't have a purchase record but the payment was successful,
-      // create one from the pending purchase or from the session metadata
-      let newPurchase = null;
-      let userId = null;
-      let includeAdGenerator = false;
-      let includeBlueprint = false;
-      
-      if (!purchaseData && isPaymentSuccessful) {
-        const metadata = session.metadata || {};
-        const email = metadata.email || (pendingPurchase?.email || '');
-        const fullName = metadata.fullName || (pendingPurchase?.full_name || '');
-        userId = metadata.userId || (pendingPurchase?.user_id || null);
-        includeAdGenerator = metadata.includeAdGenerator === 'true' || pendingPurchase?.include_ad_generator || false;
-        includeBlueprint = metadata.includeBlueprint === 'true' || pendingPurchase?.include_blueprint || false;
         
-        if (email) {
-          // Create a purchase record
-          const { data: createdPurchase, error: createError } = await supabase
-            .from('purchases')
-            .insert({
-              email,
-              full_name: fullName,
-              include_ad_generator: includeAdGenerator,
-              include_blueprint: includeBlueprint,
-              user_id: userId,
-              checkout_session_id: sessionId,
-              payment_status: paymentStatus,
-              payment_intent: session.payment_intent as string,
-              amount_total: session.amount_total ? session.amount_total / 100 : null,
-              created_at: new Date().toISOString(),
-              status: 'completed'
-            })
-            .select()
-            .single();
-          
-          if (createError) {
-            console.error('Error creating purchase record:', createError);
-          } else {
-            console.log('Created purchase record:', createdPurchase);
-            newPurchase = createdPurchase;
-            
-            // Create user entitlements based on the purchase
-            if (userId) {
-              const entitlementResult = await createUserEntitlements(
-                userId, 
-                includeAdGenerator, 
-                includeBlueprint,
-                createdPurchase.id
-              );
-              
-              if (entitlementResult.error) {
-                console.error('Error creating entitlements:', entitlementResult.error);
-              } else {
-                console.log('Created entitlements:', entitlementResult.entitlements);
-                
-                // Update purchase status to indicate entitlements were created
-                const { error: updateError } = await supabase
-                  .from('purchases')
-                  .update({ status: 'completed', entitlements_created: true })
-                  .eq('id', createdPurchase.id);
-                
-                if (updateError) {
-                  console.error('Error updating purchase status:', updateError);
-                }
-              }
-            }
-          }
-        }
-      } else if (purchaseData && isPaymentSuccessful) {
-        // If we already have a purchase record but no entitlements, create them
-        userId = purchaseData.user_id;
-        includeAdGenerator = purchaseData.include_ad_generator;
-        includeBlueprint = purchaseData.include_blueprint;
-        
-        const { data: existingEntitlements, error: entitlementsError } = await supabase
-          .from('user_entitlements')
-          .select('*')
-          .eq('user_id', purchaseData.user_id)
-          .eq('is_active', true);
-        
-        if (entitlementsError) {
-          console.error('Error checking existing entitlements:', entitlementsError);
-        } else if (!existingEntitlements || existingEntitlements.length === 0) {
-          // No entitlements found, create them
-          // Check if this is a legacy purchase with product_id
-          if (purchaseData.product_id) {
-            const entitlementResult = await createEntitlementsFromLegacyPurchase(purchaseData);
-            
-            if (entitlementResult.error) {
-              console.error('Error creating entitlements from legacy purchase:', entitlementResult.error);
-            } else {
-              console.log('Created entitlements from legacy purchase:', entitlementResult.entitlements);
-            }
-          } else {
-            // Standard purchase with include_* fields
-            const entitlementResult = await createUserEntitlements(
-              purchaseData.user_id, 
-              purchaseData.include_ad_generator, 
-              purchaseData.include_blueprint,
-              purchaseData.id
-            );
-            
-            if (entitlementResult.error) {
-              console.error('Error creating entitlements from existing purchase:', entitlementResult.error);
-            } else {
-              console.log('Created entitlements from existing purchase:', entitlementResult.entitlements);
-              
-              // Update purchase status to indicate entitlements were created
-              const { error: updateError } = await supabase
-                .from('purchases')
-                .update({ status: 'completed', entitlements_created: true })
-                .eq('id', purchaseData.id);
-              
-              if (updateError) {
-                console.error('Error updating purchase status:', updateError);
-              }
-            }
-          }
-        } else {
-          console.log('User already has entitlements:', existingEntitlements.length);
-          
-          // Update purchase status to indicate entitlements were already created
-          if (!purchaseData.entitlements_created) {
-            const { error: updateError } = await supabase
-              .from('purchases')
-              .update({ status: 'completed', entitlements_created: true })
-              .eq('id', purchaseData.id);
-            
-            if (updateError) {
-              console.error('Error updating purchase status:', updateError);
-            }
-          }
-        }
+      if (error) {
+        console.error('Error finding purchase by ID:', error);
+        return NextResponse.json({
+          success: false,
+          error: `Error finding purchase: ${error.message}`
+        }, { status: 500 });
       }
       
-      // Return the verification result for checkout session with redirect URL
-      return NextResponse.json({
+      if (!purchase) {
+        return NextResponse.json({
+          success: false,
+          verified: false,
+          error: `No purchase found with ID: ${purchaseId}`
+        }, { status: 404 });
+      }
+      
+      result = {
         success: true,
-        verified: isPaymentSuccessful,
-        paymentStatus,
-        purchaseExists: !!purchaseData,
-        pendingPurchaseExists: !!pendingPurchase,
-        newPurchaseCreated: !!newPurchase,
-        redirectUrl: `/dashboard?purchase_success=true&session_id=${sessionId}`,
-        userId,
-        includeAdGenerator,
-        includeBlueprint,
-        sessionDetails: {
-          id: session.id,
-          customer_email: session.customer_email,
-          amount_total: session.amount_total ? session.amount_total / 100 : null,
-          currency: session.currency,
-          payment_status: session.payment_status,
-          status: session.status,
+        exists: true,
+        purchase
+      };
+    } else {
+      // Otherwise, find the purchase by payment intent ID
+      result = await findPurchaseByPaymentIntent(paymentIntentId!);
+    }
+    
+    if (!result.success) {
+      return NextResponse.json({
+        success: false,
+        error: result.message 
+      }, { status: 500 });
+    }
+
+    // If no purchase was found, return a 404 response
+    if (!result.exists) {
+      return NextResponse.json({
+        success: false,
+        verified: false,
+        error: purchaseId 
+          ? `No purchase found with ID: ${purchaseId}` 
+          : `No purchase found for payment intent: ${paymentIntentId}`
+      }, { status: 404 });
+    }
+        
+        // Determine the redirect URL based on the product
+        let redirectUrl = '/dashboard';
+        
+    if (product) {
+      // Normalize the product ID to ensure consistent format
+      const normalizedProductId = normalizeProductId(product);
+      
+      // Check if the purchase is for the requested product
+      const purchaseProductId = result.purchase.product_id;
+      const requestedProductUuid = PRODUCT_IDS[product as keyof typeof PRODUCT_IDS];
+      
+      const isMatchingProduct = 
+        purchaseProductId === product || 
+        purchaseProductId === requestedProductUuid ||
+        normalizeProductId(purchaseProductId) === normalizedProductId;
+      
+      if (!isMatchingProduct) {
+        console.log(`API: Purchase product ID ${purchaseProductId} does not match requested product ${product}`);
+        // Still return success but with a warning
+      }
+      
+      // Set the redirect URL based on the product
+      if (product === 'consultation-success-blueprint') {
+        redirectUrl = '/dashboard/blueprint';
+      } else if (product === 'pricing-template') {
+        redirectUrl = '/dashboard/pricing-template';
+      } else if (product === 'pmu-ad-generator') {
+        redirectUrl = '/dashboard/ad-generator';
+          }
         }
-      });
-    }
+        
+        return NextResponse.json({
+          success: true,
+          verified: true,
+      purchase: result.purchase,
+      paymentIntentId,
+      redirectUrl
+    });
   } catch (error) {
-    console.error('Error verifying purchase:', error);
-    
-    let errorMessage = 'Failed to verify purchase';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    console.error('API: Error verifying purchase:', error);
+    return NextResponse.json({
+        success: false, 
+      verified: false,
+      error: error instanceof Error ? error.message : 'Unknown error verifying purchase' 
+    }, { status: 500 });
+  }
+}
+
+// Helper function to get the display name for a product
+function getProductDisplayName(productId: string): string {
+  switch (productId) {
+    case 'pmu-profit-system':
+      return 'PMU Profit System';
+    case 'consultation-success-blueprint':
+      return 'Consultation Success Blueprint';
+    case 'pricing-template':
+      return 'Pricing Template';
+    case 'pmu-ad-generator':
+      return 'PMU Ad Generator';
+    default:
+      return productId;
   }
 } 

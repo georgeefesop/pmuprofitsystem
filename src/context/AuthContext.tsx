@@ -34,6 +34,29 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Cache for authentication checks to prevent repeated checks in a short time
+const AUTH_CHECK_CACHE = {
+  user: null as any,
+  timestamp: 0,
+  TTL: 10000 // 10 seconds
+};
+
+// Add debounce function
+function debounce<F extends (...args: any[]) => any>(func: F, wait: number) {
+  let timeout: NodeJS.Timeout | null = null;
+  
+  return function(...args: Parameters<F>) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    
+    timeout = setTimeout(() => {
+      func(...args);
+      timeout = null;
+    }, wait);
+  };
+}
+
 // Helper function to log cookies for debugging
 function logCookies(prefix: string) {
   if (typeof document !== 'undefined') {
@@ -87,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to clear all auth-related cookies and localStorage items
   const clearAuthData = () => {
-    console.log('AuthContext: Clearing all auth data');
+    console.log('AuthContext: Clearing auth data');
     
     // Log cookies before clearing
     logCookies('Before clearing');
@@ -107,70 +130,193 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       Cookies.remove(cookieName, { path: '/' });
     });
     
-    // Clear localStorage items
-    if (typeof window !== 'undefined') {
-      console.log('AuthContext: Clearing localStorage items');
-      localStorage.removeItem('auth_user_id');
-      localStorage.removeItem('redirectTo');
-      localStorage.removeItem('loginRedirectUrl');
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('sb-access-token');
-      localStorage.removeItem('sb-refresh-token');
-    }
-    
     // Log cookies after clearing
     logCookies('After clearing');
   };
 
-  useEffect(() => {
-    // Check for active session on initial load
-    const checkSession = async () => {
-      console.log('AuthContext: Checking session on initial load...');
-      logCookies('Initial load');
-      logLocalStorage('Initial load');
+  // Function to restore session from URL parameters
+  const tryRestoreFromUrl = async () => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const url = new URL(window.location.href);
+      const stateToken = url.searchParams.get('state');
+      const authUserId = url.searchParams.get('auth_user_id');
       
-      try {
-        // Create a promise that will resolve with the session check result
-        const sessionPromise = new Promise<any>(async (resolve, reject) => {
-          try {
-            console.log('AuthContext: Getting session from Supabase...');
-            const { data: { session } } = await supabase.auth.getSession();
-            console.log('AuthContext: Session check result:', session ? 'Session found' : 'No session');
-            if (session) {
-              console.log('AuthContext: Session details:', {
-                userId: session.user.id,
-                email: session.user.email,
-                expiresAt: new Date(session.expires_at! * 1000).toISOString(),
-                hasAccessToken: !!session.access_token?.substring(0, 10),
-                hasRefreshToken: !!session.refresh_token?.substring(0, 10)
-              });
-            }
-            resolve(session);
-          } catch (error) {
-            console.error('AuthContext: Error getting session:', error);
-            reject(error);
-          }
-        });
-
-        // Create a timeout promise that will reject after 10 seconds (reduced from 30)
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => {
-            console.error('AuthContext: Session check timed out after 10 seconds');
-            reject(new Error('Session check timed out after 10 seconds'));
-          }, 10000);
-        });
-
-        // Race the promises
-        let session;
+      if (stateToken) {
+        console.log('AuthContext: Found state token in URL, attempting to restore session');
         try {
-          session = await Promise.race([sessionPromise, timeoutPromise]);
+          const tokenData = JSON.parse(atob(stateToken));
+          
+          if (tokenData.accessToken && tokenData.refreshToken) {
+            console.log('AuthContext: Found auth tokens in state token, setting session');
+            
+            // Store tokens in localStorage as a backup
+            localStorage.setItem('sb-access-token', tokenData.accessToken);
+            localStorage.setItem('sb-refresh-token', tokenData.refreshToken);
+            
+            if (tokenData.userId) {
+              localStorage.setItem('auth_user_id', tokenData.userId);
+            }
+            
+            // Set auth-status cookie
+            Cookies.set('auth-status', 'authenticated', { 
+              expires: 30,
+              path: '/',
+              secure: window.location.protocol === 'https:',
+              sameSite: 'lax'
+            });
+            
+            // Try to set the session in Supabase
+            const { data, error } = await supabase.auth.setSession({
+              access_token: tokenData.accessToken,
+              refresh_token: tokenData.refreshToken
+            });
+            
+            if (error) {
+              console.error('AuthContext: Error restoring session from state token:', error);
+              return null;
+            }
+            
+            console.log('AuthContext: Session restored successfully from state token');
+            return data.session;
+          }
         } catch (error) {
-          console.error('AuthContext: Session check race failed:', error);
-          // Gracefully handle timeout by assuming no session
-          setUser(null);
-          setSessionCheckFailed(true);
-          setIsLoading(false);
+          console.error('AuthContext: Error decoding state token:', error);
+        }
+      }
+      
+      if (authUserId) {
+        console.log('AuthContext: Found auth_user_id in URL:', authUserId);
+        // Store user ID in localStorage
+        localStorage.setItem('auth_user_id', authUserId);
+      }
+    } catch (error) {
+      console.error('AuthContext: Error restoring from URL:', error);
+    }
+    
+    return null;
+  };
+
+  // Function to restore session from localStorage
+  const tryRestoreFromLocalStorage = async () => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const accessToken = localStorage.getItem('sb-access-token');
+      const refreshToken = localStorage.getItem('sb-refresh-token');
+      
+      if (accessToken && refreshToken) {
+        console.log('AuthContext: Found auth tokens in localStorage, setting session');
+        
+        // Set auth-status cookie
+        Cookies.set('auth-status', 'authenticated', { 
+          expires: 30,
+          path: '/',
+          secure: window.location.protocol === 'https:',
+          sameSite: 'lax'
+        });
+        
+        // Try to set the session in Supabase
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+        
+        if (error) {
+          console.error('AuthContext: Error restoring session from localStorage:', error);
           return null;
+        }
+        
+        console.log('AuthContext: Session restored successfully from localStorage');
+        return data.session;
+      }
+    } catch (error) {
+      console.error('AuthContext: Error restoring from localStorage:', error);
+    }
+    
+    return null;
+  };
+
+  useEffect(() => {
+    console.log('AuthContext: Initial session check');
+    
+    // Check if we have a recent cached user
+    const now = Date.now();
+    if (AUTH_CHECK_CACHE.user && (now - AUTH_CHECK_CACHE.timestamp) < AUTH_CHECK_CACHE.TTL) {
+      console.log('AuthContext: Using cached user data for initial load');
+      setUser(AUTH_CHECK_CACHE.user);
+      setIsLoading(false);
+      return;
+    }
+    
+    const checkSession = async () => {
+      try {
+        // First try to get session from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // If no session, try to restore from URL parameters
+        if (!session) {
+          console.log('AuthContext: No session found, trying to restore from URL');
+          const urlSession = await tryRestoreFromUrl();
+          if (urlSession) {
+            console.log('AuthContext: Session restored from URL');
+            
+            // Set user from restored session
+            setUser({
+              id: urlSession.user.id,
+              email: urlSession.user.email || '',
+              full_name: urlSession.user.user_metadata?.full_name || ''
+            });
+            setSessionCheckFailed(false);
+            console.log('AuthContext: User authenticated from URL:', urlSession.user?.email);
+            
+            // Set auth-status cookie
+            console.log('AuthContext: Setting auth-status cookie');
+            Cookies.set('auth-status', 'authenticated', { 
+              expires: 30,
+              path: '/',
+              secure: window.location.protocol === 'https:',
+              sameSite: 'lax'
+            });
+            
+            // Add caching
+            AUTH_CHECK_CACHE.user = urlSession.user;
+            AUTH_CHECK_CACHE.timestamp = Date.now();
+            
+            return urlSession;
+          }
+          
+          // If still no session, try to restore from localStorage
+          console.log('AuthContext: No session found in URL, trying to restore from localStorage');
+          const localStorageSession = await tryRestoreFromLocalStorage();
+          if (localStorageSession) {
+            console.log('AuthContext: Session restored from localStorage');
+            
+            // Set user from restored session
+            setUser({
+              id: localStorageSession.user.id,
+              email: localStorageSession.user.email || '',
+              full_name: localStorageSession.user.user_metadata?.full_name || ''
+            });
+            setSessionCheckFailed(false);
+            console.log('AuthContext: User authenticated from localStorage:', localStorageSession.user?.email);
+            
+            // Set auth-status cookie
+            console.log('AuthContext: Setting auth-status cookie');
+            Cookies.set('auth-status', 'authenticated', { 
+              expires: 30,
+              path: '/',
+              secure: window.location.protocol === 'https:',
+              sameSite: 'lax'
+            });
+            
+            // Add caching
+            AUTH_CHECK_CACHE.user = localStorageSession.user;
+            AUTH_CHECK_CACHE.timestamp = Date.now();
+            
+            return localStorageSession;
+          }
         }
         
         if (session) {
@@ -196,43 +342,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             sameSite: 'lax' // Use lax for better compatibility
           });
           
-          // Also store user ID in localStorage as a backup
-          localStorage.setItem('auth_user_id', session.user.id);
-          
-          // Log cookies after setting
-          logCookies('After setting auth cookies');
+          // Add caching
+          AUTH_CHECK_CACHE.user = session.user;
+          AUTH_CHECK_CACHE.timestamp = Date.now();
           
           return session;
         } else {
           setSessionCheckFailed(true);
           console.log('AuthContext: No session found, clearing any stale auth data');
           clearAuthData(); // Clear any stale auth data
+          // Add caching
+          AUTH_CHECK_CACHE.user = null;
+          AUTH_CHECK_CACHE.timestamp = 0;
           return null;
         }
       } catch (error) {
-        console.error('AuthContext: Session check failed:', error);
+        console.error('AuthContext: Error checking session:', error);
         setSessionCheckFailed(true);
+        setUser(null);
         setIsLoading(false);
+        // Add caching
+        AUTH_CHECK_CACHE.user = null;
+        AUTH_CHECK_CACHE.timestamp = 0;
         return null;
+      } finally {
+        setIsLoading(false);
       }
     };
     
-    checkSession().finally(() => {
-      setIsLoading(false);
-    });
-  }, []);
+    // Use debounced version of checkSession
+    const debouncedCheckSession = debounce(checkSession, 300);
+    debouncedCheckSession();
+  }, [router]);
 
   // Set up auth state change listener
   useEffect(() => {
     console.log('AuthContext: Setting up auth state change listener');
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log(`AuthContext: Auth state changed: ${event}`, {
-          hasSession: !!session,
-          userId: session?.user?.id || 'none',
-          event
-        });
+      debounce((event, session) => {
+        console.log('AuthContext: Auth state changed:', event);
         
         if (event === 'SIGNED_IN') {
           console.log('AuthContext: SIGNED_IN event detected');
@@ -283,20 +432,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 window.location.href = redirectTo;
               }
             }, 1000);
+            
+            // Add caching
+            AUTH_CHECK_CACHE.user = session.user;
+            AUTH_CHECK_CACHE.timestamp = Date.now();
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('AuthContext: SIGNED_OUT event detected');
           setUser(null);
           clearAuthData();
+          // Add caching
+          AUTH_CHECK_CACHE.user = null;
+          AUTH_CHECK_CACHE.timestamp = 0;
         }
-      }
+      }, 300)
     );
     
     return () => {
-      console.log('AuthContext: Cleaning up auth state change listener');
+      console.log('AuthContext: Cleaning up - unsubscribing from auth state changes');
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string; user?: User }> => {
     console.log('AuthContext: Attempting login with email:', email);

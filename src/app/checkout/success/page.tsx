@@ -1,3 +1,23 @@
+/**
+ * Checkout Success Page
+ * 
+ * This page is shown after a successful checkout. It verifies the purchase and creates entitlements.
+ * 
+ * Key improvements:
+ * 1. Enhanced error handling and logging for better debugging
+ * 2. Fixed authentication race condition by waiting for user authentication before verification
+ * 3. Improved verification flow to ensure entitlements are created properly
+ * 4. Better handling of verification states with clear status tracking
+ * 5. Normalized product IDs to ensure consistent handling
+ * 
+ * The page flow:
+ * 1. User is redirected here after checkout with payment_intent_id, product, and purchase_id params
+ * 2. The page waits for user authentication to complete
+ * 3. Once authenticated, it calls auto-create-entitlements API to ensure entitlements are created
+ * 4. If successful, it shows a success message and links to access the purchased content
+ * 5. If unsuccessful, it provides clear error messages and fallback options
+ */
+
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
@@ -8,6 +28,10 @@ import { useAuth } from '@/context/AuthContext';
 import { usePurchases } from '@/context/PurchaseContext';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
+import { normalizeProductId } from '@/lib/product-ids';
 
 // Define the PurchaseDetails type
 interface PurchaseDetails {
@@ -47,8 +71,13 @@ function SuccessPageContent() {
   const [resendError, setResendError] = useState('');
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const { resendVerificationEmail } = useAuth();
-  const { addPurchase } = usePurchases();
+  const paymentIntentId = searchParams.get('payment_intent_id');
+  const productParam = searchParams.get('product');
+  const purchaseId = searchParams.get('purchase_id');
+  const stateToken = searchParams.get('state');
+  const authUserId = searchParams.get('auth_user_id');
+  const { user, resendVerificationEmail } = useAuth();
+  const { addPurchase, recordSuccessfulPayment } = usePurchases();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
@@ -58,7 +87,32 @@ function SuccessPageContent() {
     message: string;
   } | null>(null);
   const [verificationComplete, setVerificationComplete] = useState(false);
+  const [isRestoringSession, setIsRestoringSession] = useState(false);
+  const [sessionRestored, setSessionRestored] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [apiCallStatus, setApiCallStatus] = useState<'not_started' | 'in_progress' | 'success' | 'failed'>('not_started');
+  const [authStatus, setAuthStatus] = useState<'not_checked' | 'checking' | 'authenticated' | 'not_authenticated'>('not_checked');
   const router = useRouter();
+
+  // Function to force refresh entitlements
+  const forceRefreshEntitlements = async (userId: string) => {
+    console.log('Forcing refresh of entitlements for user:', userId);
+    try {
+      // Add a timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const refreshUrl = `/api/user-entitlements?userId=${userId}&_force_refresh=true&_t=${timestamp}`;
+      
+      // Make the request to refresh entitlements
+      const response = await fetch(refreshUrl);
+      const result = await response.json();
+      
+      console.log('Entitlements refreshed successfully:', result);
+      return true;
+    } catch (error) {
+      console.error('Error refreshing entitlements:', error);
+      return false;
+    }
+  };
 
   // Animation variants
   const containerVariants = {
@@ -104,10 +158,91 @@ function SuccessPageContent() {
     }
   };
 
+  // Effect to set purchase details based on product parameter
+  useEffect(() => {
+    // If we have a specific product parameter, set the purchase details based on that
+    if (productParam) {
+      console.log('Setting purchase details based on product parameter:', productParam);
+      
+      // Default purchase details - don't include main product for addon purchases
+      const details: PurchaseDetails = {
+        email: user?.email || '',
+        productName: '',
+        includesAdGenerator: false,
+        includesBlueprint: false
+      };
+      
+      // Update based on product parameter
+      if (productParam === 'pmu-ad-generator') {
+        details.productName = 'PMU Ad Generator';
+        details.includesAdGenerator = true;
+      } else if (productParam === 'consultation-success-blueprint') {
+        details.productName = 'Consultation Success Blueprint';
+        details.includesBlueprint = true;
+      } else if (productParam === 'pricing-template') {
+        details.productName = 'Premium Pricing Template';
+      } else {
+        // Only set main product if not an addon
+        details.productName = 'PMU Profit System';
+      }
+      
+      setPurchaseDetails(details);
+    }
+  }, [productParam, user?.email]);
+
   // Function to get products list based on purchase details
   const getProductsList = () => {
+    // If we don't have purchase details but have a product parameter, create a list based on that
+    if (!purchaseDetails && productParam) {
+      if (productParam === 'pmu-ad-generator') {
+        return [{
+          name: 'PMU Ad Generator',
+          price: '€27.00',
+          icon: '🚀'
+        }];
+      } else if (productParam === 'consultation-success-blueprint') {
+        return [{
+          name: 'Consultation Success Blueprint',
+          price: '€33.00',
+          icon: '📋'
+        }];
+      } else if (productParam === 'pricing-template') {
+        return [{
+          name: 'Premium Pricing Template',
+          price: '€27.00',
+          icon: '📊'
+        }];
+      }
+    }
+    
     if (!purchaseDetails) return [];
     
+    // For add-on purchases, only include the specific add-on product
+    if (productParam === 'pmu-ad-generator' || productParam === 'consultation-success-blueprint' || productParam === 'pricing-template') {
+      if (productParam === 'pmu-ad-generator') {
+        return [{
+          name: 'PMU Ad Generator',
+          price: '€27.00',
+          icon: '🚀'
+        }];
+      } else if (productParam === 'consultation-success-blueprint') {
+        return [{
+          name: 'Consultation Success Blueprint',
+          price: '€33.00',
+          icon: '📋'
+        }];
+      } else if (productParam === 'pricing-template') {
+        return [{
+          name: 'Premium Pricing Template',
+          price: '€27.00',
+          icon: '📊'
+        }];
+      }
+      
+      return [];
+    }
+    
+    // For main product purchase
     const products = [
       {
         name: 'PMU Profit System',
@@ -137,9 +272,30 @@ function SuccessPageContent() {
 
   // Function to calculate total amount
   const calculateTotalAmount = (details: typeof purchaseDetails) => {
+    // If we don't have purchase details but have a product parameter, calculate based on that
+    if (!details && productParam) {
+      if (productParam === 'pmu-ad-generator') {
+        return '27.00';
+      } else if (productParam === 'consultation-success-blueprint') {
+        return '33.00';
+      } else if (productParam === 'pricing-template') {
+        return '27.00';
+      }
+    }
+    
     if (!details) return '0.00';
     
-    let total = 37; // Base price
+    // For add-on purchases, only include the specific add-on price
+    if (productParam === 'pmu-ad-generator') {
+      return '27.00';
+    } else if (productParam === 'consultation-success-blueprint') {
+      return '33.00';
+    } else if (productParam === 'pricing-template') {
+      return '27.00';
+    }
+    
+    // For main product purchase
+    let total = 37; // Base price for PMU Profit System
     
     if (details.includesAdGenerator) {
       total += 27;
@@ -152,230 +308,595 @@ function SuccessPageContent() {
     return total.toFixed(2);
   };
 
-  // Function to auto-approve pending purchases and create entitlements
-  async function autoApprovePurchase(userId: string, sessionId: string) {
-    if (!userId || !sessionId) {
-      console.log('Cannot auto-approve purchase: Missing user ID or session ID');
-      return;
-    }
-
+  // Helper function to verify purchase without authentication
+  async function verifyPurchaseWithoutAuth(identifier: string, productParam?: string | null) {
+    console.log('Verifying purchase without auth:', { identifier, productParam });
     try {
-      console.log('Auto-approving purchase for user:', userId);
+      let verifyUrl = '/api/verify-purchase?';
       
-      // First, try the auto-approve-purchase API endpoint
-      const response = await fetch(`/api/auto-approve-purchase?session_id=${sessionId}&user_id=${userId}`);
-      const result = await response.json();
-      
-      console.log('Auto-approval result:', result);
-      
-      if (result.success) {
-        // Update the entitlement status
-        setEntitlementStatus({
-          success: true,
-          message: result.message || 'Purchase approved and entitlements created successfully'
-        });
+      // Determine if the identifier is a payment intent ID, session ID, or purchase ID
+      if (identifier.startsWith('pi_')) {
+        verifyUrl += `payment_intent_id=${identifier}`;
+      } else if (identifier.startsWith('cs_')) {
+        verifyUrl += `session_id=${identifier}`;
       } else {
-        console.log('Auto-approval failed:', result.message);
+        verifyUrl += `purchase_id=${identifier}`;
+      }
+      
+      if (productParam) {
+        verifyUrl += `&product=${productParam}`;
+      }
+      
+      const verifyResponse = await fetch(verifyUrl);
+        const verifyResult = await verifyResponse.json();
+      
+      console.log('Purchase verification result:', verifyResult);
         
-        // If the API call failed, try to create entitlements directly
-        // by calling the create-entitlements API endpoint
-        console.log('Trying create-entitlements API as fallback');
-        
-        // Determine if this is a payment intent ID or checkout session ID
-        const isPaymentIntent = sessionId.startsWith('pi_');
-        
-        // Call the create-entitlements API with the appropriate parameters
-        const createResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${userId}`);
-        const createResult = await createResponse.json();
-        
-        console.log('Create entitlements result:', createResult);
-        
-        if (createResult.success) {
+        if (verifyResult.success && verifyResult.verified) {
           setEntitlementStatus({
             success: true,
-            message: 'Entitlements created successfully using fallback method'
+            message: verifyResult.message || 'Purchase verified successfully'
           });
+          
+          // If the API provides a redirect URL, store it
+          if (verifyResult.redirectUrl) {
+            setRedirectUrl(verifyResult.redirectUrl);
+          }
+        
+        // Set purchase details based on the product parameter if available
+        if (productParam) {
+          if (productParam === 'pmu-ad-generator') {
+            setPurchaseDetails({
+              email: verifyResult.customerEmail || user?.email || '',
+              productName: 'PMU Ad Generator',
+              includesAdGenerator: true,
+              includesBlueprint: false
+            });
+          } else if (productParam === 'consultation-success-blueprint') {
+            setPurchaseDetails({
+              email: verifyResult.customerEmail || user?.email || '',
+              productName: 'Consultation Success Blueprint',
+              includesAdGenerator: false,
+              includesBlueprint: true
+            });
+          }
+          }
+          
+          return true;
         } else {
-          // If both methods failed, try one more approach - verify the purchase
-          console.log('Create entitlements failed, trying verify-purchase API');
+        console.error('Purchase verification failed:', verifyResult.error);
+        setError('Failed to verify purchase. Please try again or contact support.');
+        return false;
+        }
+      } catch (verifyError) {
+        console.error('Error verifying purchase:', verifyError);
+      setError('An error occurred while verifying your purchase. Please try again or contact support.');
+      return false;
+    }
+  }
+
+  // Helper function to restore user session
+  async function restoreUserSession() {
+    console.log('Attempting to restore user session');
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
           
-          const verifyResponse = await fetch(`/api/verify-purchase?session_id=${sessionId}`);
-          const verifyResult = await verifyResponse.json();
+          if (error) {
+        console.error('Error getting session:', error);
+            return false;
+          }
           
-          console.log('Verify purchase result:', verifyResult);
-          
-          if (verifyResult.success && verifyResult.verified) {
+      if (session) {
+        console.log('Session restored successfully');
+          return true;
+      } else {
+        console.log('No session found');
+          return false;
+      }
+    } catch (sessionError) {
+      console.error('Error restoring session:', sessionError);
+      return false;
+    }
+  }
+
+  // Helper function to restore session from state token
+  async function restoreSessionFromStateToken(token: string) {
+    console.log('Attempting to restore session from state token');
+    try {
+      // This is a placeholder - implement according to your auth flow
+      return await restoreUserSession();
+    } catch (tokenError) {
+      console.error('Error restoring session from token:', tokenError);
+      return false;
+    }
+  }
+  
+  // Helper function to auto-approve purchase
+  async function autoApprovePurchase(userId: string, identifier: string) {
+    console.log('Auto-approving purchase:', { userId, identifier });
+    try {
+      const autoApproveResponse = await fetch('/api/auto-approve-purchase', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+          userId,
+          identifier
+              }),
+            });
+            
+      const autoApproveResult = await autoApproveResponse.json();
+            
+      if (autoApproveResult.success) {
+        console.log('Auto-approve successful:', autoApproveResult);
             setEntitlementStatus({
               success: true,
-              message: 'Purchase verified successfully, please check your dashboard'
-            });
-          } else {
-            setEntitlementStatus({
-              success: false,
-              message: 'Failed to create entitlements. Please contact support.'
-            });
-          }
-        }
+          message: autoApproveResult.message || 'Purchase approved and entitlements created'
+              });
+              return true;
+                } else {
+        console.error('Auto-approve failed:', autoApproveResult.error);
+        return false;
       }
-    } catch (error) {
-      console.error('Error auto-approving purchase:', error);
-      
-      try {
-        // If there was an error, try the create-entitlements API as a last resort
-        console.log('Error in auto-approval, trying create-entitlements API');
-        const createResponse = await fetch(`/api/create-entitlements?session_id=${sessionId}&user_id=${userId}`);
-        const createResult = await createResponse.json();
-        
-        console.log('Create entitlements result after error:', createResult);
-        
-        if (createResult.success) {
-          setEntitlementStatus({
-            success: true,
-            message: 'Entitlements created successfully after error recovery'
-          });
-        } else {
-          setEntitlementStatus({
-            success: false,
-            message: 'Failed to create entitlements. Please contact support.'
-          });
-        }
-      } catch (fallbackError) {
-        console.error('Error in fallback entitlement creation:', fallbackError);
-        setEntitlementStatus({
-          success: false,
-          message: 'Failed to create entitlements. Please contact support.'
-        });
-      }
+    } catch (autoApproveError) {
+      console.error('Error in auto-approve:', autoApproveError);
+      return false;
     }
   }
 
-  // Function to verify purchase
-  async function verifyPurchase() {
-    // Prevent duplicate calls
-    if (verificationComplete) return;
-    
-    try {
-      console.log('Verifying purchase with session ID:', sessionId);
-      const response = await fetch(`/api/verify-purchase?session_id=${sessionId}`);
-      
-      if (!response.ok) {
-        throw new Error(`Error verifying purchase: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Verification response:', data);
-      
-      if (data.success) {
-        // Set email from session details
-        setEmail(data.sessionDetails.customer_email || '');
-        
-        // Determine which products were purchased based on the API response
-        // Use the explicit values from the API response if available
-        const includesAdGenerator = data.includeAdGenerator === true;
-        const includesBlueprint = data.includeBlueprint === true;
-        
-        console.log('Purchase details:', {
-          userId: data.userId,
-          includesAdGenerator,
-          includesBlueprint,
-          amount: data.sessionDetails.amount_total
-        });
-        
-        setPurchaseDetails({
-          email: data.sessionDetails.customer_email || '',
-          productName: 'PMU Profit System',
-          includesAdGenerator,
-          includesBlueprint
-        });
-        
-        // Store the purchase in context if user is logged in
-        try {
-          // Always add the main product
-          console.log('Adding PMU Profit System to purchases');
-          await addPurchase('pmu-profit-system', 3700); // $37.00 in cents
-          
-          // Only add the add-ons if they were purchased
-          if (includesAdGenerator) {
-            console.log('Adding Ad Generator to purchases');
-            await addPurchase('pmu-ad-generator', 2700); // $27.00 in cents
-          }
-          
-          if (includesBlueprint) {
-            console.log('Adding Blueprint to purchases');
-            await addPurchase('consultation-success-blueprint', 3300); // $33.00 in cents
-          }
-        } catch (purchaseError) {
-          console.error('Error adding purchase to context:', purchaseError);
-          // Continue anyway - this is not critical
-        }
-        
-        // If we have a redirect URL, store it for later use
-        if (data.redirectUrl) {
-          localStorage.setItem('dashboardRedirectUrl', data.redirectUrl);
-        }
-
-        // Auto-approve the purchase and create entitlements immediately
-        if (data.userId && sessionId) {
-          await autoApprovePurchase(data.userId, sessionId);
-        } else {
-          // Try to get the user ID from localStorage as a backup
-          const backupUserId = localStorage.getItem('checkout_user_id');
-          
-          if (backupUserId && sessionId) {
-            console.log('Using backup user ID from localStorage:', backupUserId);
-            await autoApprovePurchase(backupUserId, sessionId);
-            
-            // Clear the backup user ID after use
-            localStorage.removeItem('checkout_user_id');
-          } else {
-            console.error('No user ID found in verification response or localStorage. Full response:', {
-              ...data,
-              sessionDetails: {
-                ...data.sessionDetails,
-                // Exclude any sensitive data
-                payment_intent: data.sessionDetails.payment_intent ? '[REDACTED]' : null
-              }
-            });
-            
-            setEntitlementStatus({
-              success: false,
-              message: 'User ID not found. Please contact support if your purchase is not showing up.'
-            });
-          }
-        }
-      } else {
-        throw new Error('Purchase verification failed');
-      }
-    } catch (error) {
-      console.error('Error verifying purchase:', error);
-      setError(error instanceof Error ? error.message : 'Failed to verify purchase');
-    } finally {
-      setIsLoading(false);
-      setVerificationComplete(true);
-    }
-  }
-
-  // Function to handle dashboard navigation
+  // Handle dashboard click
   const handleDashboardClick = () => {
-    // Log the navigation attempt for debugging
-    console.log(`Navigating to dashboard from success page`);
+    // If this is an add-on purchase, redirect to the specific product page
+    if (productParam === 'consultation-success-blueprint') {
+      router.push('/dashboard/blueprint');
+      return;
+    } else if (productParam === 'pricing-template') {
+      router.push('/dashboard/pricing-template');
+      return;
+    }
     
-    // Simply navigate to the dashboard without any parameters
-    // Use window.location.href instead of router.push to ensure a full page reload
-    window.location.href = '/dashboard';
+    // Otherwise, redirect to the main dashboard
+    router.push('/dashboard');
   };
 
   // Effect to verify purchase on component mount
   useEffect(() => {
-    if (sessionId && !verificationComplete) {
-      console.log('Verifying purchase on component mount');
-      verifyPurchase();
-    } else if (!sessionId) {
-      setIsLoading(false);
-      setError('No session ID provided');
-      setVerificationComplete(true);
+    console.log('Success page useEffect triggered with params:', {
+      sessionId,
+      paymentIntentId,
+      productParam,
+      purchaseId,
+      user: user?.id ? 'User authenticated' : 'No user'
+    });
+    
+    // Update auth status when user changes
+    if (user?.id) {
+      console.log('User is authenticated:', user.id);
+      setAuthStatus('authenticated');
+      } else {
+      console.log('User is not authenticated yet');
+      setAuthStatus('checking');
     }
-  }, [sessionId]);
+    
+    async function verifyPurchase() {
+      // Don't proceed if verification is already complete
+      if (verificationComplete) {
+        console.log('Verification already complete, skipping');
+        return;
+      }
+      
+      console.log('Starting purchase verification process...');
+      setIsLoading(true);
+      
+      // Wait for user authentication to complete
+      if (!user?.id) {
+        console.log('User not authenticated, waiting for authentication');
+        return;
+      }
+      
+      // Call our auto-create-entitlements API to ensure entitlements are created
+      setApiCallStatus('in_progress');
+      try {
+        // Determine the correct product ID to use
+        let normalizedProductId = normalizeProductId(productParam || '');
+        
+        console.log('Calling auto-create-entitlements API with:', {
+          userId: user.id,
+          productId: normalizedProductId,
+          paymentIntentId,
+          sessionId,
+          purchaseId
+        });
+        
+        const autoCreateResponse = await fetch('/api/auto-create-entitlements', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: user.id,
+            productId: normalizedProductId,
+            paymentIntentId: paymentIntentId || undefined,
+            sessionId: sessionId || undefined,
+            purchaseId: purchaseId || undefined
+            }),
+          });
+          
+        const responseText = await autoCreateResponse.text();
+        console.log('Auto-create entitlements API raw response:', responseText);
+        
+        let autoCreateResult;
+        try {
+          autoCreateResult = JSON.parse(responseText);
+          console.log('Auto-create entitlements API parsed response:', autoCreateResult);
+        } catch (parseError) {
+          console.error('Failed to parse API response:', parseError);
+          setApiCallStatus('failed');
+          throw new Error(`Failed to parse API response: ${responseText}`);
+        }
+        
+        if (autoCreateResult.success) {
+          console.log('Auto-create entitlements successful:', autoCreateResult);
+          setApiCallStatus('success');
+          
+          // If we have entitlements, set the purchase details based on them
+          if (autoCreateResult.entitlements && autoCreateResult.entitlements.length > 0) {
+            // Find the product IDs from the entitlements
+            const productIds = autoCreateResult.entitlements.map((e: { product_id: string }) => e.product_id);
+            
+            // Set purchase details based on the entitlements
+            const includesAdGenerator = productIds.includes('4ba5c775-a8e4-449e-828f-19f938e3710b');
+            const includesBlueprint = productIds.includes('e5749058-500d-4333-8938-c8a19b16cd65');
+            const includesPricingTemplate = productIds.includes('f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a');
+            
+              setPurchaseDetails({
+                email: user.email || '',
+              productName: includesBlueprint ? 'Consultation Success Blueprint' : 
+                           includesAdGenerator ? 'PMU Ad Generator' : 
+                           includesPricingTemplate ? 'PMU Pricing Template' : 'PMU Profit System',
+              includesAdGenerator,
+              includesBlueprint
+            });
+            
+              setEntitlementStatus({
+                success: true,
+              message: autoCreateResult.message || 'Entitlements created successfully'
+            });
+            
+            setVerificationComplete(true);
+            setIsLoading(false);
+            console.log('Verification complete with entitlements');
+            
+            // Force refresh entitlements to ensure they're available immediately
+            if (user?.id) {
+              console.log('Forcing refresh of entitlements after successful creation');
+              await forceRefreshEntitlements(user.id);
+            }
+            
+              return;
+            }
+        } else {
+          console.error('Auto-create entitlements failed:', autoCreateResult.error);
+          setApiCallStatus('failed');
+          setError(`Failed to create entitlements: ${autoCreateResult.error || 'Unknown error'}`);
+        }
+      } catch (autoCreateError) {
+        console.error('Error calling auto-create-entitlements API:', autoCreateError);
+        setApiCallStatus('failed');
+        setError(`Error creating entitlements: ${autoCreateError instanceof Error ? autoCreateError.message : 'Unknown error'}`);
+      }
+      
+      // Only proceed with fallback verification if the API call failed
+      if (apiCallStatus === 'failed') {
+        console.log('API call failed, continuing with fallback verification flow');
+        
+        // Try fallback verification methods
+        let fallbackSuccess = false;
+        
+        if (paymentIntentId) {
+          console.log('Attempting to verify purchase with payment intent ID');
+          fallbackSuccess = await verifyPurchaseWithoutAuth(paymentIntentId, productParam);
+        }
+        
+        if (!fallbackSuccess && purchaseId) {
+          console.log('Attempting to verify purchase with purchase ID');
+          fallbackSuccess = await verifyPurchaseWithoutAuth(purchaseId, productParam);
+        }
+        
+        if (!fallbackSuccess && productParam && (sessionId || paymentIntentId)) {
+          console.log('Attempting to verify purchase with product parameter');
+          const identifier = sessionId || paymentIntentId || '';
+          fallbackSuccess = await verifyPurchaseWithoutAuth(identifier, productParam);
+        }
+        
+        // Only mark verification as complete if one of the fallback methods succeeded
+        if (fallbackSuccess) {
+        setVerificationComplete(true);
+          console.log('Fallback verification succeeded');
+        } else {
+          console.log('Fallback verification failed, will retry');
+        }
+      }
+      
+        setIsLoading(false);
+      }
+    
+    // Call verifyPurchase when the component mounts or when user authentication changes
+      verifyPurchase();
+    
+    // Set up a timer to retry if verification fails
+    const timer = setInterval(() => {
+      // Only retry if verification is not complete and either:
+      // 1. User is authenticated but API call failed or hasn't started
+      // 2. User authentication status changed
+      if (!verificationComplete && 
+          ((user?.id && (apiCallStatus === 'failed' || apiCallStatus === 'not_started')) || 
+           (authStatus === 'authenticated' && user?.id))) {
+        console.log('Verification not complete, retrying...', {
+          verificationComplete,
+          authStatus,
+          apiCallStatus,
+          userId: user?.id
+        });
+        verifyPurchase();
+      } else if (verificationComplete) {
+        console.log('Verification complete, clearing timer');
+        clearInterval(timer);
+      }
+    }, 3000); // Check every 3 seconds
+    
+    return () => {
+      clearInterval(timer);
+    };
+  }, [
+    sessionId, 
+    paymentIntentId, 
+    productParam, 
+    purchaseId, 
+    user?.id, 
+    verificationComplete, 
+    apiCallStatus, 
+    authStatus
+  ]);
+
+  // Render the product list
+  const renderProductList = () => {
+    const products = getProductsList();
+    
+    if (products.length === 0) {
+      return (
+        <div className="text-center text-gray-500 py-4">
+          No products found
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        {products.map((product, index) => (
+          <div key={index} className="flex justify-between items-center">
+            <div className="font-medium">
+              {product.icon && <span className="mr-2">{product.icon}</span>}
+              {product.name}
+            </div>
+            <div className="text-right">{product.price}</div>
+          </div>
+        ))}
+        
+        <div className="border-t pt-4 mt-4">
+          <div className="flex justify-between items-center">
+            <div className="font-medium">Total</div>
+            <div className="text-xl font-bold text-indigo-600">
+              €{calculateTotalAmount(purchaseDetails)}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Function to render the action buttons
+  const renderActionButtons = () => {
+    if (error) {
+      return (
+        <div className="flex flex-col space-y-4 mt-6">
+          <Button 
+            onClick={async () => {
+              // Force refresh entitlements before redirecting
+              if (user?.id) {
+                await forceRefreshEntitlements(user.id);
+              }
+              router.push('/dashboard');
+            }} 
+            className="w-full"
+          >
+            Go to Dashboard
+          </Button>
+          {productParam === 'consultation-success-blueprint' && user && (
+            <Button 
+              onClick={async () => {
+                try {
+                  const createEntitlementResponse = await fetch('/api/create-entitlement-direct', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      userId: user.id,
+                      productId: 'consultation-success-blueprint'
+                    }),
+                  });
+                  
+                  const createEntitlementResult = await createEntitlementResponse.json();
+                  
+                  if (createEntitlementResult.success) {
+                    toast({
+                      title: "Success!",
+                      description: "Blueprint entitlement created successfully. You can now access the blueprint.",
+                      variant: "default",
+                    });
+                    setTimeout(() => {
+                      router.push('/dashboard/blueprint');
+                    }, 1500);
+                  } else {
+                    toast({
+                      title: "Error",
+                      description: "Failed to create entitlement. Please contact support.",
+                      variant: "destructive",
+                    });
+                  }
+                } catch (error: any) {
+                  console.error('Error creating entitlement:', error);
+                  toast({
+                    title: "Error",
+                    description: "An error occurred. Please contact support.",
+                    variant: "destructive",
+                  });
+                }
+              }} 
+              className="w-full"
+              variant="outline"
+            >
+              Create Blueprint Entitlement Manually
+            </Button>
+          )}
+          <Button onClick={() => window.location.reload()} variant="outline" className="w-full">
+            Try Again
+          </Button>
+        </div>
+      );
+    }
+
+    if (entitlementStatus?.success) {
+      return (
+        <div className="flex flex-col space-y-4 mt-6">
+          {redirectUrl ? (
+            <Button 
+              onClick={async () => {
+                // Force refresh entitlements before redirecting
+                if (user?.id) {
+                  await forceRefreshEntitlements(user.id);
+                }
+                router.push(redirectUrl);
+              }} 
+              className="w-full"
+            >
+              Go to {redirectUrl.includes('blueprint') ? 'Blueprint' : redirectUrl.includes('ad-generator') ? 'Ad Generator' : 'Dashboard'}
+            </Button>
+          ) : (
+            <Button 
+              onClick={async () => {
+                // Force refresh entitlements before redirecting
+                if (user?.id) {
+                  await forceRefreshEntitlements(user.id);
+                }
+                router.push('/dashboard');
+              }} 
+              className="w-full"
+            >
+            Go to Dashboard
+            </Button>
+          )}
+          {productParam === 'consultation-success-blueprint' && (
+            <Button 
+              onClick={async () => {
+                // Force refresh entitlements before redirecting
+                if (user?.id) {
+                  await forceRefreshEntitlements(user.id);
+                }
+                router.push('/dashboard/blueprint');
+              }} 
+              variant="outline" 
+              className="w-full"
+            >
+              Go to Blueprint
+            </Button>
+          )}
+          {productParam === 'pmu-ad-generator' && (
+            <Button 
+              onClick={async () => {
+                // Force refresh entitlements before redirecting
+                if (user?.id) {
+                  await forceRefreshEntitlements(user.id);
+                }
+                router.push('/dashboard/ad-generator');
+              }} 
+              variant="outline" 
+              className="w-full"
+            >
+              Go to Ad Generator
+            </Button>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col space-y-4 mt-6">
+        <Button 
+          onClick={async () => {
+            // Force refresh entitlements before redirecting
+            if (user?.id) {
+              await forceRefreshEntitlements(user.id);
+            }
+            router.push('/dashboard');
+          }} 
+          className="w-full"
+        >
+          Go to Dashboard
+        </Button>
+        {productParam === 'consultation-success-blueprint' && user && (
+          <Button 
+            onClick={async () => {
+              try {
+                const createEntitlementResponse = await fetch('/api/create-entitlement-direct', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    userId: user.id,
+                    productId: 'consultation-success-blueprint'
+                  }),
+                });
+                
+                const createEntitlementResult = await createEntitlementResponse.json();
+                
+                if (createEntitlementResult.success) {
+                  toast({
+                    title: "Success!",
+                    description: "Blueprint entitlement created successfully. You can now access the blueprint.",
+                    variant: "default",
+                  });
+                  setTimeout(() => {
+                    router.push('/dashboard/blueprint');
+                  }, 1500);
+                } else {
+                  toast({
+                    title: "Error",
+                    description: "Failed to create entitlement. Please contact support.",
+                    variant: "destructive",
+                  });
+                }
+              } catch (error: any) {
+                console.error('Error creating entitlement:', error);
+                toast({
+                  title: "Error",
+                  description: "An error occurred. Please contact support.",
+                  variant: "destructive",
+                });
+              }
+            }} 
+            className="w-full"
+            variant="outline"
+          >
+            Create Blueprint Entitlement Manually
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
@@ -486,18 +1007,7 @@ function SuccessPageContent() {
                       </div>
                     )}
                     
-                    <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                      <motion.button
-                        variants={itemVariants}
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-300 flex items-center justify-center"
-                        onClick={handleDashboardClick}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                        </svg>
-                        Go to Dashboard
-                      </motion.button>
-                    </div>
+                    {renderActionButtons()}
                   </div>
                 </div>
               </motion.div>
@@ -508,21 +1018,7 @@ function SuccessPageContent() {
                 variants={itemVariants}
               >
                 <h2 className="text-lg font-medium text-gray-900 mb-3">Order Summary</h2>
-                <div className="space-y-3">
-                  {getProductsList().map((product, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <span className="text-xl mr-2">{product.icon}</span>
-                        <span className="text-gray-800">{product.name}</span>
-                      </div>
-                      <span className="text-gray-600 font-medium">{product.price}</span>
-                    </div>
-                  ))}
-                  <div className="border-t border-gray-200 pt-3 mt-3 flex justify-between items-center">
-                    <span className="font-medium text-gray-900">Total</span>
-                    <span className="font-bold text-indigo-600">€{calculateTotalAmount(purchaseDetails)}</span>
-                  </div>
-                </div>
+                {renderProductList()}
               </motion.div>
               
               <motion.div 

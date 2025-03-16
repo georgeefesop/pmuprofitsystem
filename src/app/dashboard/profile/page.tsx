@@ -4,18 +4,17 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePurchases } from '@/context/PurchaseContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
-import { useEnhancedUser } from "@/hooks/useEnhancedUser";
+import { useAuthState } from "@/hooks/useAuthState";
 import { UserEntitlements } from "@/components/UserEntitlements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
-  const { user, isLoading, refreshUser, signOut } = useEnhancedUser();
+  const { user, isLoading, refreshUser, signOut } = useAuthState();
   const [isUpdating, setIsUpdating] = useState(false);
   const [fullName, setFullName] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -95,83 +94,74 @@ export default function ProfilePage() {
 
   return (
     <DashboardLayout title="My Profile">
-      <div className="max-w-3xl mx-auto">
-        <Tabs defaultValue="account" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="purchases">Purchases</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="account" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Information</CardTitle>
-                <CardDescription>
-                  Update your account information.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleUpdateProfile} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={user.email || ""}
-                      disabled
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Your email address cannot be changed.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                    />
-                  </div>
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Account Information Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Information</CardTitle>
+            <CardDescription>
+              Update your account information.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user.email || ""}
+                  disabled
+                />
+                <p className="text-sm text-muted-foreground">
+                  Your email address cannot be changed.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </div>
 
-                  {updateSuccess && (
-                    <p className="text-sm text-green-600">
-                      Profile updated successfully!
-                    </p>
-                  )}
+              {updateSuccess && (
+                <p className="text-sm text-green-600">
+                  Profile updated successfully!
+                </p>
+              )}
 
-                  <div className="flex justify-between">
-                    <Button type="submit" disabled={isUpdating}>
-                      {isUpdating ? "Updating..." : "Update Profile"}
-                    </Button>
-                    
-                    <Button 
-                      type="button" 
-                      variant="destructive" 
-                      onClick={handleSignOut}
-                    >
-                      Sign Out
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="purchases" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Purchases</CardTitle>
-                <CardDescription>
-                  View all your active products and subscriptions.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UserEntitlements />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              <div className="flex justify-between">
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Updating..." : "Update Profile"}
+                </Button>
+                
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+        
+        {/* Purchases Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Purchases</CardTitle>
+            <CardDescription>
+              View all your active products and subscriptions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UserEntitlements />
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
@@ -248,23 +238,20 @@ function PurchaseItem({
                       €{(purchase.amount / 100).toFixed(2)}
                     </dd>
                   </div>
-                  <div>
-                    <dt className="text-gray-500">Access</dt>
-                    <dd className="font-medium text-gray-900">
-                      {accessType}
-                    </dd>
-                  </div>
                 </React.Fragment>
               ))}
           </dl>
+          
+          <div className="mt-4">
+            <Link 
+              href={viewLink}
+              className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            >
+              {viewText}
+            </Link>
+          </div>
         </div>
-      ) : (
-        <div className="mt-4 border-t border-gray-200 pt-4">
-          <p className="text-sm text-gray-600">
-            Purchase this add-on to enhance your PMU business growth.
-          </p>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 } 

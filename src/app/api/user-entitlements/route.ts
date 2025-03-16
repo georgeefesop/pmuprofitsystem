@@ -77,7 +77,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ 
       authenticated: false, 
       message: 'No user ID found. Please log in again.' 
-    }, { status: 401 });
+    }, { 
+      status: 401,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   }
   
   try {
@@ -85,23 +92,49 @@ export async function GET(req: NextRequest) {
     console.log(`API: Creating service client to fetch entitlements for user ${userId}`);
     const serviceClient = await createServiceClient();
     
+    // Add a timestamp to the query to prevent caching issues
+    const timestamp = new Date().toISOString();
+    console.log(`API: Adding timestamp ${timestamp} to prevent caching issues`);
+    
     // Get the user's entitlements using the service client
     console.log(`API: Querying entitlements for user ${userId} with service client`);
     const { data: entitlements, error: entitlementsError } = await serviceClient
       .from('user_entitlements')
       .select('*, products:product_id(*)')
       .eq('user_id', userId)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
     
     if (entitlementsError) {
       console.error('API: Error getting entitlements:', entitlementsError);
       return NextResponse.json({ 
         error: 'Error getting entitlements',
         details: entitlementsError.message
-      }, { status: 500 });
+      }, { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      });
     }
     
     console.log(`API: Found ${entitlements?.length || 0} entitlements for user ${userId}`);
+    
+    // Log each entitlement for debugging
+    if (entitlements && entitlements.length > 0) {
+      console.log('API: Entitlements details:');
+      entitlements.forEach((entitlement, index) => {
+        console.log(`API: Entitlement ${index + 1}:`, {
+          id: entitlement.id,
+          product_id: entitlement.product_id,
+          product_name: entitlement.products?.name || 'Unknown',
+          is_active: entitlement.is_active,
+          created_at: entitlement.created_at
+        });
+      });
+    }
     
     // If no entitlements found, check if the user has any purchases that might need entitlements
     if (!entitlements || entitlements.length === 0) {
@@ -127,8 +160,16 @@ export async function GET(req: NextRequest) {
           entitlementCount: 0,
           purchases,
           purchaseCount: purchases.length,
-          message: 'No active entitlements found, but user has purchases'
-        }, { status: 200 });
+          message: 'No active entitlements found, but user has purchases',
+          timestamp
+        }, { 
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          }
+        });
       }
     }
     
@@ -138,15 +179,33 @@ export async function GET(req: NextRequest) {
       userId,
       entitlements: entitlements || [],
       entitlementCount: entitlements?.length || 0,
-    }, { status: 200 });
+      timestamp
+    }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   } catch (error) {
     console.error('API: Unexpected error in user-entitlements route:', error);
     return NextResponse.json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    }, { 
+      status: 500,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   }
 }
 
 // Force this route to be dynamic since it uses cookies
-export const dynamic = 'force-dynamic'; 
+export const dynamic = 'force-dynamic';
+
+// Disable caching for this route
+export const fetchCache = 'force-no-store'; 

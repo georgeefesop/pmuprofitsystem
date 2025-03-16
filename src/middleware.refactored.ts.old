@@ -1,0 +1,604 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/middleware';
+import { isDevelopment, allowTestPage } from '@/lib/env-utils';
+import { PRODUCT_IDS } from '@/lib/product-ids';
+
+// ======================================================================
+// Configuration
+// ======================================================================
+
+/**
+ * Log levels for middleware logging
+ */
+const LOG_LEVELS = {
+  NONE: 0,
+  ERROR: 1,
+  WARN: 2,
+  INFO: 3,
+  DEBUG: 4
+};
+
+/**
+ * Current log level based on environment
+ */
+const CURRENT_LOG_LEVEL = process.env.NODE_ENV === 'development' 
+  ? LOG_LEVELS.DEBUG 
+  : LOG_LEVELS.ERROR;
+
+/**
+ * Protected routes that require authentication and entitlements
+ */
+const PROTECTED_ROUTES = [
+  '/dashboard/modules',
+  '/dashboard/ad-generator',
+  '/dashboard/consultation-blueprint',
+  '/dashboard/pricing-template',
+  '/dashboard/profile',
+  '/dashboard/settings',
+];
+
+/**
+ * Routes that require authentication but not entitlements
+ */
+const AUTH_ONLY_ROUTES = [
+  '/checkout',
+  '/checkout/success',
+  '/checkout/cancel',
+  '/dashboard/purchases',
+];
+
+/**
+ * Public routes that don't require authentication
+ */
+const PUBLIC_ROUTES = [
+  '/',
+  '/login',
+  '/signup',
+  '/pre-checkout',
+  '/reset-password',
+  '/terms',
+  '/privacy',
+  '/dashboard', // Note: This is incorrectly marked as public and should be protected
+];
+
+/**
+ * Product IDs for entitlement checking
+ */
+const PRODUCT_IDS_ARRAY = [
+  'pmu-profit-system',
+  'pmu-ad-generator',
+  'consultation-success-blueprint',
+  'pricing-template'
+];
+
+// Cache for authentication checks to avoid redundant processing
+const authCheckCache = new Map();
+const AUTH_CHECK_CACHE_TTL = 5000; // 5 seconds
+
+// ======================================================================
+// Logging Utilities
+// ======================================================================
+
+/**
+ * Configurable logging function
+ * @param level - Log level
+ * @param message - Message to log
+ * @param data - Optional data to log
+ */
+function log(level, message, data = undefined) {
+  if (level <= CURRENT_LOG_LEVEL) {
+    if (data !== undefined) {
+      console.log(`Middleware: ${message}`, data);
+    } else {
+      console.log(`Middleware: ${message}`);
+    }
+  }
+}
+
+/**
+ * Log cookies from request for debugging
+ * @param req - NextRequest object
+ * @param prefix - Optional prefix for log messages
+ */
+function logCookies(req, prefix = '') {
+  if (CURRENT_LOG_LEVEL < LOG_LEVELS.DEBUG) return;
+  
+  const cookies = req.cookies;
+  const cookieMap = {
+    'sb-access-token': cookies.has('sb-access-token') ? '✓ Present' : '✗ Missing',
+    'sb-refresh-token': cookies.has('sb-refresh-token') ? '✓ Present' : '✗ Missing',
+    'auth-status': cookies.get('auth-status')?.value || 'Not set',
+    'cookieCount': cookies.size
+  };
+  
+  log(LOG_LEVELS.DEBUG, `${prefix}Request Cookies:`, cookieMap);
+}
+
+// ======================================================================
+// Route Matching Utilities
+// ======================================================================
+
+/**
+ * Check if a path is a public route
+ * @param path - URL path to check
+ * @returns boolean indicating if the path is a public route
+ */
+function isPublicRoute(path) {
+  return PUBLIC_ROUTES.some(route => path.startsWith(route));
+}
+
+/**
+ * Check if a path is a protected route
+ * @param path - URL path to check
+ * @returns boolean indicating if the path is a protected route
+ */
+function isProtectedRoute(path) {
+  return PROTECTED_ROUTES.some(route => path.startsWith(route));
+}
+
+/**
+ * Check if a path is an auth-only route
+ * @param path - URL path to check
+ * @returns boolean indicating if the path is an auth-only route
+ */
+function isAuthOnlyRoute(path) {
+  return AUTH_ONLY_ROUTES.some(route => path.startsWith(route));
+}
+
+// ======================================================================
+// Main Middleware Function (Preserved for External Compatibility)
+// ======================================================================
+
+export async function middleware(req: NextRequest) {
+  console.log('Middleware: Starting middleware execution');
+  
+  // Get the pathname from the URL
+  const { pathname, searchParams } = new URL(req.url);
+  const path = pathname;
+  
+  // Handle domain redirects to align with Vercel's configuration
+  const hostname = req.headers.get('host') || '';
+  // Redirect from non-www to www instead of the other way around
+  if (hostname && !hostname.startsWith('www.') && !hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+    console.log('Middleware: Redirecting from non-www to www domain');
+    const newUrl = new URL(req.url);
+    newUrl.host = 'www.' + hostname;
+    return NextResponse.redirect(newUrl, { status: 301 });
+  }
+  
+  // Log cookies for debugging
+  logCookies(req, 'Request');
+  
+  // Create the response and Supabase client
+  const { supabase, response } = createClient(req);
+  
+  // Get query parameters
+  const purchaseSuccess = searchParams.get('purchase_success');
+  const sessionId = searchParams.get('session_id');
+  const stateToken = searchParams.get('state');
+  
+  // Log the request for debugging
+  console.log(`Middleware: Path=${path}, purchaseSuccess=${purchaseSuccess}, sessionId=${sessionId}, stateToken=${stateToken ? 'present' : 'null'}`);
+  
+  // Skip middleware for static files, API routes, and other non-page routes
+  if (
+    path.startsWith('/_next') ||
+    path.startsWith('/api') ||
+    path.startsWith('/static') ||
+    path.includes('.') ||
+    path === '/favicon.ico'
+  ) {
+    console.log(`Middleware: Skipping middleware for non-page route: ${path}`);
+    // Optionally inject browser error logger for HTML responses in development
+    if (process.env.NODE_ENV === 'development') {
+      return await injectBrowserErrorLogger(response);
+    }
+    return response;
+  }
+  
+  // Special handling for checkout success page
+  if (path === '/checkout/success' && (sessionId || stateToken)) {
+    console.log('Middleware: Allowing access to checkout success page with session ID or state token');
+    
+    // If we have a state token, try to extract user ID from it
+    if (stateToken) {
+      try {
+        const decodedState = JSON.parse(Buffer.from(stateToken, 'base64').toString());
+        if (decodedState.userId) {
+          console.log('Middleware: Extracted user ID from state token:', decodedState.userId);
+          // Set the user ID in request headers
+          const requestHeaders = new Headers(req.headers);
+          requestHeaders.set('x-user-id', decodedState.userId);
+          requestHeaders.set('x-state-token', stateToken);
+          
+          if (sessionId) {
+            requestHeaders.set('x-session-id', sessionId);
+          }
+          
+          return NextResponse.next({
+            request: {
+              headers: requestHeaders,
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Middleware: Error decoding state token:', error);
+      }
+    }
+    
+    // If we have auth_user_id in the URL, use it
+    const authUserId = searchParams.get('auth_user_id');
+    if (authUserId) {
+      console.log('Middleware: Found auth_user_id in URL:', authUserId);
+      const requestHeaders = new Headers(req.headers);
+      requestHeaders.set('x-user-id', authUserId);
+      
+      if (sessionId) {
+        requestHeaders.set('x-session-id', sessionId);
+      }
+      
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+    
+    return NextResponse.next();
+  }
+  
+  // Special handling for checkout/addon route
+  if (path.startsWith('/checkout/addon')) {
+    console.log('Middleware: Special handling for checkout/addon route');
+    
+    // Check for state token or auth_user_id in URL
+    const stateToken = searchParams.get('state');
+    const authUserId = searchParams.get('auth_user_id');
+    
+    if (stateToken || authUserId) {
+      console.log('Middleware: Found authentication parameters in URL for checkout/addon');
+      
+      // Set headers with user information
+      const requestHeaders = new Headers(req.headers);
+      
+      if (stateToken) {
+        try {
+          const decodedState = JSON.parse(Buffer.from(stateToken, 'base64').toString());
+          if (decodedState.userId) {
+            console.log('Middleware: Setting user ID from state token:', decodedState.userId);
+            requestHeaders.set('x-user-id', decodedState.userId);
+            requestHeaders.set('x-state-token', stateToken);
+          }
+        } catch (error) {
+          console.error('Middleware: Error decoding state token:', error);
+        }
+      }
+      
+      if (authUserId) {
+        console.log('Middleware: Setting user ID from auth_user_id:', authUserId);
+        requestHeaders.set('x-user-id', authUserId);
+      }
+      
+      // Allow access with the updated headers
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+    
+    // If no authentication parameters, proceed with normal auth check
+    console.log('Middleware: No authentication parameters found for checkout/addon, proceeding with normal auth check');
+  }
+  
+  // If the path is a public route, allow access regardless of authentication
+  if (PUBLIC_ROUTES.some(route => path.startsWith(route) && route !== '/login' && route !== '/signup' && route !== '/pre-checkout')) {
+    console.log(`Middleware: Path ${path} is a public route, allowing access`);
+    // Optionally inject browser error logger for HTML responses in development
+    if (process.env.NODE_ENV === 'development') {
+      return await injectBrowserErrorLogger(response);
+    }
+    
+    return response;
+  }
+  
+  // Enhanced authentication check
+  const enhancedAuthCheck = async (): Promise<boolean> => {
+    try {
+      // Check cache first to avoid repeated auth checks
+      const cacheKey = `auth-${req.cookies.get('sb-refresh-token')?.value || 'no-token'}-${Date.now()}`;
+      const cachedResult = authCheckCache.get(cacheKey);
+      if (cachedResult && (Date.now() - cachedResult.timestamp) < AUTH_CHECK_CACHE_TTL) {
+        console.log('Middleware: Using cached auth check result:', cachedResult.isAuthenticated);
+        return cachedResult.isAuthenticated;
+      }
+
+      // Check for auth-status cookie first (faster)
+      const hasAuthCookie = req.cookies.has('auth-status') && req.cookies.get('auth-status')?.value === 'authenticated';
+      console.log('Middleware: Auth cookie check:', hasAuthCookie ? 'Present' : 'Missing');
+      
+      // If we have the auth cookie, we can consider the user authenticated for most routes
+      if (hasAuthCookie) {
+        console.log('Middleware: Auth cookie found, considering user authenticated');
+        // Cache the result
+        authCheckCache.set(cacheKey, { isAuthenticated: true, timestamp: Date.now() });
+        return true;
+      }
+      
+      // Check for state token in URL
+      const stateToken = searchParams.get('state');
+      if (stateToken) {
+        console.log('Middleware: Found state token in URL');
+        try {
+          const decodedState = JSON.parse(Buffer.from(stateToken, 'base64').toString());
+          if (decodedState.userId) {
+            console.log('Middleware: Extracted user ID from state token:', decodedState.userId);
+            return true;
+          }
+        } catch (error) {
+          console.error('Middleware: Error decoding state token:', error);
+        }
+      }
+      
+      // Check for user ID in cookies or query params as a secondary verification
+      const hasUserIdCookie = req.cookies.has('auth_user_id') && req.cookies.get('auth_user_id')?.value;
+      const hasUserIdParam = searchParams.has('auth_user_id') && searchParams.get('auth_user_id');
+      
+      console.log('Middleware: User ID verification:', {
+        fromCookie: hasUserIdCookie ? 'Present' : 'Missing',
+        fromParam: hasUserIdParam ? 'Present' : 'Missing'
+      });
+      
+      // If we have either user ID source, consider authenticated
+      if (hasUserIdCookie || hasUserIdParam) {
+        console.log('Middleware: User ID found, considering user authenticated');
+        return true;
+      }
+      
+      // Check for Supabase tokens
+      const hasAccessToken = req.cookies.has('sb-access-token');
+      const hasRefreshToken = req.cookies.has('sb-refresh-token');
+      
+      console.log('Middleware: Supabase tokens check:', {
+        accessToken: hasAccessToken ? 'Present' : 'Missing',
+        refreshToken: hasRefreshToken ? 'Present' : 'Missing'
+      });
+      
+      if (hasAccessToken || hasRefreshToken) {
+        console.log('Middleware: Supabase tokens found, considering user authenticated');
+        return true;
+      }
+      
+      // If no auth cookie or user ID, try to get the session from Supabase
+      console.log('Middleware: Checking Supabase session');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Middleware: Error fetching session:', sessionError.message);
+        return false;
+      }
+      
+      if (session) {
+        console.log('Middleware: Valid Supabase session found');
+        return true;
+      }
+      
+      // Try to restore session from tokens if available
+      if (req.cookies.has('sb-access-token') && req.cookies.has('sb-refresh-token')) {
+        console.log('Middleware: Attempting to restore session from tokens');
+        try {
+          const accessToken = req.cookies.get('sb-access-token')?.value;
+          const refreshToken = req.cookies.get('sb-refresh-token')?.value;
+          
+          if (accessToken && refreshToken) {
+            const { data: { session: restoredSession }, error: restoreError } = 
+              await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              });
+            
+            if (restoreError) {
+              console.error('Middleware: Error restoring session:', restoreError.message);
+              return false;
+            }
+            
+            if (restoredSession) {
+              console.log('Middleware: Session restored successfully');
+              return true;
+            }
+          }
+        } catch (error) {
+          console.error('Middleware: Exception during session restoration:', error);
+          return false;
+        }
+      }
+      
+      console.log('Middleware: No valid authentication found');
+      return false;
+    } catch (error) {
+      console.error('Middleware: Unexpected error in enhancedAuthCheck:', error);
+      return false;
+    }
+  };
+  
+  // Special handling for login page - if user is already authenticated, redirect to dashboard
+  if ((path === '/login' || path === '/signup') && await enhancedAuthCheck()) {
+    console.log('Middleware: User is already authenticated and trying to access login/signup page, redirecting to dashboard');
+    return NextResponse.redirect(new URL('/dashboard', req.url));
+  }
+  
+  // Special handling for pre-checkout page - if user is already authenticated, redirect to checkout
+  if (path === '/pre-checkout' && await enhancedAuthCheck()) {
+    console.log('Middleware: User is already authenticated and trying to access pre-checkout, redirecting to checkout');
+    const redirectUrl = new URL('/checkout', req.url);
+    // Preserve any product parameters
+    const products = searchParams.get('products');
+    if (products) {
+      redirectUrl.searchParams.set('products', products);
+    }
+    return NextResponse.redirect(redirectUrl);
+  }
+  
+  // If user is not authenticated and trying to access a protected route, redirect to login
+  if (!(await enhancedAuthCheck())) {
+    if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
+      console.log('Middleware: User not authenticated, redirecting to login');
+      const redirectUrl = new URL('/login', req.url);
+      redirectUrl.searchParams.set('redirect', path);
+      console.log(`Middleware: Redirecting to ${redirectUrl.toString()} with redirect param: ${path}`);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    if (AUTH_ONLY_ROUTES.some(route => path.startsWith(route))) {
+      // For checkout, redirect to pre-checkout to create an account first
+      if (path.startsWith('/checkout') && !path.includes('/success')) {
+        console.log('Middleware: User not authenticated, redirecting to pre-checkout');
+        const redirectUrl = new URL('/pre-checkout', req.url);
+        // Preserve any product parameters
+        const products = searchParams.get('products');
+        if (products) {
+          redirectUrl.searchParams.set('products', products);
+        }
+        return NextResponse.redirect(redirectUrl);
+      }
+      
+      // For other auth-only routes, redirect to login
+      console.log('Middleware: User not authenticated, redirecting to login');
+      const redirectUrl = new URL('/login', req.url);
+      redirectUrl.searchParams.set('redirect', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    // For public routes, allow access
+    console.log('Middleware: Path is public and user is not authenticated, allowing access');
+    // Optionally inject browser error logger for HTML responses in development
+    if (process.env.NODE_ENV === 'development') {
+      return await injectBrowserErrorLogger(response);
+    }
+    return response;
+  }
+  
+  // User is authenticated, set user claim in request headers
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-user-id', req.cookies.get('auth_user_id')?.value || req.cookies.get('sb-access-token')?.value || req.cookies.get('sb-refresh-token')?.value || '');
+  console.log(`Middleware: User authenticated: ${requestHeaders.get('x-user-id')}`);
+  
+  // For protected routes, check entitlements
+  if (PROTECTED_ROUTES.some(route => path.startsWith(route))) {
+    console.log('Middleware: User authenticated, checking entitlements');
+    
+    // Set the user ID in request headers for API routes
+    requestHeaders.set('x-user-id', requestHeaders.get('x-user-id') || '');
+    
+    // Check if user has entitlements
+    try {
+      // Instead of directly querying the database, we'll make a request to our API endpoint
+      // This will use the service role client to bypass RLS
+      const apiUrl = new URL('/api/user-entitlements', req.url);
+      apiUrl.searchParams.set('userId', requestHeaders.get('x-user-id') || '');
+      console.log(`Middleware: Fetching entitlements from API: ${apiUrl.toString()}`);
+      
+      const apiResponse = await fetch(apiUrl, {
+        headers: {
+          'x-user-id': requestHeaders.get('x-user-id') || '',
+          'Cookie': req.headers.get('cookie') || ''
+        }
+      });
+      
+      if (!apiResponse.ok) {
+        console.error(`Middleware: API returned error: ${apiResponse.status}`);
+        // If the API returns an error, allow access to avoid blocking legitimate users
+        // This is a fallback to prevent users from being locked out due to technical issues
+        console.log('Middleware: Allowing access despite API error');
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+      
+      const data = await apiResponse.json();
+      console.log(`Middleware: API returned ${data.entitlementCount || 0} entitlements`);
+      
+      // If user has active entitlements, allow access
+      if (data.entitlements && data.entitlements.length > 0) {
+        console.log(`Middleware: User has ${data.entitlements.length} active entitlements`);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+      
+      // If user has purchases but no entitlements, they might need entitlements created
+      if (data.purchases && data.purchases.length > 0) {
+        console.log(`Middleware: User has ${data.purchases.length} purchases but no entitlements`);
+        console.log('Middleware: Allowing access and will create entitlements asynchronously');
+        
+        // Allow access but trigger entitlement creation asynchronously
+        // This ensures users aren't blocked while entitlements are being created
+        fetch(`${req.nextUrl.origin}/api/create-entitlements-from-purchases?userId=${requestHeaders.get('x-user-id') || ''}`, {
+          method: 'POST',
+          headers: {
+            'x-user-id': requestHeaders.get('x-user-id') || ''
+          }
+        }).catch(error => {
+          console.error('Middleware: Error triggering entitlement creation:', error);
+        });
+        
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+      
+      // If user has no entitlements and no purchases, redirect to checkout
+      console.log('Middleware: User has no active entitlements or purchases, redirecting to checkout');
+      return NextResponse.redirect(new URL('/checkout', req.url));
+    } catch (error) {
+      console.error('Middleware: Error checking entitlements:', error);
+      // If there's an error checking entitlements, allow access to avoid blocking legitimate users
+      console.log('Middleware: Allowing access despite entitlement check error');
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
+    }
+  }
+  
+  // For all other routes, allow access for authenticated users
+  console.log(`Middleware: Allowing access to ${path} for authenticated user`);
+  // Optionally inject browser error logger for HTML responses in development
+  if (process.env.NODE_ENV === 'development') {
+    const nextResponse = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    return await injectBrowserErrorLogger(nextResponse);
+  }
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
+
+// ======================================================================
+// Middleware Configuration
+// ======================================================================
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+  ],
+}; 

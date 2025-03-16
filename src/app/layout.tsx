@@ -5,6 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { PurchaseProvider } from '@/context/PurchaseContext';
 import { Navbar } from '@/components/Navbar';
 import SiteFooter from '@/components/SiteFooter';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,6 +44,7 @@ export default function RootLayout({
               {children}
             </main>
             <SiteFooter />
+            <Toaster position="top-center" richColors closeButton />
           </PurchaseProvider>
         </AuthProvider>
       </body>

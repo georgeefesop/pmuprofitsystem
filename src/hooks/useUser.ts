@@ -161,6 +161,30 @@ export function useUser() {
     }
   };
 
+  // Resend verification email
+  const resendVerificationEmail = async (email: string) => {
+    try {
+      console.log("Resending verification email to:", email);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+      
+      if (error) {
+        console.error("Error resending verification email:", error);
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Exception resending verification email:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      };
+    }
+  };
+
   return {
     user,
     isLoading,
@@ -168,5 +192,6 @@ export function useUser() {
     signUp,
     signOut,
     refreshUser,
+    resendVerificationEmail,
   };
 } 

@@ -6,23 +6,41 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { usePurchases } from '@/context/PurchaseContext';
+import { useEntitlements } from '@/hooks/useEntitlements';
+import { PRODUCT_IDS } from '@/lib/product-ids';
 
 export default function ConsultationBlueprint() {
   const router = useRouter();
   const { hasPurchased } = usePurchases();
+  const { entitlements, isLoading: entitlementsLoading } = useEntitlements();
   
-  // Check if the user has purchased the blueprint
+  // Check if the user has access to the blueprint
+  const hasAccess = React.useMemo(() => {
+    // First check purchases
+    if (hasPurchased('consultation-success-blueprint')) {
+      return true;
+    }
+    
+    // Then check entitlements
+    const blueprintProductId = PRODUCT_IDS['consultation-success-blueprint'];
+    return entitlements.some(entitlement => 
+      entitlement.product_id === blueprintProductId && 
+      entitlement.is_active
+    );
+  }, [hasPurchased, entitlements]);
+  
+  // Redirect if no access
   useEffect(() => {
-    if (!hasPurchased('consultation-success-blueprint')) {
+    if (!entitlementsLoading && !hasAccess) {
       router.push('/dashboard/blueprint/purchase');
     }
-  }, [hasPurchased, router]);
+  }, [hasAccess, entitlementsLoading, router]);
   
   // Consultation Blueprint Google Doc URL
   const consultationBlueprintUrl = "https://docs.google.com/document/d/1qNyoDDkOUPmr3DIMJe7UfACM0Woh0SKc-VU4c75zXMY/edit?usp=drive_link";
 
-  // If the user hasn't purchased, don't render the content
-  if (!hasPurchased('consultation-success-blueprint')) {
+  // If still loading or no access, show loading state
+  if (entitlementsLoading || !hasAccess) {
     return (
       <DashboardLayout title="Consultation Success Blueprint">
         <div className="flex items-center justify-center h-64">

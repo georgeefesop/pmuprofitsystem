@@ -46,24 +46,21 @@ export async function POST(req: NextRequest) {
     
     console.log(`API: Found ${purchases.length} purchases for user ${userId}`);
     
-    // Check if user already has entitlements
+    // Get existing entitlements to avoid duplicates
     const { data: existingEntitlements, error: entitlementsError } = await serviceClient
       .from('user_entitlements')
-      .select('*')
-      .eq('user_id', userId);
+      .select('product_id')
+      .eq('user_id', userId)
+      .eq('is_active', true);
     
     if (entitlementsError) {
       console.error('API: Error checking existing entitlements:', entitlementsError);
       return NextResponse.json({ error: 'Error checking existing entitlements' }, { status: 500 });
     }
     
-    if (existingEntitlements && existingEntitlements.length > 0) {
-      console.log(`API: User already has ${existingEntitlements.length} entitlements`);
-      return NextResponse.json({ 
-        message: 'User already has entitlements',
-        entitlementCount: existingEntitlements.length
-      }, { status: 200 });
-    }
+    // Create a set of product IDs that the user already has entitlements for
+    const existingProductIds = new Set(existingEntitlements?.map(e => e.product_id) || []);
+    console.log(`API: User already has entitlements for ${existingProductIds.size} products:`, Array.from(existingProductIds));
     
     // Create entitlements for each purchase
     const createdEntitlements = [];
@@ -77,18 +74,46 @@ export async function POST(req: NextRequest) {
       
       // If purchase has a product_id, use that
       if (purchase.product_id) {
-        productIds.push(purchase.product_id);
+        // Only add if the user doesn't already have an entitlement for this product
+        if (!existingProductIds.has(purchase.product_id)) {
+          productIds.push(purchase.product_id);
+        } else {
+          console.log(`API: User already has entitlement for product ${purchase.product_id}, skipping`);
+        }
       } else {
         // Otherwise, use the main product ID
-        productIds.push(PRODUCT_IDS['pmu-profit-system']);
-        
-        // Check metadata for add-ons
-        const metadata = purchase.metadata || {};
-        if (metadata.include_ad_generator === true || metadata.includeAdGenerator === 'true') {
-          productIds.push(PRODUCT_IDS['pmu-ad-generator']);
+        const mainProductId = PRODUCT_IDS['pmu-profit-system'];
+        if (!existingProductIds.has(mainProductId)) {
+          productIds.push(mainProductId);
+        } else {
+          console.log(`API: User already has entitlement for main product, skipping`);
         }
-        if (metadata.include_blueprint === true || metadata.includeBlueprint === 'true') {
-          productIds.push(PRODUCT_IDS['consultation-success-blueprint']);
+        
+        // Check metadata for add-ons - ONLY add if the value is explicitly true
+        const metadata = purchase.metadata || {};
+        
+        // For Ad Generator, check if include_ad_generator is explicitly true
+        if (metadata.include_ad_generator === true || metadata.includeAdGenerator === true || metadata.includeAdGenerator === 'true') {
+          const adGeneratorId = PRODUCT_IDS['pmu-ad-generator'];
+          if (!existingProductIds.has(adGeneratorId)) {
+            productIds.push(adGeneratorId);
+          } else {
+            console.log(`API: User already has entitlement for Ad Generator, skipping`);
+          }
+        } else {
+          console.log(`API: Purchase ${purchase.id} does not include Ad Generator (metadata: ${JSON.stringify(metadata)})`);
+        }
+        
+        // For Blueprint, check if include_blueprint is explicitly true
+        if (metadata.include_blueprint === true || metadata.includeBlueprint === true || metadata.includeBlueprint === 'true') {
+          const blueprintId = PRODUCT_IDS['consultation-success-blueprint'];
+          if (!existingProductIds.has(blueprintId)) {
+            productIds.push(blueprintId);
+          } else {
+            console.log(`API: User already has entitlement for Blueprint, skipping`);
+          }
+        } else {
+          console.log(`API: Purchase ${purchase.id} does not include Blueprint (metadata: ${JSON.stringify(metadata)})`);
         }
       }
       
@@ -114,6 +139,8 @@ export async function POST(req: NextRequest) {
         } else {
           console.log(`API: Created entitlement ${entitlement.id} for product ${productId}`);
           createdEntitlements.push(entitlement);
+          // Add to the set of existing product IDs to avoid duplicates in future iterations
+          existingProductIds.add(productId);
         }
       }
       

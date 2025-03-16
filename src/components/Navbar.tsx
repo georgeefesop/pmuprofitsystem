@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
-import { useEnhancedUser } from '@/hooks/useEnhancedUser';
+import { useAuthState } from '@/hooks/useAuthState';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,8 +17,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const { user } = useAuth();
-  const { signOut } = useEnhancedUser();
+  const { user, signOut } = useAuthState();
   
   // Check if we're on a dashboard page
   const isDashboardPage = pathname.startsWith('/dashboard');

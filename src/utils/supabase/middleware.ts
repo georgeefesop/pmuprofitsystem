@@ -5,10 +5,10 @@ import { type CookieOptions } from '@supabase/ssr';
 // Enhanced logging for debugging
 console.log('SupabaseMiddleware: Module loaded');
 
-export const createClient = (request: NextRequest) => {
+export const createClient = async (request: NextRequest) => {
   console.log('SupabaseMiddleware: Creating Supabase client for middleware');
   
-  // Log cookies for debugging
+  // Log cookies for debugging - only log essential auth cookies
   const cookieObj: Record<string, string> = {};
   request.cookies.getAll().forEach(cookie => {
     cookieObj[cookie.name] = cookie.value || '';
@@ -30,21 +30,16 @@ export const createClient = (request: NextRequest) => {
 
   const cookies = {
     get(name: string) {
+      // Simplify cookie retrieval - don't log every attempt
       const value = request.cookies.get(name)?.value;
-      console.log(`SupabaseMiddleware: Getting cookie ${name}: ${value ? 'Found' : 'Not found'}`);
+      // Only log for main auth cookies
+      if (name === 'sb-access-token' || name === 'sb-refresh-token') {
+        console.log(`SupabaseMiddleware: Getting cookie ${name}: ${value ? 'Found' : 'Not found'}`);
+      }
       return value;
     },
     set(name: string, value: string, options: CookieOptions) {
-      console.log(`SupabaseMiddleware: Setting cookie ${name}`, {
-        value: value ? `${value.substring(0, 10)}...` : 'empty',
-        options: {
-          ...options,
-          maxAge: options.maxAge,
-          path: options.path,
-          sameSite: options.sameSite,
-          secure: options.secure
-        }
-      });
+      console.log(`SupabaseMiddleware: Setting cookie ${name}`);
       
       // If the cookie is updated, update the cookies for the request and response
       request.cookies.set({
@@ -115,6 +110,29 @@ export const createClient = (request: NextRequest) => {
       },
     }
   );
+
+  // Check if we need to refresh the token
+  const accessToken = cookies.get('sb-access-token');
+  const refreshToken = cookies.get('sb-refresh-token');
+  
+  if (!accessToken && refreshToken) {
+    console.log('SupabaseMiddleware: Access token missing but refresh token present, attempting to refresh');
+    try {
+      const { data, error } = await supabase.auth.refreshSession({
+        refresh_token: refreshToken,
+      });
+      
+      if (error) {
+        console.error('SupabaseMiddleware: Error refreshing token:', error.message);
+      } else if (data?.session) {
+        console.log('SupabaseMiddleware: Successfully refreshed token');
+        // The cookies will be automatically set by the Supabase client
+      }
+    } catch (refreshError) {
+      console.error('SupabaseMiddleware: Exception refreshing token:', 
+        refreshError instanceof Error ? refreshError.message : String(refreshError));
+    }
+  }
 
   return { supabase, response };
 }; 

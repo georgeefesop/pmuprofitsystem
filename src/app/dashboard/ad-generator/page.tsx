@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/DashboardLayout';
@@ -8,26 +8,89 @@ import { usePurchases } from '@/context/PurchaseContext';
 
 export default function PMUAdGenerator() {
   const router = useRouter();
-  const { hasPurchased } = usePurchases();
+  const { hasPurchased, hasPurchasedAsync } = usePurchases();
   const [adText, setAdText] = useState('');
   const [generatedAds, setGeneratedAds] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
+  const redirectInProgress = useRef(false);
   
   // Check if the user has purchased the ad generator
   useEffect(() => {
-    if (!hasPurchased('pmu-ad-generator')) {
-      router.push('/dashboard/ad-generator/purchase');
+    let isMounted = true;
+    
+    async function checkAccess() {
+      if (redirectInProgress.current) return;
+      
+      setIsCheckingAccess(true);
+      try {
+        // Use the async version that waits for API call to complete
+        const hasAdGeneratorAccess = await hasPurchasedAsync('pmu-ad-generator');
+        
+        console.log('Ad Generator access check result:', hasAdGeneratorAccess);
+        
+        if (!isMounted) return;
+        
+        setHasAccess(hasAdGeneratorAccess);
+        
+        if (!hasAdGeneratorAccess && !redirectInProgress.current) {
+          redirectInProgress.current = true;
+          console.log('No access to Ad Generator, redirecting to purchase page');
+          router.push('/dashboard/ad-generator/purchase');
+        }
+      } catch (error) {
+        console.error('Error checking access:', error);
+        
+        if (!isMounted) return;
+        
+        // Fall back to synchronous check if async check fails
+        const hasAccessSync = hasPurchased('pmu-ad-generator');
+        setHasAccess(hasAccessSync);
+        
+        if (!hasAccessSync && !redirectInProgress.current) {
+          redirectInProgress.current = true;
+          console.log('No access to Ad Generator (sync check), redirecting to purchase page');
+          router.push('/dashboard/ad-generator/purchase');
+        }
+      } finally {
+        if (isMounted) {
+          setIsCheckingAccess(false);
+        }
+      }
     }
-  }, [hasPurchased, router]);
+    
+    checkAccess();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [hasPurchased, hasPurchasedAsync, router]);
 
-  // If the user hasn't purchased, don't render the content
-  if (!hasPurchased('pmu-ad-generator')) {
+  // If we're still checking access, show loading
+  if (isCheckingAccess) {
     return (
       <DashboardLayout title="PMU Ad Generator">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700 mx-auto mb-4"></div>
             <p className="text-gray-600">Checking access...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+  
+  // If we don't have access, show a message instead of redirecting
+  if (!hasAccess) {
+    return (
+      <DashboardLayout title="PMU Ad Generator">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Redirecting to purchase page...</p>
+            <Link href="/dashboard/ad-generator/purchase" className="text-purple-600 hover:text-purple-800 underline">
+              Click here if you are not redirected automatically
+            </Link>
           </div>
         </div>
       </DashboardLayout>

@@ -14,6 +14,7 @@ export const PRODUCT_IDS = {
   // Add-ons
   'pmu-ad-generator': '4ba5c775-a8e4-449e-828f-19f938e3710b',
   'consultation-success-blueprint': 'e5749058-500d-4333-8938-c8a19b16cd65',
+  'pricing-template': 'f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a',
   
   // Future products can be added here
 } as const;
@@ -23,6 +24,7 @@ export const LEGACY_PRODUCT_IDS = {
   'pmu-profit-system': 'pmu-profit-system',
   'pmu-ad-generator': 'pmu-ad-generator',
   'consultation-success-blueprint': 'consultation-success-blueprint',
+  'pricing-template': 'pricing-template',
 } as const;
 
 // Type for product IDs to enable type checking
@@ -162,6 +164,11 @@ export const PRODUCT_METADATA = {
   'consultation-success-blueprint': {
     name: 'Consultation Success Blueprint',
     description: 'Guide for successful PMU consultations',
+    type: 'resource',
+  },
+  'pricing-template': {
+    name: 'Premium Pricing Template',
+    description: 'Create professional, conversion-optimized pricing packages in minutes',
     type: 'resource',
   },
 } as const;

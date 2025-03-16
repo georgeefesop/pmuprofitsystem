@@ -6,24 +6,31 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { usePurchases } from '@/context/PurchaseContext';
+import { loadStripe } from '@stripe/stripe-js';
+import { useAuth } from '@/context/AuthContext';
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function PMUAdGeneratorPurchase() {
   const router = useRouter();
   const { addPurchase } = usePurchases();
   const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
   
-  // Handle purchase
-  const handlePurchase = () => {
+  // Handle purchase button click
+  const handlePurchaseClick = async () => {
     setIsProcessing(true);
     
-    // Simulate payment processing
-    setTimeout(() => {
-      // Add the purchase to the user's account
-      addPurchase('pmu-ad-generator', 27);
-      
-      // Redirect to the ad generator page
-      router.push('/dashboard/ad-generator');
-    }, 2000);
+    try {
+      // Redirect to the addon checkout page
+      router.push('/checkout/addon?product=pmu-ad-generator');
+    } catch (err) {
+      console.error('Navigation error:', err);
+      alert('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
   
   return (
@@ -114,7 +121,7 @@ export default function PMUAdGeneratorPurchase() {
                   </div>
                   
                   <button
-                    onClick={handlePurchase}
+                    onClick={handlePurchaseClick}
                     disabled={isProcessing}
                     className={`w-full py-3 px-4 rounded-md text-white font-medium transition-all ${
                       isProcessing 
@@ -128,10 +135,10 @@ export default function PMUAdGeneratorPurchase() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Processing...
+                        Redirecting...
                       </span>
                     ) : (
-                      'Get Instant Access'
+                      'Buy Now'
                     )}
                   </button>
                   

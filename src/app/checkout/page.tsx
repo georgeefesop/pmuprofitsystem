@@ -114,7 +114,8 @@ function CheckoutForm({ user, calculateTotal, formData, updateFormData }: {
           name: fullName,
           includeAdGenerator: formData.includeAdGenerator,
           includeBlueprint: formData.includeBlueprint,
-          userId: user.id
+          userId: user.id,
+          currency: 'eur'
         }),
         });
         

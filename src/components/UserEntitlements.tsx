@@ -9,15 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/lib/supabase";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, Trash2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { PRODUCT_IDS, normalizeProductId, isValidUuidProductId, uuidToLegacyProductId } from '@/lib/product-ids';
 
 // Define product type
 interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number | string;
   type: string;
   currency: string;
   active: boolean;
@@ -49,7 +50,7 @@ interface ProductWithEntitlement extends Product {
   entitlement?: Entitlement;
   isPurchased: boolean;
   purchaseDate?: string;
-  purchaseAmount?: number;
+  purchaseAmount?: number | string;
 }
 
 export function UserEntitlements() {
@@ -69,13 +70,58 @@ export function UserEntitlements() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isClearingAddons, setIsClearingAddons] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
+
+  // Function to toggle debug section
+  const toggleDebug = () => {
+    setShowDebug(prev => !prev);
+  };
+
+  // Clear localStorage cache on mount to ensure fresh data
+  useEffect(() => {
+    if (user) {
+      // Clear the entitlements cache in localStorage
+      const entitlementsKey = `user_entitlements_${user.id}`;
+      try {
+        localStorage.removeItem(entitlementsKey);
+        console.log('Cleared entitlements cache from localStorage');
+      } catch (error) {
+        console.error('Error clearing localStorage cache:', error);
+      }
+      
+      // Refresh entitlements from API
+      refetchEntitlements();
+    }
+  }, [user, refetchEntitlements]);
+
+  // Map entitlements to products when entitlements change
+  useEffect(() => {
+    if (!entitlementsLoading && !isRefreshing) {
+      mapEntitlementsToProducts();
+    }
+  }, [entitlements, entitlementsLoading, isRefreshing]);
 
   // Function to fetch all products
   async function fetchAllProducts() {
     try {
       console.log("Fetching all products...");
-      // Fetch all products from the API
-      const response = await fetch('/api/products');
+      
+      // Add cache-busting parameters
+      const timestamp = new Date().getTime();
+      const randomId = Math.random().toString(36).substring(2, 15);
+      const url = `/api/products?_t=${timestamp}&_r=${randomId}`;
+      
+      // Fetch all products from the API with cache-busting headers
+      const response = await fetch(url, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        cache: 'no-store'
+      });
       
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -105,52 +151,57 @@ export function UserEntitlements() {
         setDebugInfo(prev => `${prev || ''}\nNo products returned from API`);
       }
       
-      // Log entitlements for debugging
-      console.log(`Mapping ${entitlements?.length || 0} entitlements to ${allProducts?.length || 0} products`);
-      if (entitlements?.length > 0) {
-        console.log("First entitlement:", {
-          id: entitlements[0].id,
-          productId: entitlements[0].product_id,
-          isActive: entitlements[0].is_active,
-          hasProduct: !!entitlements[0].products
-        });
-      }
+      // Count active entitlements for debugging
+      const activeEntitlements = entitlements.filter(e => e.is_active);
+      
+      console.log('mapEntitlementsToProducts: Starting mapping with', {
+        productCount: allProducts?.length || 0,
+        entitlementCount: entitlements.length,
+        activeEntitlementCount: activeEntitlements.length
+      });
+      
+      console.log('mapEntitlementsToProducts: Active entitlements:', activeEntitlements);
       
       // Map products with entitlements
       const productsWithEntitlements = allProducts.map((product: Product) => {
-        // Find matching entitlement for this product
-        const entitlement = entitlements.find(
-          (e: Entitlement) => e.product_id === product.id
-        );
+        // Find matching entitlement for this product - EXACT MATCH ONLY
+        const matchingEntitlement = activeEntitlements.find((e: Entitlement) => {
+          // Direct match by product_id
+          const isDirectMatch = e.product_id === product.id;
+          
+          if (isDirectMatch) {
+            console.log(`mapEntitlementsToProducts: Found direct match for product ${product.id} (${product.name}) with entitlement ${e.id}`);
+            return true;
+          }
+          
+          return false;
+        });
         
-        // If found, log for debugging
-        if (entitlement) {
-          console.log(`Found entitlement for product ${product.name} (${product.id}):`, {
-            entitlementId: entitlement.id,
-            isActive: entitlement.is_active,
-            validFrom: entitlement.valid_from
-          });
+        // A product is only purchased if it has an active entitlement with EXACT product_id match
+        const isPurchased = !!matchingEntitlement;
+        
+        if (isPurchased) {
+          console.log(`mapEntitlementsToProducts: Product ${product.id} (${product.name}) is purchased with entitlement ${matchingEntitlement?.id}`);
+        } else {
+          console.log(`mapEntitlementsToProducts: Product ${product.id} (${product.name}) is NOT purchased`);
         }
         
         return {
           ...product,
-          entitlement,
-          isPurchased: !!entitlement,
-          purchaseDate: entitlement?.valid_from,
+          entitlement: matchingEntitlement,
+          isPurchased,
+          purchaseDate: matchingEntitlement?.valid_from,
           purchaseAmount: product.price
         };
       });
       
       console.log(`Mapped ${productsWithEntitlements.length} products with entitlements`);
+      console.log(`Products with active entitlements: ${productsWithEntitlements.filter((p: ProductWithEntitlement) => p.isPurchased).length}`);
       setProducts(productsWithEntitlements);
     } catch (error) {
       console.error('Error mapping entitlements to products:', error);
       setError('Failed to load your entitlements. Please try again later.');
-      
-      // Add debug info
-      if (error instanceof Error) {
-        setDebugInfo(`Error: ${error.message}`);
-      }
+      setDebugInfo(prev => `${prev || ''}\nError mapping entitlements to products: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsLoading(false);
     }
@@ -159,75 +210,136 @@ export function UserEntitlements() {
   // Function to manually refresh data
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    setDebugInfo("Starting refresh...");
+    setError(null);
+    setSuccessMessage(null);
     
     try {
-      // Try to fetch from debug endpoint first for more detailed information
-      const response = await fetch('/api/debug/user-entitlements');
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Debug endpoint data:", data);
-        setDebugInfo(prev => `${prev || ''}\n\nDebug API Response:\n${JSON.stringify(data, null, 2)}`);
-      } else {
-        console.warn("Debug endpoint returned error:", response.status);
-        setDebugInfo(prev => `${prev || ''}\nDebug endpoint error: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error fetching from debug endpoint:", error);
-      setDebugInfo(prev => `${prev || ''}\nError fetching from debug endpoint: ${error instanceof Error ? error.message : String(error)}`);
-    }
-    
-    // Refresh the entitlements
-    try {
+      console.log("Refreshing entitlements...");
       await refetchEntitlements();
-      setDebugInfo(prev => `${prev || ''}\nEntitlements refreshed successfully`);
+      
+      // Add a direct API check for debugging
+      if (showDebug) {
+        try {
+          // Add timestamp and random ID to prevent caching
+          const timestamp = Date.now();
+          const randomId = Math.random().toString(36).substring(2, 15);
+          const response = await fetch(`/api/user-entitlements?t=${timestamp}&r=${randomId}`, {
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Direct API response:', data);
+            setDebugInfo(prev => `${prev || ''}\n\nDirect API response:\n${JSON.stringify(data, null, 2)}`);
+          } else {
+            console.error('Error fetching from API directly:', response.statusText);
+            setDebugInfo(prev => `${prev || ''}\n\nError fetching from API directly: ${response.statusText}`);
+          }
+        } catch (apiError) {
+          console.error('Error in direct API check:', apiError);
+          setDebugInfo(prev => `${prev || ''}\n\nError in direct API check: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
+        }
+      }
+      
+      console.log("Refreshing products...");
+      await mapEntitlementsToProducts();
+      
+      setSuccessMessage("Your entitlements have been refreshed.");
     } catch (error) {
       console.error("Error refreshing entitlements:", error);
+      setError("Failed to refresh your entitlements. Please try again later.");
       setDebugInfo(prev => `${prev || ''}\nError refreshing entitlements: ${error instanceof Error ? error.message : String(error)}`);
     }
     
     setIsRefreshing(false);
   };
 
-  // Update products when entitlements change
-  useEffect(() => {
-    if (!entitlementsLoading) {
-      console.log("Entitlements loaded, mapping to products");
-      mapEntitlementsToProducts();
+  // Function to clear addon entitlements
+  const handleClearAddons = async () => {
+    // Reset error and success message
+    setError(null);
+    setSuccessMessage(null);
+    
+    // Check if we have a user ID
+    if (!user?.id) {
+      setError("User ID not found. Please log in again.");
+      return;
     }
-  }, [entitlements, entitlementsLoading]);
-
-  // Set up real-time subscription for entitlement changes
-  useEffect(() => {
-    if (!user?.id) return;
     
-    console.log(`Setting up real-time subscription for user ${user.id}`);
+    // Confirm before proceeding
+    if (!window.confirm("Are you sure you want to clear all addon entitlements and clean up phantom data? This will remove access to all products except the main PMU Profit System and allow you to re-purchase them.")) {
+      return;
+    }
     
-    // Subscribe to changes in user_entitlements table for this user
-    const subscription = supabase
-      .channel('user_entitlements_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen for all events (insert, update, delete)
-          schema: 'public',
-          table: 'user_entitlements',
-          filter: `user_id=eq.${user.id}`
+    try {
+      setIsLoading(true);
+      
+      console.log("Clearing addon entitlements and phantom data for user:", user.id);
+      
+      // Call the API to clear addon entitlements
+      const response = await fetch('/api/user-entitlements/clear-addons', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
-        (payload) => {
-          console.log('Entitlement change detected:', payload);
-          // Refresh data when entitlements change
-          refetchEntitlements();
-        }
-      )
-      .subscribe();
-    
-    // Clean up subscription on unmount
-    return () => {
-      console.log("Cleaning up Supabase subscription");
-      supabase.removeChannel(subscription);
-    };
-  }, [user?.id, refetchEntitlements]);
+        body: JSON.stringify({ userId: user.id })
+      });
+      
+      // Parse the response
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to clear addon entitlements');
+      }
+      
+      console.log("Successfully cleared addon entitlements and phantom data:", data);
+      
+      // Set success message with details
+      let successMsg = `Successfully cleared ${data.entitlementsRemoved} addon entitlements and deleted ${data.purchasesDeleted} purchases.`;
+      
+      // Add phantom data cleanup details if any were found
+      if (data.phantomEntitlementsRemoved > 0 || data.phantomPurchasesDeleted > 0) {
+        successMsg += ` Also cleaned up ${data.phantomEntitlementsRemoved} phantom entitlements and ${data.phantomPurchasesDeleted} phantom purchases.`;
+      }
+      
+      setSuccessMessage(successMsg);
+      
+      // Wait for the database to update before refreshing
+      console.log("Waiting 1 second for database to update...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Refresh entitlements and products
+      console.log("Refreshing entitlements...");
+      await refetchEntitlements();
+      
+      // Clear products before mapping to prevent stale data
+      setProducts([]);
+      
+      console.log("Refreshing products...");
+      await mapEntitlementsToProducts();
+    } catch (error) {
+      console.error("Error clearing addon entitlements:", error);
+      setError(error instanceof Error ? error.message : 'Unknown error clearing addon entitlements');
+      
+      // Try to refresh anyway to show current state
+      try {
+        console.log("Attempting to refresh data after error...");
+        await refetchEntitlements();
+        await mapEntitlementsToProducts();
+      } catch (refreshError) {
+        console.error("Error refreshing data after clearing error:", refreshError);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // If loading, show skeleton UI
   if (isLoading || entitlementsLoading) {
@@ -334,25 +446,73 @@ export function UserEntitlements() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Available Products</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleDebug}
+          >
+            {showDebug ? 'Hide Debug' : 'Show Debug'}
+          </Button>
+        </div>
       </div>
+      
+      {/* Show success message if present */}
+      {successMessage && (
+        <Alert className="bg-green-50 border-green-200 text-green-800">
+          <div className="flex items-center">
+            <div className="mr-2">✅</div>
+            <div>{successMessage}</div>
+          </div>
+        </Alert>
+      )}
+      
+      {error && (
+        <Alert className="bg-red-50 border-red-200 text-red-800">
+          <div className="flex items-center">
+            <div className="mr-2">❌</div>
+            <div>{error}</div>
+          </div>
+        </Alert>
+      )}
       
       {/* Show debug info in development */}
       {process.env.NODE_ENV === 'development' && (
         <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
           <p>User ID: {user?.id || 'Not logged in'}</p>
           <p>Has Active Entitlements: {hasActiveEntitlements ? 'Yes' : 'No'}</p>
-          <p>Has Purchases: {hasPurchases ? 'Yes' : 'No'}</p>
-          <p>Entitlements Count: {entitlements.length}</p>
-          <p>Products Count: {products.length}</p>
+          <p>Active Entitlements Count: {entitlements.filter(e => e.is_active).length}</p>
+          <p>Total Products Count: {products.length}</p>
+          <p>Main Product: PMU Profit System (ID: {PRODUCT_IDS['pmu-profit-system']})</p>
+          <p>Addon Products: Ad Generator (ID: {PRODUCT_IDS['pmu-ad-generator']}), Consultation Success Blueprint (ID: {PRODUCT_IDS['consultation-success-blueprint']})</p>
+          
+          {/* Add clear addons button */}
+          <div className="mt-2 pt-2 border-t border-gray-200">
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={handleClearAddons}
+              disabled={isLoading || !user?.id}
+              className="w-full"
+            >
+              <Trash2 className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? 'Clearing...' : 'Clean Up Entitlements & Purchases'}
+            </Button>
+            <p className="mt-1 text-xs text-gray-500">
+              This will remove all addon entitlements while preserving the main product, clean up phantom entitlements and purchases, and allow you to re-purchase addons for testing.
+            </p>
+          </div>
+          
           {entitlements.length > 0 && (
             <details>
               <summary>Entitlements Details</summary>
@@ -360,14 +520,101 @@ export function UserEntitlements() {
                 {JSON.stringify(entitlements.map(e => ({
                   id: e.id,
                   product_id: e.product_id,
+                  product_name: e.products?.name || 'Unknown',
+                  is_main_product: e.product_id === PRODUCT_IDS['pmu-profit-system'] ? 'Yes' : 'No',
                   source_type: e.source_type,
                   is_active: e.is_active,
-                  valid_from: e.valid_from,
-                  product_name: e.products?.name || 'Unknown'
+                  valid_from: new Date(e.valid_from).toLocaleString()
                 })), null, 2)}
               </pre>
             </details>
           )}
+          
+          {/* Update the products with entitlements section to show only products with active entitlements */}
+          <details className="mt-2">
+            <summary>Products with Active Entitlements</summary>
+            <pre className="mt-2 overflow-auto max-h-40">
+              {JSON.stringify(products.filter(p => !!p.entitlement?.is_active).map(p => ({
+                name: p.name,
+                id: p.id,
+                is_main_product: p.id === PRODUCT_IDS['pmu-profit-system'] ? 'Yes' : 'No',
+                entitlement_id: p.entitlement?.id,
+                entitlement_product_id: p.entitlement?.product_id,
+                is_active: p.entitlement?.is_active,
+                exact_match: p.id === p.entitlement?.product_id ? 'Yes' : 'No'
+              })), null, 2)}
+            </pre>
+          </details>
+          
+          {/* Add all products section */}
+          <details className="mt-2">
+            <summary>All Products</summary>
+            <pre className="mt-2 overflow-auto max-h-40">
+              {JSON.stringify(products.map(p => ({
+                name: p.name,
+                id: p.id,
+                isPurchased: p.isPurchased,
+                has_entitlement: !!p.entitlement,
+                entitlement_product_id: p.entitlement?.product_id || 'None'
+              })), null, 2)}
+            </pre>
+          </details>
+          
+          {/* Add debug log */}
+          {debugInfo && (
+            <details className="mt-2">
+              <summary>Debug Log</summary>
+              <pre className="mt-2 overflow-auto max-h-40 whitespace-pre-wrap">
+                {debugInfo}
+              </pre>
+            </details>
+          )}
+        </div>
+      )}
+      
+      {/* Debug section */}
+      {showDebug && (
+        <div className="mt-8 p-4 bg-gray-100 rounded-md text-xs font-mono overflow-auto max-h-96">
+          <h3 className="font-bold mb-2">Debug Information</h3>
+          <p>User ID: {user?.id || 'Not logged in'}</p>
+          <p>Has Active Entitlements: {hasActiveEntitlements ? 'Yes' : 'No'}</p>
+          <p>Active Entitlements Count: {entitlements.filter(e => e.is_active).length}</p>
+          <p>Products Count: {products.length}</p>
+          <p>Products with Active Entitlements: {products.filter(p => p.isPurchased).length}</p>
+          
+          <h4 className="font-bold mt-4 mb-2">Active Entitlements:</h4>
+          <pre className="whitespace-pre-wrap">
+            {JSON.stringify(entitlements.filter(e => e.is_active).map(e => ({
+              id: e.id,
+              product_id: e.product_id,
+              product_name: e.products?.name,
+              is_active: e.is_active,
+              valid_from: e.valid_from,
+              valid_until: e.valid_until
+            })), null, 2)}
+          </pre>
+          
+          <h4 className="font-bold mt-4 mb-2">Products with Active Entitlements:</h4>
+          <pre className="whitespace-pre-wrap">
+            {JSON.stringify(products.filter(p => p.isPurchased).map(p => ({
+              id: p.id,
+              name: p.name,
+              entitlement_id: p.entitlement?.id,
+              is_purchased: p.isPurchased
+            })), null, 2)}
+          </pre>
+          
+          <h4 className="font-bold mt-4 mb-2">All Products:</h4>
+          <pre className="whitespace-pre-wrap">
+            {JSON.stringify(products.map(p => ({
+              id: p.id,
+              name: p.name,
+              is_purchased: p.isPurchased
+            })), null, 2)}
+          </pre>
+          
+          <h4 className="font-bold mt-4 mb-2">Raw Debug Info:</h4>
+          <pre className="whitespace-pre-wrap">{debugInfo}</pre>
         </div>
       )}
       
@@ -381,6 +628,7 @@ export function UserEntitlements() {
   );
 }
 
+// ProductCard component
 function ProductCard({ product }: { product: ProductWithEntitlement }) {
   // Function to get the purchase link for a product
   const getPurchaseLink = (product: ProductWithEntitlement) => {
@@ -396,15 +644,23 @@ function ProductCard({ product }: { product: ProductWithEntitlement }) {
     return `/checkout?products=${product.id}`;
   };
 
+  // Get the appropriate link based on product type and ID
+  const viewLink = product.id === 'e5749058-500d-4333-8938-c8a19b16cd65' 
+    ? '/dashboard/blueprint'
+    : getProductLink(product);
+
+  // Determine if the product is purchased based ONLY on active entitlement with EXACT product_id match
+  const isPurchased = !!product.isPurchased;
+  
   return (
-    <Card className={`overflow-hidden ${product.isPurchased ? 'border-green-200 bg-green-50' : ''}`}>
+    <Card className={`overflow-hidden ${isPurchased ? 'border-green-200 bg-green-50' : ''}`}>
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
             <CardTitle>{product.name}</CardTitle>
             <CardDescription>{formatProductType(product.type)}</CardDescription>
           </div>
-          {product.isPurchased && (
+          {isPurchased && (
             <Badge variant="success" className="bg-green-100 text-green-800 hover:bg-green-200">
               Purchased
             </Badge>
@@ -414,7 +670,7 @@ function ProductCard({ product }: { product: ProductWithEntitlement }) {
       <CardContent>
         <p className="text-sm text-gray-600 mb-4">{product.description}</p>
         
-        {product.isPurchased && product.entitlement && (
+        {isPurchased && product.entitlement && (
           <div className="bg-green-50 p-3 rounded-md text-sm space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-600">Status:</span>
@@ -429,51 +685,37 @@ function ProductCard({ product }: { product: ProductWithEntitlement }) {
                 <span className="font-medium">{formatDate(product.purchaseDate)}</span>
               </div>
             )}
-
-            <div className="flex justify-between">
-              <span className="text-gray-600">Item Price:</span>
-              <span className="font-medium">
-                {formatPrice(product.price, product.currency || 'EUR')}
-              </span>
-            </div>
-
-            {product.purchaseAmount !== undefined && product.purchaseAmount > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">Amount Paid:</span>
-                <span className="font-medium">
-                  {formatPrice(product.purchaseAmount, product.currency || 'EUR')}
-                </span>
-              </div>
-            )}
-
+            
             <div className="flex justify-between">
               <span className="text-gray-600">Source:</span>
               <span className="font-medium">
-                {formatSourceType(product.entitlement.source_type)}
+                {formatSourceType(product.entitlement?.source_type || 'purchase')}
               </span>
             </div>
+            
+            {/* Add debug info for product ID mapping */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-2 pt-2 border-t border-green-200 text-xs text-gray-500">
+                <div>Product ID: {product.id}</div>
+                <div>Entitlement Product ID: {product.entitlement?.product_id || 'N/A'}</div>
+                <div>Exact Match: {product.id === product.entitlement?.product_id ? 'Yes' : 'No'}</div>
+                <div>Is Active: {product.entitlement?.is_active ? 'Yes' : 'No'}</div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
       <CardFooter>
-        {product.isPurchased ? (
-          <Button 
-            variant="default" 
-            className="w-full"
-            asChild
-          >
-            <Link href={getProductLink(product)}>
-              Access Content
+        {isPurchased ? (
+          <Button asChild className="w-full">
+            <Link href={viewLink}>
+              View {product.type}
             </Link>
           </Button>
         ) : (
-          <Button 
-            variant="outline" 
-            className="w-full"
-            asChild
-          >
+          <Button asChild variant="outline" className="w-full">
             <Link href={getPurchaseLink(product)}>
-              Purchase for {formatPrice(product.price, product.currency || 'EUR')}
+              Purchase for {formatPrice(product.price, product.currency)}
             </Link>
           </Button>
         )}
@@ -483,64 +725,124 @@ function ProductCard({ product }: { product: ProductWithEntitlement }) {
 }
 
 // Helper functions
-function formatSourceType(sourceType: string): string {
-  switch (sourceType) {
-    case 'purchase':
-      return 'Direct Purchase';
-    case 'subscription':
-      return 'Subscription';
+function formatSourceType(sourceType: string | null): string {
+  if (!sourceType) return 'Unknown';
+  
+  switch (sourceType.toLowerCase()) {
+    case 'stripe':
+      return 'Online Purchase';
+    case 'manual':
+      return 'Manual Assignment';
     case 'gift':
       return 'Gift';
+    case 'promotion':
+      return 'Promotional Offer';
+    case 'bundle':
+      return 'Product Bundle';
     default:
-      return sourceType.charAt(0).toUpperCase() + sourceType.slice(1);
+      // Capitalize first letter of each word
+      return sourceType
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
   }
 }
 
-function formatProductType(type: string): string {
-  switch (type) {
+// Format the product type for display
+function formatProductType(type: string | null): string {
+  if (!type) return 'Product';
+  
+  switch (type.toLowerCase()) {
     case 'course':
-      return 'Course';
+      return 'Online Course';
+    case 'ebook':
+      return 'E-Book';
+    case 'template':
+      return 'Template';
     case 'tool':
-      return 'Tool';
+      return 'Digital Tool';
     case 'resource':
-      return 'Resource';
+      return 'Digital Resource';
+    case 'consultation':
+      return 'Consultation Service';
+    case 'blueprint':
+      return 'Success Blueprint';
     default:
-      return type.charAt(0).toUpperCase() + type.slice(1);
+      // Capitalize first letter of each word
+      return type
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
   }
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(date);
+// Format a date for display
+function formatDate(dateString: string | null): string {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid date';
+    }
+    
+    // Format: "Jan 1, 2023"
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Error';
+  }
 }
 
-function formatPrice(price: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
+// Format price for display
+function formatPrice(price: number | string | null | undefined, currency: string = 'EUR'): string {
+  if (price === null || price === undefined) return 'N/A';
+  
+  // Convert price to number if it's a string
+  const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+  
+  // Check if conversion was successful
+  if (isNaN(numericPrice)) return 'N/A';
+  
+  // Format the price (assuming the price is already in the correct unit, not cents)
+  const formattedPrice = numericPrice.toLocaleString('en-US', {
     style: 'currency',
-    currency: currency
-  }).format(price);
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  
+  return formattedPrice;
 }
 
+// Function to get the link to a product's content
 function getProductLink(product: ProductWithEntitlement): string {
-  switch (product.type) {
+  // Check if the product is the Consultation Success Blueprint
+  if (product.name.toLowerCase().includes('consultation') || 
+      product.name.toLowerCase().includes('blueprint')) {
+    return '/dashboard/blueprint';
+  }
+  
+  // Check if the product is the Ad Generator
+  if (product.name.toLowerCase().includes('ad generator')) {
+    return '/dashboard/ad-generator';
+  }
+  
+  // Default case for other products
+  switch (product.type.toLowerCase()) {
     case 'course':
-      return '/dashboard/modules';
-    case 'tool':
-      if (product.name.toLowerCase().includes('ad generator')) {
-        return '/dashboard/ad-generator';
-      }
-      return '/dashboard';
-    case 'resource':
-      if (product.name.toLowerCase().includes('consultation') || 
-          product.name.toLowerCase().includes('blueprint')) {
-        return '/dashboard/blueprint';
-      }
-      return '/dashboard';
+      return `/dashboard/courses/${product.id}`;
+    case 'ebook':
+      return `/dashboard/ebooks/${product.id}`;
+    case 'template':
+      return `/dashboard/templates/${product.id}`;
     default:
-      return '/dashboard';
+      return `/dashboard/products/${product.id}`;
   }
 } 

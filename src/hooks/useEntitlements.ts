@@ -77,9 +77,10 @@ export function useEntitlements(): UseEntitlementsResult {
       // Include the user ID in the URL to ensure it's available even if cookies fail
       const url = `/api/user-entitlements?userId=${encodeURIComponent(user.id)}`;
       
-      // Add a timestamp to prevent caching
+      // Add a timestamp and random component to prevent caching
       const timestamp = new Date().getTime();
-      const urlWithTimestamp = `${url}&_t=${timestamp}`;
+      const randomId = Math.random().toString(36).substring(2, 15);
+      const urlWithTimestamp = `${url}&_t=${timestamp}&_r=${randomId}`;
       
       const response = await fetch(urlWithTimestamp, {
         headers: {
@@ -112,7 +113,19 @@ export function useEntitlements(): UseEntitlementsResult {
         hasPurchases: !!data.purchases?.length,
       });
       
-      setEntitlements(data.entitlements || []);
+      // Log the full entitlements data for debugging
+      console.log('useEntitlements: Full entitlements data:', data.entitlements);
+      
+      // Filter out any entitlements that don't have a valid product_id
+      const validEntitlements = (data.entitlements || []).filter((e: Entitlement) => {
+        if (!e.product_id) {
+          console.warn('useEntitlements: Found entitlement without product_id:', e.id);
+          return false;
+        }
+        return true;
+      });
+      
+      setEntitlements(validEntitlements);
       setPurchases(data.purchases || []);
       
       // If we have purchases but no entitlements, we might need to create them

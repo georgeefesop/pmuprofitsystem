@@ -1,11 +1,24 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 
-// Enhanced logging for debugging
-console.log('useEnhancedUser: Initializing hook with singleton Supabase client');
+// Conditionally log based on environment
+const isDev = process.env.NODE_ENV === 'development';
+const shouldLog = isDev && process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true';
+
+// Only log initialization once
+if (shouldLog) {
+  console.log('useEnhancedUser: Initializing hook with singleton Supabase client');
+}
+
+// Add a cache for auth checks with longer TTL
+const AUTH_CHECK_CACHE = {
+  user: null as any,
+  timestamp: 0,
+  TTL: 30000 // Increased to 30 seconds
+};
 
 export interface User {
   id: string;
@@ -21,102 +34,152 @@ export interface User {
 
 // Helper function to log cookies for debugging
 function logCookies(prefix: string) {
-  if (typeof document !== 'undefined') {
-    const cookieObj: Record<string, string> = {};
-    document.cookie.split(';').forEach(cookie => {
-      const [name, value] = cookie.trim().split('=');
-      if (name) {
-        cookieObj[name] = value || '';
-      }
-    });
-    
-    console.log(`useEnhancedUser: ${prefix} Cookies:`, {
-      'sb-access-token': cookieObj['sb-access-token'] ? '✓ Present' : '✗ Missing',
-      'sb-refresh-token': cookieObj['sb-refresh-token'] ? '✓ Present' : '✗ Missing',
-      'auth-status': cookieObj['auth-status'] || 'Missing',
-      cookieCount: Object.keys(cookieObj).length
-    });
-  }
+  if (!shouldLog || typeof document === 'undefined') return;
+  
+  const cookieObj: Record<string, string> = {};
+  document.cookie.split(';').forEach(cookie => {
+    const [name, value] = cookie.trim().split('=');
+    if (name) {
+      cookieObj[name] = value || '';
+    }
+  });
+  
+  console.log(`useEnhancedUser: ${prefix} Cookies:`, {
+    'sb-access-token': cookieObj['sb-access-token'] ? '✓ Present' : '✗ Missing',
+    'sb-refresh-token': cookieObj['sb-refresh-token'] ? '✓ Present' : '✗ Missing',
+    'auth-status': cookieObj['auth-status'] || 'Missing',
+    cookieCount: Object.keys(cookieObj).length
+  });
 }
 
 // Helper function to log localStorage for debugging
 function logLocalStorage(prefix: string) {
-  if (typeof window !== 'undefined') {
-    const authItems: Record<string, string> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (
-        key.includes('supabase') || 
-        key.includes('sb-') || 
-        key.includes('auth') || 
-        key.includes('redirect')
-      )) {
-        authItems[key] = localStorage.getItem(key) || '';
-      }
+  if (!shouldLog || typeof window === 'undefined') return;
+  
+  const authItems: Record<string, string> = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (
+      key.includes('supabase') || 
+      key.includes('sb-') || 
+      key.includes('auth') || 
+      key.includes('redirect')
+    )) {
+      authItems[key] = localStorage.getItem(key) || '';
     }
-    
-    console.log(`useEnhancedUser: ${prefix} LocalStorage:`, {
-      'auth_user_id': localStorage.getItem('auth_user_id') || 'Missing',
-      'sb-access-token': localStorage.getItem('sb-access-token') ? '✓ Present' : '✗ Missing',
-      'sb-refresh-token': localStorage.getItem('sb-refresh-token') ? '✓ Present' : '✗ Missing',
-      authItemCount: Object.keys(authItems).length
-    });
   }
+  
+  console.log(`useEnhancedUser: ${prefix} LocalStorage:`, {
+    'auth_user_id': localStorage.getItem('auth_user_id') || 'Missing',
+    'sb-access-token': localStorage.getItem('sb-access-token') ? '✓ Present' : '✗ Missing',
+    'sb-refresh-token': localStorage.getItem('sb-refresh-token') ? '✓ Present' : '✗ Missing',
+    authItemCount: Object.keys(authItems).length
+  });
 }
 
+// Create a singleton instance tracker to prevent multiple hook initializations
+let hookInstanceCount = 0;
+
 export function useEnhancedUser() {
-  console.log('useEnhancedUser: Hook function called');
+  // Only log on first call in development
+  const instanceId = useRef(++hookInstanceCount).current;
+  
+  if (shouldLog && instanceId <= 3) {
+    console.log(`useEnhancedUser: Hook function called (instance ${instanceId})`);
+  }
+  
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  
+  // Add debounce ref with longer timeout
+  const authCheckTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to refresh user data
+  // Function to refresh user data with improved debouncing
   const refreshUser = useCallback(async () => {
-    console.log('useEnhancedUser: refreshUser called');
-    try {
-      setIsLoading(true);
-      
-      // Log current auth state
-      logCookies('Before refreshUser');
-      logLocalStorage('Before refreshUser');
-      
-      // Use the singleton client
-      console.log('useEnhancedUser: Calling supabase.auth.getUser()');
-      const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
-      
-      if (userData) {
-        console.log('useEnhancedUser: User found in refreshUser:', {
-          id: userData.id,
-          email: userData.email,
-          hasMetadata: !!userData.user_metadata
-        });
-        setUser(userData as User);
-        setError(null);
-      } else if (userError) {
-        console.error('useEnhancedUser: Error fetching user:', userError);
-        setError(userError.message);
-        setUser(null);
-      } else {
-        console.log('useEnhancedUser: No user found in refreshUser');
-        setUser(null);
-        setError(null);
-      }
-      
-      // Log updated auth state
-      logCookies('After refreshUser');
-    } catch (err) {
-      console.error('useEnhancedUser: Unexpected error in refreshUser:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      setUser(null);
-    } finally {
+    if (shouldLog) console.log('useEnhancedUser: refreshUser called');
+    
+    // Check if we have a recent cached user
+    const now = Date.now();
+    if (AUTH_CHECK_CACHE.user && (now - AUTH_CHECK_CACHE.timestamp) < AUTH_CHECK_CACHE.TTL) {
+      if (shouldLog) console.log('useEnhancedUser: Using cached user data');
+      setUser(AUTH_CHECK_CACHE.user);
       setIsLoading(false);
+      return;
     }
+    
+    // Clear any existing timeout
+    if (authCheckTimeoutRef.current) {
+      clearTimeout(authCheckTimeoutRef.current);
+    }
+    
+    // Set a timeout to debounce multiple calls with longer delay
+    authCheckTimeoutRef.current = setTimeout(async () => {
+      try {
+        setIsLoading(true);
+        
+        // Log current auth state
+        logCookies('Before refreshUser');
+        logLocalStorage('Before refreshUser');
+        
+        // Use the singleton client
+        if (shouldLog) console.log('useEnhancedUser: Calling supabase.auth.getUser()');
+        const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
+        
+        if (userData) {
+          if (shouldLog) {
+            console.log('useEnhancedUser: User found in refreshUser:', {
+              id: userData.id,
+              email: userData.email,
+              hasMetadata: !!userData.user_metadata
+            });
+          }
+          
+          // Update cache
+          AUTH_CHECK_CACHE.user = userData;
+          AUTH_CHECK_CACHE.timestamp = Date.now();
+          
+          setUser(userData as User);
+          setError(null);
+        } else if (userError) {
+          console.error('useEnhancedUser: Error fetching user:', userError);
+          setError(userError.message);
+          setUser(null);
+          
+          // Clear cache on error
+          AUTH_CHECK_CACHE.user = null;
+          AUTH_CHECK_CACHE.timestamp = 0;
+        } else {
+          if (shouldLog) console.log('useEnhancedUser: No user found in refreshUser');
+          setUser(null);
+          setError(null);
+          
+          // Clear cache when no user
+          AUTH_CHECK_CACHE.user = null;
+          AUTH_CHECK_CACHE.timestamp = 0;
+        }
+        
+        // Log updated auth state
+        logCookies('After refreshUser');
+      } catch (err) {
+        console.error('useEnhancedUser: Unexpected error in refreshUser:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setUser(null);
+        
+        // Clear cache on error
+        AUTH_CHECK_CACHE.user = null;
+        AUTH_CHECK_CACHE.timestamp = 0;
+      } finally {
+        setIsLoading(false);
+        authCheckTimeoutRef.current = null;
+      }
+    }, 800); // Increased to 800ms for better debouncing
   }, []);
 
   // Function to sign out
   const signOut = useCallback(async () => {
-    console.log('useEnhancedUser: signOut called');
+    if (shouldLog) console.log('useEnhancedUser: signOut called');
     try {
       setIsLoading(true);
       
@@ -125,11 +188,11 @@ export function useEnhancedUser() {
       logLocalStorage('Before signOut');
       
       // First clear cookies manually to ensure they're removed
-      console.log('useEnhancedUser: Clearing cookies manually');
+      if (shouldLog) console.log('useEnhancedUser: Clearing cookies manually');
       document.cookie.split(';').forEach(cookie => {
         const [name] = cookie.trim().split('=');
         if (name) {
-          console.log(`useEnhancedUser: Clearing cookie: ${name}`);
+          if (shouldLog) console.log(`useEnhancedUser: Clearing cookie: ${name}`);
           // Clear the cookie with all possible path and domain combinations
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname};`;
@@ -138,7 +201,7 @@ export function useEnhancedUser() {
       });
       
       // Clear all Supabase-related local storage items
-      console.log('useEnhancedUser: Clearing localStorage items');
+      if (shouldLog) console.log('useEnhancedUser: Clearing localStorage items');
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && (
@@ -147,13 +210,13 @@ export function useEnhancedUser() {
           key.includes('auth') || 
           key.includes('redirect')
         )) {
-          console.log(`useEnhancedUser: Removing localStorage item: ${key}`);
+          if (shouldLog) console.log(`useEnhancedUser: Removing localStorage item: ${key}`);
           localStorage.removeItem(key);
         }
       }
       
       // Explicitly remove known items
-      console.log('useEnhancedUser: Removing specific localStorage items');
+      if (shouldLog) console.log('useEnhancedUser: Removing specific localStorage items');
       localStorage.removeItem('auth_user_id');
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('redirectTo');
@@ -162,19 +225,19 @@ export function useEnhancedUser() {
       localStorage.removeItem('sb-refresh-token');
       
       // Sign out using the singleton client
-      console.log('useEnhancedUser: Calling supabase.auth.signOut()');
+      if (shouldLog) console.log('useEnhancedUser: Calling supabase.auth.signOut()');
       try {
         const { error } = await supabase.auth.signOut({ scope: 'global' });
         if (error) {
           console.error('useEnhancedUser: Error from supabase.auth.signOut():', error);
         } else {
-          console.log('useEnhancedUser: supabase.auth.signOut() successful');
+          if (shouldLog) console.log('useEnhancedUser: supabase.auth.signOut() successful');
         }
       } catch (e) {
         console.error('useEnhancedUser: Exception during supabase.auth.signOut():', e);
       }
       
-      console.log('useEnhancedUser: Setting user to null');
+      if (shouldLog) console.log('useEnhancedUser: Setting user to null');
       setUser(null);
       
       // Log updated auth state
@@ -182,10 +245,10 @@ export function useEnhancedUser() {
       logLocalStorage('After signOut');
       
       // Add a delay to ensure everything is cleared before redirecting
-      console.log('useEnhancedUser: Waiting before redirect...');
+      if (shouldLog) console.log('useEnhancedUser: Waiting before redirect...');
       setTimeout(() => {
         // Force a hard navigation to ensure all state is cleared
-        console.log('useEnhancedUser: Redirecting to login page');
+        if (shouldLog) console.log('useEnhancedUser: Redirecting to login page');
         window.location.href = '/login';
       }, 500);
     } catch (err) {
@@ -193,7 +256,7 @@ export function useEnhancedUser() {
       setError(err instanceof Error ? err.message : 'Error signing out');
       
       // If sign out fails, force a hard navigation to login after a delay
-      console.log('useEnhancedUser: Sign out failed, forcing redirect');
+      if (shouldLog) console.log('useEnhancedUser: Sign out failed, forcing redirect');
       setTimeout(() => {
         window.location.href = '/login';
       }, 500);
@@ -202,51 +265,67 @@ export function useEnhancedUser() {
     }
   }, []);
 
-  // Check for user on initial load
+  // Check for user on initial load with improved debouncing
   useEffect(() => {
-    console.log('useEnhancedUser: Initial useEffect running');
+    if (shouldLog) console.log('useEnhancedUser: Initial useEffect running');
+    
+    // Check if we have a recent cached user
+    const now = Date.now();
+    if (AUTH_CHECK_CACHE.user && (now - AUTH_CHECK_CACHE.timestamp) < AUTH_CHECK_CACHE.TTL) {
+      if (shouldLog) console.log('useEnhancedUser: Using cached user data for initial load');
+      setUser(AUTH_CHECK_CACHE.user);
+      setIsLoading(false);
+      return;
+    }
     
     const checkUser = async () => {
-      console.log('useEnhancedUser: checkUser called');
+      if (shouldLog) console.log('useEnhancedUser: checkUser called');
       try {
         setIsLoading(true);
         
         // Log current auth state
         logCookies('Initial checkUser');
-        logLocalStorage('Initial checkUser');
         
-        // Use the singleton client
-        console.log('useEnhancedUser: Calling supabase.auth.getUser()');
+        // Use the singleton client to get user directly from Supabase
+        if (shouldLog) console.log('useEnhancedUser: Calling supabase.auth.getUser()');
         const { data: { user: userData }, error: userError } = await supabase.auth.getUser();
         
         if (userData) {
-          console.log('useEnhancedUser: User found in checkUser:', {
-            id: userData.id,
-            email: userData.email,
-            hasMetadata: !!userData.user_metadata
-          });
+          if (shouldLog) {
+            console.log('useEnhancedUser: User found in checkUser:', {
+              id: userData.id,
+              email: userData.email,
+              hasMetadata: !!userData.user_metadata
+            });
+          }
           
           // Also check session to ensure it's valid
-          console.log('useEnhancedUser: Verifying session');
+          if (shouldLog) console.log('useEnhancedUser: Verifying session');
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           
           if (sessionError) {
             console.error('useEnhancedUser: Error getting session:', sessionError);
           } else if (!session) {
-            console.warn('useEnhancedUser: User exists but no session found, attempting to refresh');
+            if (shouldLog) console.warn('useEnhancedUser: User exists but no session found, attempting to refresh');
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             
             if (refreshError) {
               console.error('useEnhancedUser: Error refreshing session:', refreshError);
             } else if (refreshData.session) {
-              console.log('useEnhancedUser: Session refreshed successfully');
+              if (shouldLog) console.log('useEnhancedUser: Session refreshed successfully');
             }
           } else {
-            console.log('useEnhancedUser: Valid session found:', {
-              userId: session.user.id,
-              expiresAt: new Date(session.expires_at! * 1000).toISOString()
-            });
+            if (shouldLog) {
+              console.log('useEnhancedUser: Valid session found:', {
+                userId: session.user.id,
+                expiresAt: new Date(session.expires_at! * 1000).toISOString()
+              });
+            }
           }
+          
+          // Update cache
+          AUTH_CHECK_CACHE.user = userData;
+          AUTH_CHECK_CACHE.timestamp = Date.now();
           
           setUser(userData as User);
           setError(null);
@@ -254,10 +333,18 @@ export function useEnhancedUser() {
           console.error('useEnhancedUser: Error fetching user:', userError);
           setError(userError.message);
           setUser(null);
+          
+          // Clear cache when no user
+          AUTH_CHECK_CACHE.user = null;
+          AUTH_CHECK_CACHE.timestamp = 0;
         } else {
-          console.log('useEnhancedUser: No user found in checkUser');
+          if (shouldLog) console.log('useEnhancedUser: No user found in Supabase');
           setUser(null);
           setError(null);
+          
+          // Clear cache when no user
+          AUTH_CHECK_CACHE.user = null;
+          AUTH_CHECK_CACHE.timestamp = 0;
         }
         
         // Log updated auth state
@@ -266,78 +353,43 @@ export function useEnhancedUser() {
         console.error('useEnhancedUser: Unexpected error in checkUser:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         setUser(null);
+        
+        // Clear cache when no user
+        AUTH_CHECK_CACHE.user = null;
+        AUTH_CHECK_CACHE.timestamp = 0;
       } finally {
         setIsLoading(false);
       }
     };
-
-    checkUser();
     
-    // Set up auth state change listener
-    console.log('useEnhancedUser: Setting up auth state change listener');
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('useEnhancedUser: Auth state changed:', event);
-        
-        if (session?.user) {
-          console.log('useEnhancedUser: User from auth state change:', {
-            id: session.user.id,
-            email: session.user.email,
-            event: event
-          });
-          
-          // Log session details
-          console.log('useEnhancedUser: Session details:', {
-            expiresAt: new Date(session.expires_at! * 1000).toISOString(),
-            hasAccessToken: !!session.access_token?.substring(0, 10),
-            hasRefreshToken: !!session.refresh_token?.substring(0, 10)
-          });
-          
-          setUser(session.user as User);
-          setError(null);
-          
-          // Store auth status in a cookie for middleware
-          if (typeof document !== 'undefined') {
-            console.log('useEnhancedUser: Setting auth-status cookie');
-            document.cookie = `auth-status=authenticated; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax${window.location.protocol === 'https:' ? '; Secure' : ''}`;
-            
-            // Also store user ID in localStorage as a backup
-            localStorage.setItem('auth_user_id', session.user.id);
-          }
-          
-          // Log updated auth state
-          logCookies('After auth state change');
-          logLocalStorage('After auth state change');
-        } else {
-          console.log('useEnhancedUser: No user in auth state change, setting user to null');
-          setUser(null);
-          
-          // If signed out, clear cookies and localStorage
-          if (event === 'SIGNED_OUT') {
-            console.log('useEnhancedUser: SIGNED_OUT event, clearing auth data');
-            if (typeof document !== 'undefined') {
-              document.cookie = `auth-status=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-              localStorage.removeItem('auth_user_id');
-            }
-          }
-        }
-        
-        setIsLoading(false);
-      }
-    );
-
+    // Clear any existing timeout
+    if (authCheckTimeoutRef.current) {
+      clearTimeout(authCheckTimeoutRef.current);
+    }
+    
+    // Set a timeout to debounce multiple calls with longer delay
+    authCheckTimeoutRef.current = setTimeout(() => {
+      checkUser();
+      authCheckTimeoutRef.current = null;
+    }, 800); // Increased to 800ms for better debouncing
+    
+    // Cleanup function
     return () => {
-      console.log('useEnhancedUser: Cleaning up - unsubscribing from auth state changes');
-      subscription.unsubscribe();
+      if (authCheckTimeoutRef.current) {
+        clearTimeout(authCheckTimeoutRef.current);
+      }
     };
   }, []);
 
-  return {
+  // Memoize the return value to prevent unnecessary re-renders
+  const authState = useMemo(() => ({
     user,
     isLoading,
     error,
     refreshUser,
     signOut,
     isAuthenticated: !!user,
-  };
+  }), [user, isLoading, error, refreshUser, signOut]);
+
+  return authState;
 } 
