@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/middleware';
 import { PRODUCT_IDS } from '@/lib/product-ids';
+import { middlewareMatcher } from './config';
 
 // Import logger
 import { logger } from './logger';
@@ -163,14 +164,5 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
  * Specifies which paths the middleware should run on
  */
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
-  ],
+  matcher: middlewareMatcher,
 }; 

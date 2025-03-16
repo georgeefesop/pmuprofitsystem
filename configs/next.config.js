@@ -17,6 +17,10 @@ const nextConfig = {
     if (dev && isServer) {
       // Server-side only logging in development
       console.log('Server-side webpack config');
+      
+      // Set a global variable that can be used by the middleware
+      // This replaces the experimental.middleware setting
+      process.env.ENABLE_CUSTOM_MIDDLEWARE = 'true';
     }
     
     return config;
@@ -54,8 +58,7 @@ const nextConfig = {
           '*': ['**/diagnostics/**'] 
         } 
       : {},
-    // Explicitly enable middleware
-    middleware: true,
+    // Removed middleware: true as it's deprecated in Next.js 14+
   },
   // Conditionally exclude pages from production builds
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'].filter(ext => {
@@ -96,12 +99,17 @@ if (process.env.VERCEL) {
       },
     ];
   };
+  
+  // Ensure middleware is enabled for Vercel builds
+  process.env.ENABLE_CUSTOM_MIDDLEWARE = 'true';
 }
 
 // Configure server-side only routes
 nextConfig.serverRuntimeConfig = {
   // Will only be available on the server side
   testRoutes: true,
+  // Add middleware configuration here instead of in experimental
+  enableCustomMiddleware: true,
 };
 
 // Replace unstable_excludeFiles with supported configuration
