@@ -1,0 +1,252 @@
+# PMU Profit System Codebase Index
+
+# SUMMARY
+# This index catalogs the PMU Profit System codebase, a Next.js application with Supabase backend and Stripe integration.
+# The system provides a platform for PMU (Permanent Makeup) professionals to access training materials and resources.
+# Key components include:
+# - Authentication system using Supabase Auth
+# - Product entitlements management
+# - Stripe payment integration (using EUR currency)
+# - Dashboard for accessing purchased content
+# - Marketing pages for product promotion
+# The codebase follows a modular structure with React Server Components where possible and client components when necessary.
+
+# Format: FILE:{filepath}|TYPE:{filetype}|PURPOSE:{short description}|DEPENDS_ON:[{dependency1},{dependency2}]|EXPORTS:[{export1},{export2}]|IMPLEMENTS:[{concept1},{concept2}]|DB_TABLES:[{table_name},{relationships}]|DB_FIELDS:[{key_fields}]|API_FLOW:[{request_path},{handler},{response_type}]|CACHE_STRATEGY:[{resource_type},{cache_policy}]|PRODUCT_IDS:[{id},{name}]|AUTH_STATES:[{state_name},{transition_triggers}]
+
+# Core Configuration
+FILE:next.config.js|TYPE:config|PURPOSE:Next.js configuration with redirects and environment settings|DEPENDS_ON:[]|EXPORTS:[module.exports]|IMPLEMENTS:[config,redirects]
+FILE:tailwind.config.js|TYPE:config|PURPOSE:Tailwind CSS configuration with custom theme settings|DEPENDS_ON:[]|EXPORTS:[module.exports]|IMPLEMENTS:[styling,theming]
+FILE:tsconfig.json|TYPE:config|PURPOSE:TypeScript configuration for the project|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[typescript-config]
+FILE:configs/tailwind.config.js|TYPE:config|PURPOSE:Extended Tailwind CSS configuration with custom theme settings|DEPENDS_ON:[@tailwindcss/typography]|EXPORTS:[module.exports]|IMPLEMENTS:[styling,theming]
+FILE:configs/tsconfig.json|TYPE:config|PURPOSE:Detailed TypeScript configuration with path aliases|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[typescript-config,path-aliases]
+FILE:configs/next.config.js|TYPE:config|PURPOSE:Extended Next.js configuration with image domains and redirects|DEPENDS_ON:[]|EXPORTS:[module.exports]|IMPLEMENTS:[config,redirects,image-optimization]
+FILE:configs/postcss.config.js|TYPE:config|PURPOSE:PostCSS configuration for Tailwind processing|DEPENDS_ON:[tailwindcss,autoprefixer]|EXPORTS:[module.exports]|IMPLEMENTS:[styling,css-processing]
+FILE:configs/.env.example|TYPE:config|PURPOSE:Example environment variables template|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[configuration,environment]
+FILE:package.json|TYPE:config|PURPOSE:Project dependencies and scripts configuration|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[dependencies,scripts]
+
+# Middleware and Logging
+FILE:src/middleware.ts|TYPE:middleware|PURPOSE:Entry point for Next.js middleware with browser error logging|DEPENDS_ON:[src/middleware/implementation.ts]|EXPORTS:[middleware,config]|IMPLEMENTS:[middleware,authentication,routing]
+FILE:src/middleware/implementation.ts|TYPE:middleware|PURPOSE:Core middleware implementation with route handling and authentication|DEPENDS_ON:[src/middleware/utils,src/middleware/handlers,src/middleware/logger]|EXPORTS:[middleware,config]|IMPLEMENTS:[middleware,authentication,routing,entitlements]
+FILE:src/middleware/core.ts|TYPE:utility|PURPOSE:Re-export file to maintain backward compatibility|DEPENDS_ON:[src/middleware/implementation.ts]|EXPORTS:[middleware,config]|IMPLEMENTS:[middleware,compatibility]
+FILE:src/middleware/logger/index.ts|TYPE:utility|PURPOSE:Configurable logging system for middleware|DEPENDS_ON:[]|EXPORTS:[logger]|IMPLEMENTS:[logging,debugging]|ENV_VARS:[MIDDLEWARE_LOG_LEVEL]
+FILE:src/middleware/utils/browser-logger.ts|TYPE:utility|PURPOSE:Browser error logger for client-side error tracking|DEPENDS_ON:[src/middleware/logger]|EXPORTS:[injectBrowserErrorLogger]|IMPLEMENTS:[error-logging,debugging]|ENV_VARS:[MIDDLEWARE_LOG_LEVEL]|NOTES:Only activates when log level is set to debug
+FILE:src/middleware/utils/routes.ts|TYPE:utility|PURPOSE:Route configuration and type checking utilities|DEPENDS_ON:[]|EXPORTS:[isStaticRoute,isPublicRoute,isProtectedRoute,isAuthOnlyRoute]|IMPLEMENTS:[routing,middleware]
+FILE:src/middleware/utils/auth.ts|TYPE:utility|PURPOSE:Authentication utilities for middleware|DEPENDS_ON:[src/middleware/logger]|EXPORTS:[logCookies,enhancedAuthCheck,extractUserId]|IMPLEMENTS:[authentication,middleware]
+FILE:src/middleware/handlers/special-routes.ts|TYPE:handler|PURPOSE:Special route handling for checkout and redirects|DEPENDS_ON:[src/middleware/logger,src/middleware/utils/routes]|EXPORTS:[handleCheckoutSuccessPage,handleCheckoutAddonPage,handleDomainRedirect,handleAuthPageRedirect,handlePreCheckoutRedirect,handleProtectedRouteRedirect,handleAuthOnlyRouteRedirect]|IMPLEMENTS:[routing,middleware]
+FILE:src/middleware/handlers/entitlements.ts|TYPE:handler|PURPOSE:User entitlements checking and handling with direct database access and UUID format handling|DEPENDS_ON:[src/middleware/logger,src/utils/supabase/middleware]|EXPORTS:[checkUserEntitlements]|IMPLEMENTS:[entitlements,middleware]|DB_TABLES:[user_entitlements]|NOTES:Queries database directly and handles various user ID formats
+
+# App Structure
+FILE:src/app/layout.tsx|TYPE:layout|PURPOSE:Root layout with providers and global structure|DEPENDS_ON:[src/components/ui,src/lib/supabase.ts]|EXPORTS:[RootLayout,metadata]|IMPLEMENTS:[layout,providers]
+FILE:src/app/page.tsx|TYPE:page|PURPOSE:Homepage with main content and navigation|DEPENDS_ON:[src/components/sections/HeroSection,src/components/sections/ResultsSection,src/components/sections/FeaturesSection,src/components/sections/TargetAudienceSection,src/components/sections/FAQSection]|EXPORTS:[Home]|IMPLEMENTS:[page,routing,marketing]
+FILE:src/app/globals.css|TYPE:styles|PURPOSE:Global CSS styles including Tailwind directives|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[styling]
+FILE:src/app/error.tsx|TYPE:error-handler|PURPOSE:Error boundary for app pages|DEPENDS_ON:[src/lib/error-handler.ts]|EXPORTS:[Error]|IMPLEMENTS:[error-handling,user-interface]
+FILE:src/app/global-error.tsx|TYPE:error-handler|PURPOSE:Global error boundary for entire app|DEPENDS_ON:[src/lib/error-handler.ts]|EXPORTS:[GlobalError]|IMPLEMENTS:[error-handling,user-interface]
+FILE:src/app/loading.tsx|TYPE:loading|PURPOSE:Loading state for app pages|DEPENDS_ON:[]|EXPORTS:[Loading]|IMPLEMENTS:[loading-state,user-interface]
+
+# Authentication
+FILE:src/app/login/page.tsx|TYPE:page|PURPOSE:Login page with authentication form|DEPENDS_ON:[src/lib/supabase.ts,src/components]|EXPORTS:[LoginPage]|IMPLEMENTS:[authentication,forms]|AUTH_STATES:[unauthenticated,authenticating]
+FILE:src/app/signup/page.tsx|TYPE:page|PURPOSE:Signup page with registration form|DEPENDS_ON:[src/lib/supabase.ts,src/components]|EXPORTS:[SignupPage]|IMPLEMENTS:[authentication,forms]|AUTH_STATES:[unauthenticated,registering]
+FILE:src/app/auth/callback/route.ts|TYPE:route-handler|PURPOSE:Auth callback handler for Supabase authentication|DEPENDS_ON:[src/lib/supabase.ts]|EXPORTS:[GET]|IMPLEMENTS:[authentication,oauth]|AUTH_STATES:[authenticating,authenticated]|API_FLOW:[GET /auth/callback,handleAuthCallback,RedirectResponse]
+FILE:src/context/AuthContext.tsx|TYPE:context|PURPOSE:Authentication context provider with debounced session checks and caching|DEPENDS_ON:[src/lib/supabase.ts,src/hooks/useUser.ts]|EXPORTS:[AuthProvider,useAuth]|IMPLEMENTS:[authentication,state-management,caching]|AUTH_STATES:[authenticated,unauthenticated,loading]
+FILE:src/hooks/useEnhancedUser.ts|TYPE:hook|PURPOSE:Enhanced user authentication hook with improved debouncing and conditional logging|DEPENDS_ON:[src/utils/supabase/client.ts]|EXPORTS:[useEnhancedUser,User]|IMPLEMENTS:[authentication,caching,performance-optimization]|ENV_VARS:[NEXT_PUBLIC_DEBUG_AUTH]|AUTH_STATES:[authenticated,unauthenticated,loading]
+FILE:src/hooks/useAuthState.ts|TYPE:hook|PURPOSE:Unified authentication hook that combines AuthContext and useEnhancedUser|DEPENDS_ON:[src/context/AuthContext.tsx,src/hooks/useEnhancedUser.ts]|EXPORTS:[useAuthState,CombinedUser]|IMPLEMENTS:[authentication,state-management,performance-optimization]|AUTH_STATES:[authenticated,unauthenticated,loading]
+
+# Dashboard & User Interface
+FILE:src/app/dashboard/page.tsx|TYPE:page|PURPOSE:Server component wrapper for dashboard with revalidation|DEPENDS_ON:[src/components/DashboardClient.tsx]|EXPORTS:[DashboardPage]|IMPLEMENTS:[dashboard,user-interface,revalidation]|AUTH_STATES:[authenticated]|NOTES:Uses @/ import path for DashboardClient component
+FILE:src/components/DashboardClient.tsx|TYPE:component|PURPOSE:Client component for dashboard UI with user entitlements and products|DEPENDS_ON:[src/components/DashboardLayout.tsx,src/components/ui]|EXPORTS:[DashboardClient]|IMPLEMENTS:[dashboard,user-interface]|AUTH_STATES:[authenticated]
+FILE:src/components/Dashboard.tsx|TYPE:component|PURPOSE:Main dashboard component with user data display|DEPENDS_ON:[src/components/ui,src/lib/supabase-utils.ts]|EXPORTS:[Dashboard]|IMPLEMENTS:[dashboard,data-display]
+FILE:src/components/Sidebar.tsx|TYPE:component|PURPOSE:Navigation sidebar with links and user info|DEPENDS_ON:[src/components/ui]|EXPORTS:[Sidebar]|IMPLEMENTS:[navigation,layout]
+FILE:src/components/Navbar.tsx|TYPE:component|PURPOSE:Top navigation bar with user actions|DEPENDS_ON:[src/components/ui,src/lib/supabase.ts]|EXPORTS:[Navbar]|IMPLEMENTS:[navigation,user-interface]|AUTH_STATES:[authenticated,unauthenticated]
+FILE:src/components/UserEntitlements.tsx|TYPE:component|PURPOSE:Display and manage user product entitlements|DEPENDS_ON:[src/lib/entitlements.ts,src/lib/purchases.ts]|EXPORTS:[UserEntitlements]|IMPLEMENTS:[entitlements,user-interface]|DB_TABLES:[user_entitlements,products]|DB_FIELDS:[id,user_id,product_id,is_active,created_at]|PRODUCT_IDS:[4a554622-d759-42b7-b830-79c9136d2f96,PMU Profit System]
+
+# API Routes - Entitlements & Purchases
+FILE:src/app/api/user-entitlements/route.ts|TYPE:route-handler|PURPOSE:API endpoint for fetching user entitlements with inline cache control headers|DEPENDS_ON:[src/utils/supabase/server.ts,src/lib/supabase.ts]|EXPORTS:[GET,dynamic,fetchCache]|IMPLEMENTS:[api,entitlements,cache-control]|DB_TABLES:[user_entitlements,products]|DB_FIELDS:[id,user_id,product_id,is_active,created_at]|API_FLOW:[GET /api/user-entitlements,getUserEntitlements,EntitlementResponse]|CACHE_STRATEGY:[entitlements,force-no-store]|NOTES:Uses inline headers in response objects instead of headers export function
+FILE:src/app/api/check-entitlements/route.ts|TYPE:route-handler|PURPOSE:API endpoint for checking if a user has entitlements for a specific product|DEPENDS_ON:[src/utils/supabase/server.ts,src/lib/product-ids.ts]|EXPORTS:[POST]|IMPLEMENTS:[api,entitlements,access-control]|DB_TABLES:[user_entitlements]|DB_FIELDS:[id,user_id,product_id,is_active]|API_FLOW:[POST /api/check-entitlements,checkUserEntitlements,EntitlementStatusResponse]|CACHE_STRATEGY:[entitlements,no-store]
+FILE:src/app/api/user-entitlements/clear-addons/route.ts|TYPE:route-handler|PURPOSE:Removes addon entitlements while preserving main product|DEPENDS_ON:[src/lib/entitlements.ts,src/lib/purchases.ts]|EXPORTS:[POST]|IMPLEMENTS:[api,entitlements]|DB_TABLES:[user_entitlements,purchases,products]|DB_FIELDS:[id,user_id,product_id,is_active,status]|API_FLOW:[POST /api/user-entitlements/clear-addons,clearAddonEntitlements,ClearAddonsResponse]|PRODUCT_IDS:[4a554622-d759-42b7-b830-79c9136d2f96,PMU Profit System,4ba5c775-a8e4-449e-828f-19f938e3710b,pmu-ad-generator,e5749058-500d-4333-8938-c8a19b16cd65,consultation-success-blueprint,f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a,pricing-template]
+FILE:src/app/api/purchases/route.ts|TYPE:route-handler|PURPOSE:API endpoint for managing user purchases|DEPENDS_ON:[src/lib/purchases.ts,src/lib/supabase.ts]|EXPORTS:[GET,POST]|IMPLEMENTS:[api,purchases]|DB_TABLES:[purchases]|DB_FIELDS:[id,user_id,product_id,status,stripe_payment_intent_id,created_at]|API_FLOW:[GET /api/purchases,getUserPurchases,PurchasesResponse]|CACHE_STRATEGY:[purchases,auto-no-cache]
+FILE:src/app/api/products/route.ts|TYPE:route-handler|PURPOSE:API endpoint for fetching product data|DEPENDS_ON:[src/lib/supabase.ts]|EXPORTS:[GET]|IMPLEMENTS:[api,products]|DB_TABLES:[products]|DB_FIELDS:[id,name,description,price,active]|API_FLOW:[GET /api/products,getProducts,ProductsResponse]|CACHE_STRATEGY:[products,cache-hit]
+
+# API Routes - Checkout & Payment
+FILE:src/app/api/create-checkout-session/route.ts|TYPE:route-handler|PURPOSE:API endpoint for creating Stripe checkout sessions|DEPENDS_ON:[src/lib/stripe.ts,src/lib/supabase.ts]|EXPORTS:[POST]|IMPLEMENTS:[api,payments]|API_FLOW:[POST /api/create-checkout-session,createCheckoutSession,CheckoutSessionResponse]
+FILE:src/app/api/create-addon-payment-intent/route.ts|TYPE:route-handler|PURPOSE:API endpoint for creating payment intents for addon products|DEPENDS_ON:[src/lib/stripe.ts,src/lib/supabase.ts]|EXPORTS:[POST]|IMPLEMENTS:[api,payments]|API_FLOW:[POST /api/create-addon-payment-intent,createAddonPaymentIntent,PaymentIntentResponse]
+FILE:src/app/api/webhooks/stripe/route.ts|TYPE:route-handler|PURPOSE:Webhook handler for Stripe events|DEPENDS_ON:[src/lib/stripe.ts,src/lib/entitlements.ts]|EXPORTS:[POST]|IMPLEMENTS:[webhooks,payments]|API_FLOW:[POST /api/webhooks/stripe,handleStripeWebhook,WebhookResponse]|DB_TABLES:[purchases,user_entitlements]
+
+# Core Libraries - Database & Authentication
+FILE:src/lib/supabase.ts|TYPE:utility|PURPOSE:Supabase client initialization and helpers|DEPENDS_ON:[@supabase/auth-helpers-nextjs]|EXPORTS:[createClient,createServerClient,getServiceSupabase]|IMPLEMENTS:[database,authentication]|AUTH_STATES:[authenticated,unauthenticated,token-refresh]
+FILE:src/lib/supabase-utils.ts|TYPE:utility|PURPOSE:Utility functions for Supabase operations|DEPENDS_ON:[src/lib/supabase.ts]|EXPORTS:[getUserProfile,updateUserProfile,checkUserExists]|IMPLEMENTS:[database,user-management]|DB_TABLES:[profiles,users]|DB_FIELDS:[id,user_id,email,full_name,avatar_url]
+
+# Core Libraries - Entitlements & Products
+FILE:src/lib/entitlements.ts|TYPE:utility|PURPOSE:User entitlements management functions|DEPENDS_ON:[src/lib/supabase.ts,src/lib/product-ids.ts]|EXPORTS:[getUserEntitlements,createEntitlement,createEntitlementsFromStripeSession,createEntitlementsFromPaymentIntent]|IMPLEMENTS:[entitlements,business-logic]|DB_TABLES:[user_entitlements,products,purchases]|DB_FIELDS:[id,user_id,product_id,is_active,created_at,source_id,source_type]|PRODUCT_IDS:[4a554622-d759-42b7-b830-79c9136d2f96,PMU Profit System,4ba5c775-a8e4-449e-828f-19f938e3710b,pmu-ad-generator,e5749058-500d-4333-8938-c8a19b16cd65,consultation-success-blueprint,f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a,pricing-template]
+FILE:src/lib/purchases.ts|TYPE:utility|PURPOSE:User purchases management functions|DEPENDS_ON:[src/lib/supabase.ts,src/lib/product-ids.ts]|EXPORTS:[updatePurchaseStatus,findPurchaseByPaymentIntent]|IMPLEMENTS:[purchases,business-logic]|DB_TABLES:[purchases]|DB_FIELDS:[id,user_id,product_id,status,stripe_payment_intent_id,created_at]
+FILE:src/lib/product-ids.ts|TYPE:constants|PURPOSE:Product IDs and related constants|DEPENDS_ON:[]|EXPORTS:[PRODUCT_IDS,LEGACY_PRODUCT_IDS,isValidUuidProductId,isValidLegacyProductId,normalizeProductId]|IMPLEMENTS:[constants]|PRODUCT_IDS:[4a554622-d759-42b7-b830-79c9136d2f96,PMU Profit System,4ba5c775-a8e4-449e-828f-19f938e3710b,pmu-ad-generator,e5749058-500d-4333-8938-c8a19b16cd65,consultation-success-blueprint,f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a,pricing-template]
+
+# Core Libraries - Payments & Error Handling
+FILE:src/lib/stripe.ts|TYPE:utility|PURPOSE:Stripe API client with retry logic and error handling|DEPENDS_ON:[stripe]|EXPORTS:[stripe,safeStripeOperation,checkStripeConfiguration]|IMPLEMENTS:[payment-processing,error-handling]
+FILE:src/lib/error-handler.ts|TYPE:utility|PURPOSE:Error handling and logging utilities|DEPENDS_ON:[]|EXPORTS:[handleError,ErrorWithCode,logError]|IMPLEMENTS:[error-handling]
+FILE:src/lib/env-utils.ts|TYPE:utility|PURPOSE:Environment utilities and configuration helpers|DEPENDS_ON:[]|EXPORTS:[isDevelopment,isProduction,allowTestPage]|IMPLEMENTS:[configuration]
+
+# UI Components
+FILE:src/components/ui/button.tsx|TYPE:component|PURPOSE:Reusable button component with variants|DEPENDS_ON:[@radix-ui/react-slot]|EXPORTS:[Button]|IMPLEMENTS:[ui,interaction]
+FILE:src/components/ui/card.tsx|TYPE:component|PURPOSE:Card component for content containers|DEPENDS_ON:[]|EXPORTS:[Card,CardHeader,CardFooter,CardTitle,CardDescription,CardContent]|IMPLEMENTS:[ui,layout]
+FILE:src/components/ui/toast.tsx|TYPE:component|PURPOSE:Toast notification component|DEPENDS_ON:[@radix-ui/react-toast]|EXPORTS:[Toast,ToastProvider,ToastViewport]|IMPLEMENTS:[ui,notifications]
+FILE:src/components/ui/toaster.tsx|TYPE:component|PURPOSE:Toaster component for managing multiple toasts|DEPENDS_ON:[src/components/ui/toast.tsx,src/components/ui/use-toast.tsx]|EXPORTS:[Toaster]|IMPLEMENTS:[ui,notifications]
+FILE:src/components/ui/use-toast.tsx|TYPE:hook|PURPOSE:Hook for managing toast notifications|DEPENDS_ON:[]|EXPORTS:[useToast,toast]|IMPLEMENTS:[ui,notifications]
+FILE:src/components/ui/input.tsx|TYPE:component|PURPOSE:Input component for forms|DEPENDS_ON:[]|EXPORTS:[Input]|IMPLEMENTS:[ui,forms]
+FILE:src/components/ui/label.tsx|TYPE:component|PURPOSE:Label component for form fields|DEPENDS_ON:[@radix-ui/react-label]|EXPORTS:[Label]|IMPLEMENTS:[ui,forms]
+FILE:src/components/ui/tabs.tsx|TYPE:component|PURPOSE:Tabs component for tabbed interfaces|DEPENDS_ON:[@radix-ui/react-tabs]|EXPORTS:[Tabs,TabsList,TabsTrigger,TabsContent]|IMPLEMENTS:[ui,navigation]
+FILE:src/components/ui/sheet.tsx|TYPE:component|PURPOSE:Sheet component for slide-out panels|DEPENDS_ON:[@radix-ui/react-dialog]|EXPORTS:[Sheet,SheetTrigger,SheetContent,SheetHeader,SheetFooter,SheetTitle,SheetDescription]|IMPLEMENTS:[ui,layout]
+FILE:src/components/ui/separator.tsx|TYPE:component|PURPOSE:Separator component for visual dividers|DEPENDS_ON:[@radix-ui/react-separator]|EXPORTS:[Separator]|IMPLEMENTS:[ui,layout]
+FILE:src/components/ui/badge.tsx|TYPE:component|PURPOSE:Badge component for labels and status indicators|DEPENDS_ON:[]|EXPORTS:[Badge]|IMPLEMENTS:[ui,data-display]
+FILE:src/components/ui/alert.tsx|TYPE:component|PURPOSE:Alert component for notifications|DEPENDS_ON:[]|EXPORTS:[Alert,AlertTitle,AlertDescription]|IMPLEMENTS:[ui,notifications]
+FILE:src/components/ui/skeleton.tsx|TYPE:component|PURPOSE:Skeleton component for loading states|DEPENDS_ON:[]|EXPORTS:[Skeleton]|IMPLEMENTS:[ui,loading-state]
+FILE:src/components/ui/container.tsx|TYPE:component|PURPOSE:Container component for layout constraints|DEPENDS_ON:[]|EXPORTS:[Container]|IMPLEMENTS:[ui,layout]
+FILE:src/components/ui/connection-status.tsx|TYPE:component|PURPOSE:Connection status indicator|DEPENDS_ON:[]|EXPORTS:[ConnectionStatus]|IMPLEMENTS:[ui,status-indicator]
+FILE:src/components/ui/image.tsx|TYPE:component|PURPOSE:Enhanced image component with loading states|DEPENDS_ON:[next/image]|EXPORTS:[Image]|IMPLEMENTS:[ui,media]
+
+# Supabase Utilities
+FILE:src/utils/supabase/client.ts|TYPE:utility|PURPOSE:Supabase client for browser usage|DEPENDS_ON:[@supabase/supabase-js]|EXPORTS:[supabase]|IMPLEMENTS:[database,authentication]
+FILE:src/utils/supabase/server.ts|TYPE:utility|PURPOSE:Supabase client for server components|DEPENDS_ON:[@supabase/supabase-js]|EXPORTS:[createClient,createServiceClient]|IMPLEMENTS:[database,authentication]
+FILE:src/utils/supabase/middleware.ts|TYPE:utility|PURPOSE:Optimized Supabase client for middleware with efficient cookie handling and token refresh|DEPENDS_ON:[@supabase/ssr]|EXPORTS:[createClient]|IMPLEMENTS:[database,authentication,token-refresh]|NOTES:Reduces excessive cookie lookups and implements automatic token refresh
+FILE:src/utils/user-entitlements.ts|TYPE:utility|PURPOSE:Utility functions for user entitlements|DEPENDS_ON:[src/lib/entitlements.ts]|EXPORTS:[getUserEntitlements,hasEntitlement]|IMPLEMENTS:[entitlements,business-logic]
+
+# Database Files
+FILE:database/supabase-setup.sql|TYPE:sql|PURPOSE:Initial Supabase database setup with tables and policies|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-schema,rls-policies]|DB_TABLES:[users,purchases,email_logs]|DB_FIELDS:[id,user_id,email,full_name,product_id,amount,status]
+FILE:migrations/20240620_create_verified_sessions.sql|TYPE:sql|PURPOSE:Migration to create verified sessions table for payment tracking|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-schema,payment-verification]|DB_TABLES:[verified_sessions]|DB_FIELDS:[id,session_id,payment_intent_id,user_id,customer_email,payment_status,metadata,verified_at,created_at]
+FILE:scripts/add-entitlements-created-column.sql|TYPE:sql|PURPOSE:Migration to add created_at column to entitlements table|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-schema]|DB_TABLES:[user_entitlements]|DB_FIELDS:[created_at]
+FILE:scripts/add-payment-intent-column.sql|TYPE:sql|PURPOSE:Migration to add payment intent column to purchases table|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-schema,payments]|DB_TABLES:[purchases]|DB_FIELDS:[stripe_payment_intent_id]
+FILE:scripts/create-verified-sessions-table.sql|TYPE:sql|PURPOSE:SQL script to create verified sessions table|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-schema,payment-verification]|DB_TABLES:[verified_sessions]|DB_FIELDS:[id,session_id,payment_intent_id,user_id,customer_email,payment_status]
+FILE:scripts/create-exec-sql-function.sql|TYPE:sql|PURPOSE:Creates a SQL function for executing dynamic SQL|DEPENDS_ON:[]|EXPORTS:[exec_sql]|IMPLEMENTS:[database-utilities]
+
+# Database Schema Information
+# DB_TABLE:user_entitlements|FIELDS:[id,user_id,product_id,is_active,created_at,source_id,source_type]|RELATIONSHIPS:[products:product_id,users:user_id]|PURPOSE:Stores user entitlements to products
+# DB_TABLE:purchases|FIELDS:[id,user_id,product_id,status,stripe_payment_intent_id,amount,created_at,updated_at]|RELATIONSHIPS:[products:product_id,users:user_id]|PURPOSE:Stores user purchase records
+# DB_TABLE:products|FIELDS:[id,name,description,price,active]|RELATIONSHIPS:[]|PURPOSE:Stores product information
+# DB_TABLE:profiles|FIELDS:[id,user_id,email,full_name,avatar_url]|RELATIONSHIPS:[users:user_id]|PURPOSE:Stores user profile information
+# DB_TABLE:users|FIELDS:[id,email,full_name,created_at,updated_at]|RELATIONSHIPS:[]|PURPOSE:Stores user account information
+# DB_TABLE:email_logs|FIELDS:[id,recipient,subject,content,sent_at]|RELATIONSHIPS:[]|PURPOSE:Stores email sending logs
+# DB_TABLE:verified_sessions|FIELDS:[id,session_id,payment_intent_id,user_id,customer_email,payment_status,metadata,verified_at,created_at]|RELATIONSHIPS:[users:user_id]|PURPOSE:Stores verified payment sessions
+
+# Product System Information
+# PRODUCT:4a554622-d759-42b7-b830-79c9136d2f96|NAME:PMU Profit System|TYPE:main|LEGACY_ID:pmu-profit-system
+# PRODUCT:4ba5c775-a8e4-449e-828f-19f938e3710b|NAME:PMU Ad Generator|TYPE:addon|LEGACY_ID:pmu-ad-generator
+# PRODUCT:e5749058-500d-4333-8938-c8a19b16cd65|NAME:Consultation Success Blueprint|TYPE:addon|LEGACY_ID:consultation-success-blueprint
+# PRODUCT:f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a|NAME:Pricing Template|TYPE:addon|LEGACY_ID:pricing-template
+
+# Authentication Flow Information
+# AUTH_STATE:unauthenticated|TRIGGERS:[page load without valid session]|NEXT_STATES:[authenticating,registering]|COOKIES:[sb-refresh-token:missing,auth-status:unauthenticated]
+# AUTH_STATE:authenticating|TRIGGERS:[login form submission]|NEXT_STATES:[authenticated,unauthenticated]|COOKIES:[sb-refresh-token:pending]
+# AUTH_STATE:authenticated|TRIGGERS:[successful login,valid session]|NEXT_STATES:[unauthenticated,token-refresh]|COOKIES:[sb-refresh-token:present,auth-status:authenticated]
+# AUTH_STATE:token-refresh|TRIGGERS:[access token expired]|NEXT_STATES:[authenticated,unauthenticated]|COOKIES:[sb-access-token:missing,sb-refresh-token:present]
+
+# Hooks & State Management
+FILE:src/hooks/useUser.ts|TYPE:hook|PURPOSE:Custom hook for user authentication state|DEPENDS_ON:[src/lib/supabase.ts]|EXPORTS:[useUser]|IMPLEMENTS:[authentication,state-management]|AUTH_STATES:[authenticated,unauthenticated,loading]
+FILE:src/hooks/useEntitlements.ts|TYPE:hook|PURPOSE:Custom hook for user entitlements|DEPENDS_ON:[src/lib/entitlements.ts]|EXPORTS:[useEntitlements]|IMPLEMENTS:[entitlements,state-management]|DB_TABLES:[user_entitlements,products]
+FILE:src/context/PurchaseContext.tsx|TYPE:context|PURPOSE:Purchase and entitlements management with async access checking|DEPENDS_ON:[src/context/AuthContext,src/lib/supabase,src/lib/product-ids]|EXPORTS:[PurchaseProvider,usePurchases,ProductId]|IMPLEMENTS:[purchase-management,entitlements,access-control]|DB_TABLES:[purchases,user_entitlements]|NOTES:Uses string type for product_id in Purchase interface to support both legacy IDs and UUIDs
+
+# Landing Page Sections
+FILE:src/components/sections/HeroSection.tsx|TYPE:component|PURPOSE:Hero section for landing page|DEPENDS_ON:[src/components/ui]|EXPORTS:[HeroSection]|IMPLEMENTS:[marketing,user-interface]
+FILE:src/components/sections/ResultsSection.tsx|TYPE:component|PURPOSE:Results section showcasing product benefits|DEPENDS_ON:[src/components/ui]|EXPORTS:[ResultsSection]|IMPLEMENTS:[marketing,user-interface]
+FILE:src/components/sections/FeaturesSection.tsx|TYPE:component|PURPOSE:Features section highlighting product capabilities|DEPENDS_ON:[src/components/ui]|EXPORTS:[FeaturesSection]|IMPLEMENTS:[marketing,user-interface]
+FILE:src/components/sections/TargetAudienceSection.tsx|TYPE:component|PURPOSE:Target audience section for ideal customers|DEPENDS_ON:[src/components/ui]|EXPORTS:[TargetAudienceSection]|IMPLEMENTS:[marketing,user-interface]
+FILE:src/components/sections/FAQSection.tsx|TYPE:component|PURPOSE:FAQ section answering common questions|DEPENDS_ON:[src/components/ui]|EXPORTS:[FAQSection]|IMPLEMENTS:[marketing,user-interface]
+
+# Checkout & Payment Components
+FILE:src/components/PaymentForm.tsx|TYPE:component|PURPOSE:Stripe payment form with card element|DEPENDS_ON:[@stripe/react-stripe-js,src/lib/stripe.ts]|EXPORTS:[PaymentForm]|IMPLEMENTS:[payments,forms]|API_FLOW:[createPaymentIntent,handlePaymentSubmission]
+FILE:src/components/StripeProvider.tsx|TYPE:component|PURPOSE:Stripe Elements provider for payment components|DEPENDS_ON:[@stripe/react-stripe-js]|EXPORTS:[StripeProvider]|IMPLEMENTS:[payments,providers]
+FILE:src/app/checkout/page.tsx|TYPE:page|PURPOSE:Main checkout page with Stripe Elements integration and EUR currency|DEPENDS_ON:[src/context/AuthContext,src/context/PurchaseContext,@stripe/react-stripe-js]|EXPORTS:[CheckoutPage]|IMPLEMENTS:[checkout,payment-processing]
+FILE:src/app/checkout/addon/page.tsx|TYPE:page|PURPOSE:Add-on product checkout page with explicit EUR currency setting|DEPENDS_ON:[src/context/AuthContext,src/context/PurchaseContext,@stripe/react-stripe-js]|EXPORTS:[AddonCheckoutPage]|IMPLEMENTS:[checkout,payment-processing]
+FILE:src/app/checkout/success/page.tsx|TYPE:page|PURPOSE:Checkout success page that verifies purchases and creates entitlements|DEPENDS_ON:[src/context/AuthContext.tsx,src/context/PurchaseContext.tsx,src/lib/supabase.ts,src/app/api/auto-create-entitlements/route.ts]|EXPORTS:[default]|IMPLEMENTS:[checkout,purchase-verification,entitlements]|DB_TABLES:[purchases,user_entitlements]
+
+# Additional Components
+FILE:src/components/SiteFooter.tsx|TYPE:component|PURPOSE:Site footer with links and information|DEPENDS_ON:[src/components/ui]|EXPORTS:[SiteFooter]|IMPLEMENTS:[layout,navigation]
+FILE:src/components/ModuleNavBar.tsx|TYPE:component|PURPOSE:Navigation bar for course modules|DEPENDS_ON:[src/components/ui]|EXPORTS:[ModuleNavBar]|IMPLEMENTS:[navigation,courses]
+FILE:src/components/VideoPlayer.tsx|TYPE:component|PURPOSE:Video player for course content|DEPENDS_ON:[]|EXPORTS:[VideoPlayer]|IMPLEMENTS:[media,courses]
+FILE:src/components/ErrorBoundary.tsx|TYPE:component|PURPOSE:Error boundary component for catching errors|DEPENDS_ON:[src/lib/error-handler.ts]|EXPORTS:[ErrorBoundary]|IMPLEMENTS:[error-handling]
+FILE:src/components/ClientWrapper.tsx|TYPE:component|PURPOSE:Client component wrapper for hydration|DEPENDS_ON:[]|EXPORTS:[ClientWrapper]|IMPLEMENTS:[client-rendering]
+FILE:src/components/FloatingMenuButton.tsx|TYPE:component|PURPOSE:Floating menu button for mobile navigation|DEPENDS_ON:[src/components/ui]|EXPORTS:[FloatingMenuButton]|IMPLEMENTS:[navigation,mobile]
+FILE:src/components/DashboardLayout.tsx|TYPE:component|PURPOSE:Layout component for dashboard pages|DEPENDS_ON:[src/components/Sidebar.tsx,src/components/Navbar.tsx]|EXPORTS:[DashboardLayout]|IMPLEMENTS:[layout,dashboard]
+
+# Script Files
+FILE:scripts/run-database-updates.js|TYPE:script|PURPOSE:Node.js script to run database updates|DEPENDS_ON:[pg,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-migration,automation]
+FILE:scripts/development/auto-fix-dev.js|TYPE:script|PURPOSE:Development script to fix middleware issues|DEPENDS_ON:[fs,path]|EXPORTS:[]|IMPLEMENTS:[development,middleware]|NOTES:Checks for middleware.ts imports from implementation.ts and preserves the file when it contains proper imports
+FILE:scripts/create-verified-sessions-table.js|TYPE:script|PURPOSE:Node.js script to create verified sessions table|DEPENDS_ON:[pg,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-migration,automation]
+FILE:scripts/clean-database.js|TYPE:script|PURPOSE:Script to clean up test data from database|DEPENDS_ON:[pg,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-maintenance,testing]
+FILE:scripts/combined-database-updates.sql|TYPE:sql|PURPOSE:Combined SQL updates for database maintenance|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-migration]|DB_TABLES:[user_entitlements,purchases,verified_sessions]
+FILE:scripts/testing/test-auth-flow.js|TYPE:test|PURPOSE:Automated test for authentication flow|DEPENDS_ON:[puppeteer]|EXPORTS:[]|IMPLEMENTS:[testing,authentication]
+FILE:scripts/database/setup-database.js|TYPE:script|PURPOSE:Script to set up database schema and initial data|DEPENDS_ON:[pg,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-setup,automation]
+FILE:scripts/database/verify-database.js|TYPE:script|PURPOSE:Script to verify database schema and connections|DEPENDS_ON:[pg,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-verification,automation]
+FILE:scripts/utils/check-image-domains.js|TYPE:script|PURPOSE:Script to check image domains in Next.js config|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[build-verification,image-optimization]
+
+# Test Files
+FILE:tests/auth-flow.test.js|TYPE:test|PURPOSE:Tests for authentication flow|DEPENDS_ON:[playwright]|EXPORTS:[]|IMPLEMENTS:[testing,authentication]|AUTH_STATES:[unauthenticated,authenticating,authenticated]
+FILE:tests/session-debug.test.js|TYPE:test|PURPOSE:Tests for session handling and debugging|DEPENDS_ON:[jest]|EXPORTS:[]|IMPLEMENTS:[testing,authentication,sessions]
+FILE:tests/valid-user-check.test.js|TYPE:test|PURPOSE:Tests for user validation|DEPENDS_ON:[jest]|EXPORTS:[]|IMPLEMENTS:[testing,authentication,validation]
+FILE:tests/middleware-check.test.js|TYPE:test|PURPOSE:Tests for middleware functionality|DEPENDS_ON:[jest]|EXPORTS:[]|IMPLEMENTS:[testing,middleware,authentication]
+FILE:tests/new-user-flow.test.js|TYPE:test|PURPOSE:Tests for new user registration flow|DEPENDS_ON:[playwright]|EXPORTS:[]|IMPLEMENTS:[testing,authentication,registration]|AUTH_STATES:[unauthenticated,registering,authenticated]
+FILE:tests/dashboard-access.test.js|TYPE:test|PURPOSE:Tests for dashboard access permissions|DEPENDS_ON:[playwright]|EXPORTS:[]|IMPLEMENTS:[testing,authentication,authorization]|AUTH_STATES:[authenticated,unauthenticated]
+FILE:tests/full-journey.test.js|TYPE:test|PURPOSE:End-to-end tests for complete user journey|DEPENDS_ON:[playwright]|EXPORTS:[]|IMPLEMENTS:[testing,user-journey]|AUTH_STATES:[unauthenticated,authenticated]
+
+# Tool Files
+FILE:tools/supabase_tools.ps1|TYPE:script|PURPOSE:PowerShell script for Supabase operations|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-utilities,automation]
+FILE:tools/test_supabase_connection.py|TYPE:script|PURPOSE:Python script to test Supabase connection|DEPENDS_ON:[requests,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-verification,testing]
+FILE:tools/test_supabase_query.py|TYPE:script|PURPOSE:Python script to test Supabase queries|DEPENDS_ON:[requests,dotenv]|EXPORTS:[]|IMPLEMENTS:[database-verification,testing]
+FILE:tools/supabase_tools.bat|TYPE:script|PURPOSE:Batch script for Supabase operations|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-utilities,automation]
+FILE:tools/check_supabase_installation.ps1|TYPE:script|PURPOSE:PowerShell script to check Supabase installation|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[environment-verification]
+FILE:tools/add-vercel-env.ps1|TYPE:script|PURPOSE:PowerShell script to add environment variables to Vercel|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[deployment,configuration]
+FILE:tools/README.md|TYPE:documentation|PURPOSE:Documentation for development tools|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[documentation]
+
+# Supabase Configuration
+FILE:supabase/config.toml|TYPE:config|PURPOSE:Supabase configuration file|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[database-config,authentication-config]
+
+# Public Assets
+FILE:public/favicon.svg|TYPE:asset|PURPOSE:Site favicon|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[branding]
+FILE:public/favicon/favicon.ico|TYPE:asset|PURPOSE:Site favicon in ICO format|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[branding]
+FILE:public/images/logo.svg|TYPE:asset|PURPOSE:Site logo|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[branding]
+FILE:public/images/hero-image.webp|TYPE:asset|PURPOSE:Hero section background image|DEPENDS_ON:[]|EXPORTS:[]|IMPLEMENTS:[marketing]
+
+# API Flow Information
+# API_FLOW:GET /api/user-entitlements|getUserEntitlements|EntitlementResponse|CACHE:force-no-store|REQUIRES:authenticated
+# API_FLOW:POST /api/user-entitlements/clear-addons|clearAddonEntitlements|ClearAddonsResponse|CACHE:auto-no-cache|REQUIRES:authenticated
+# API_FLOW:GET /api/products|getProducts|ProductsResponse|CACHE:cache-hit|REQUIRES:none
+# API_FLOW:GET /api/purchases|getUserPurchases|PurchasesResponse|CACHE:auto-no-cache|REQUIRES:authenticated
+# API_FLOW:POST /api/create-checkout-session|createCheckoutSession|CheckoutSessionResponse|CACHE:no-store|REQUIRES:authenticated
+# API_FLOW:POST /api/create-addon-payment-intent|createAddonPaymentIntent|PaymentIntentResponse|CACHE:no-store|REQUIRES:authenticated
+# API_FLOW:POST /api/webhooks/stripe|handleStripeWebhook|WebhookResponse|CACHE:no-store|REQUIRES:none
+# API_FLOW:GET /auth/callback|handleAuthCallback|RedirectResponse|CACHE:no-store|REQUIRES:none
+# API_FLOW:POST /api/check-entitlements|checkUserEntitlements|EntitlementStatusResponse|CACHE:no-store|REQUIRES:authenticated
+
+# Public Directory Structure
+# DIR:public/images|PURPOSE:Contains images for the website|INCLUDES:[payment-icons,testimonial-images,background-images,before-after-images]
+# DIR:public/favicon|PURPOSE:Contains favicon files in different formats|INCLUDES:[ico,png,svg]
+
+# Cache Strategy Information
+# CACHE_STRATEGY:entitlements|POLICY:force-no-store|REASON:Always fetch fresh entitlement data
+# CACHE_STRATEGY:products|POLICY:cache-hit|REASON:Product data can be cached for performance
+# CACHE_STRATEGY:purchases|POLICY:auto-no-cache|REASON:Purchase data should be fresh
+# CACHE_STRATEGY:auth|POLICY:no-store|REASON:Authentication data should never be cached
+
+FILE:src/app/api/create-payment-intent/route.ts|TYPE:api-route|PURPOSE:Creates Stripe payment intents with enforced EUR currency|DEPENDS_ON:[src/lib/stripe,src/lib/supabase,src/lib/product-ids]|EXPORTS:[POST]|IMPLEMENTS:[payment-processing,stripe-integration]|API_FLOW:[POST /api/create-payment-intent,createPaymentIntent,JSON]
+
+FILE:src/app/api/verify-purchase/route.ts|TYPE:api|PURPOSE:Verifies a purchase using session ID, payment intent ID, or purchase ID|DEPENDS_ON:[src/lib/stripe.ts,src/lib/supabase.ts,src/lib/purchases.ts]|EXPORTS:[GET]|IMPLEMENTS:[payments,api]|NOTES:Can verify purchases by purchase ID or payment intent ID 
+
+FILE:src/app/api/create-entitlement-direct/route.ts|TYPE:api|PURPOSE:Creates entitlements directly for a user and product|DEPENDS_ON:[src/lib/supabase.ts,src/lib/product-ids.ts]|EXPORTS:[POST]|IMPLEMENTS:[entitlements,api]|NOTES:Provides a direct way to create entitlements for a user, with support for creating a purchase record if needed. Enhanced to handle purchase_id parameter and mark purchases as having entitlements created. 
+
+FILE:src/app/api/update-pending-purchases/route.ts|TYPE:api|PURPOSE:Updates pending purchases to completed and creates entitlements|DEPENDS_ON:[src/lib/supabase.ts,src/lib/product-ids.ts]|EXPORTS:[POST]|IMPLEMENTS:[purchase-management,entitlement-creation]|DB_TABLES:[purchases,user_entitlements]
+
+FILE:src/app/api/auto-create-entitlements/route.ts|TYPE:api-route|PURPOSE:Automatically creates entitlements for users when they reach the success page|DEPENDS_ON:[src/lib/supabase.ts,src/lib/product-ids.ts]|EXPORTS:[POST]|IMPLEMENTS:[entitlements,purchases,auto-creation]|DB_TABLES:[purchases,user_entitlements]
+
+# Dashboard & Product Pages
+FILE:src/app/dashboard/ad-generator/page.tsx|TYPE:page|PURPOSE:PMU Ad Generator tool with improved access checking and redirect prevention|DEPENDS_ON:[src/context/PurchaseContext,src/components/DashboardLayout]|EXPORTS:[PMUAdGenerator]|IMPLEMENTS:[ad-generator,access-control,redirect-handling]|PRODUCT_IDS:[pmu-ad-generator]
+FILE:src/app/dashboard/ad-generator/purchase/page.tsx|TYPE:page|PURPOSE:Purchase page for PMU Ad Generator|DEPENDS_ON:[src/context/AuthContext,src/context/PurchaseContext]|EXPORTS:[PMUAdGeneratorPurchase]|IMPLEMENTS:[product-purchase,marketing]|PRODUCT_IDS:[pmu-ad-generator]
+FILE:src/context/PurchaseContext.tsx|TYPE:context|PURPOSE:Purchase and entitlements management with async access checking|DEPENDS_ON:[src/context/AuthContext,src/lib/supabase,src/lib/product-ids]|EXPORTS:[PurchaseProvider,usePurchases,ProductId]|IMPLEMENTS:[purchase-management,entitlements,access-control]|DB_TABLES:[purchases,user_entitlements]|NOTES:Uses string type for product_id in Purchase interface to support both legacy IDs and UUIDs
+
+# Recent Updates
+# 2023-07-15: Fixed currency mismatch in Stripe checkout by enforcing EUR currency in payment intent creation
+# 2023-07-14: Fixed redirect loop in Ad Generator access checking by improving entitlement verification
+# 2023-07-13: Enhanced middleware entitlement checking with better error handling and logging
+# 2023-07-12: Implemented check-entitlements API endpoint for secure entitlement verification
+# 2023-07-11: Updated middleware to redirect users based on entitlements
+# 2023-07-10: Restructured middleware files to avoid duplicate detection by Next.js
+# 2023-07-09: Renamed middleware/index.ts to middleware/core.ts to prevent conflicts
+# 2024-03-16: Fixed UUID format error in entitlements handler by improving user ID extraction and formatting
+# 2024-03-16: Implemented token refresh in Supabase middleware client to handle missing access tokens

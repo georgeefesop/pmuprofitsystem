@@ -1,6 +1,61 @@
 # PMU Profit System
 
-A complete system to help PMU artists reach €5,000/month with marketing tools, consultation frameworks, and business strategies.
+This is the codebase for the PMU Profit System, a platform for PMU professionals to access training materials, tools, and resources.
+
+## Features
+
+- User authentication with Supabase Auth
+- Dashboard with access to purchased products
+- Stripe integration for payments
+- Add-on products (Blueprint, Pricing Template, Ad Generator)
+- Unauthenticated checkout flow
+
+## Recent Updates
+
+### Unauthenticated Checkout Flow
+
+We've implemented a robust system for handling purchases by unauthenticated users:
+
+- **Webhook-First Approach**: The Stripe webhook is now the primary source of truth for purchase verification
+- **Verified Sessions Table**: Stores information about verified checkout sessions
+- **User Creation**: Automatically creates users based on email when needed
+- **Purchase Verification API**: New endpoint at `/api/verify-purchase` for verifying purchases
+
+### Testing
+
+We've added automated tests for the checkout flows:
+
+- `scripts/testing/test-addon-checkout-flow.js`: Tests the add-on checkout flow for authenticated users
+- `scripts/testing/test-unauthenticated-checkout.js`: Tests the checkout flow for unauthenticated users
+
+Run tests with:
+
+```bash
+node scripts/testing/test-addon-checkout-flow.js
+node scripts/testing/test-unauthenticated-checkout.js
+```
+
+## Development
+
+### Setup
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env.example`)
+4. Run the development server: `npm run dev`
+
+### Database Migrations
+
+New migrations are in the `migrations` folder. To apply them:
+
+1. Connect to your Supabase project
+2. Run the SQL in the migration files
+
+## Documentation
+
+See the `docs` folder for detailed documentation:
+
+- `docs/docs.md`: Main documentation file
 
 ## Getting Started
 
@@ -120,7 +175,7 @@ Comprehensive documentation is available in the `docs` directory:
 - [Development Workflow](docs/DEVELOPMENT-WORKFLOW.md) - Guide to the development workflow
 - [Supabase Setup](docs/supabase-setup-instructions.md) - Instructions for setting up Supabase
 - [Deployment Guide](docs/DEPLOYMENT.md) - Guide for deploying the application
-- [Testing Guide](docs/TESTING.md) - Instructions for testing the application
+- [Testing Guide](docs/TESTING.md) - Instructions for testing the application, including add-on purchases and unauthenticated user payments
 - [Error Handling](docs/ERROR_HANDLING.md) - Overview of the error handling system
 
 ### Troubleshooting
@@ -135,6 +190,17 @@ For testing payments, use the following test card numbers:
 - **Payment declined**: 4000 0000 0000 9995
 
 Use any future expiration date, any 3-digit CVC, and any postal code.
+
+### Testing Add-on Purchases
+
+The system now supports add-on products with a streamlined checkout flow:
+
+1. Navigate to the add-on product page (e.g., `/dashboard/pricing-template/purchase`)
+2. Click the "Buy Now" button
+3. Complete the payment on the Stripe checkout page
+4. The system will record the purchase and grant access to the add-on
+
+The system also supports recording successful payments for unauthenticated users through the `/api/verify-purchase` endpoint.
 
 ## Scripts
 

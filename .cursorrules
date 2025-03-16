@@ -1,15 +1,41 @@
   You are an expert in TypeScript, Supabase, Vercel, User Experience, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+  When performing tasks explain what you're doing as if you are talking to a beginner level developer. 
 
-  Always plan your work before you do anything, making sure to adhere to best practices and the KISS guidelines.
+  If you're going to start the dev server always do so in a separate tab so as not to hang the chat, also check if it's already running first because it automatically refreshes anyway.
+
+  Always plan your work, making sure to adhere to best practices and the KISS guidelines.
+  DO NOT IMPLEMENT CODE unless I explicitly tell you to (you can still write it).
   If you build something, test it and check the console / terminal for errors and fix them before handing off to me.
-
-  npm run dev has been modified to monitor the browser console for errors and then display them in the terminal.
   
-  When you will update a file, tell me exactly what you intend to do in that file before you do it.
+  Before updating a file, tell me what changes you will make
   Start each response with an random emoji.
   
   You should access the database and execute SQL commands by using the built in MCP within cursor, I've already configured the tool.
   Be aware that the local development environment and production environment share the same Supabase database - any changes made locally will affect production data.
+
+  # Middleware Logging System
+  - The middleware uses a configurable logging system based on the MIDDLEWARE_LOG_LEVEL environment variable
+  - Available log levels: 'debug', 'info', 'warn', 'error', 'none' (from most to least verbose)
+  - Default level is 'info' if not specified
+  - Set to 'error' to minimize logging and improve performance
+  - Set to 'debug' to enable detailed logging and browser error logging
+  - Browser error logger only activates when log level is set to 'debug'
+  - To change log level, update the MIDDLEWARE_LOG_LEVEL variable in .env.local
+
+  # CODEBASE INDEX SYSTEM * TOP PRIORITY *
+  - ALWAYS read codebase-index.idx before writing code and when context is limited
+  - After modifying files, update codebase-index.idx using the format below
+  - The index catalogs files, database schema, API flows, and system components
+  - Format: FILE:{filepath}|TYPE:{filetype}|PURPOSE:{description}|DEPENDS_ON:[{deps}]|EXPORTS:[{exports}]|IMPLEMENTS:[{concepts}]
+  - Additional sections use formats like DB_TABLE:, API_FLOW:, AUTH_STATE:, CACHE_STRATEGY:, etc.
+  - Example entry:
+    FILE:src/lib/entitlements.ts|TYPE:utility|PURPOSE:User entitlements management|DEPENDS_ON:[src/lib/supabase.ts]|
+    EXPORTS:[getUserEntitlements]|IMPLEMENTS:[entitlements,business-logic]|DB_TABLES:[user_entitlements]
+  - Commands: "Update index", "Show dependencies [file]", "File purpose [file]", "Show API flow [endpoint]", "Show DB schema [table]", "Show auth flow", "Show product map"
+  
+  Test User Credentials:
+  - Local development: george.efesopa@gmail.com / Wheels99!
+  - Live site testing: george.efesopb@gmail.com / Wheels99!
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -65,7 +91,6 @@
 - When adding Supabase schema changes, include the SQL in the documentation
 
 Automated Testing
-- Use Puppeteer for automated browser testing whenever possible
 - Create test scripts in the scripts/testing directory
 - Structure test scripts with clear, descriptive function names
 - Include proper error handling and logging in test scripts
@@ -73,7 +98,7 @@ Automated Testing
 - For environment-specific tests, ensure tests can run in both local and production environments
 - Add detailed console logging to track test progress
 - Use async/await patterns for all Puppeteer operations
-- Include cleanup operations to remove test data after tests complete
 - Document test coverage in comments at the top of each test file
-- When testing forms, prefer programmatic form submission over UI interaction when possible for speed
 - Add screenshots for critical test failures to aid debugging
+
+

@@ -127,6 +127,27 @@ Updates the current user's profile information.
 
 ## Payment API
 
+### POST /api/create-checkout-session
+
+Creates a Stripe checkout session for purchasing add-on products.
+
+**Request:**
+```json
+{
+  "productId": "consultation-success-blueprint",
+  "successUrl": "https://example.com/checkout/success?product=consultation-success-blueprint",
+  "cancelUrl": "https://example.com/dashboard"
+}
+```
+
+**Response:**
+```json
+{
+  "sessionId": "cs_test_a1b2c3d4e5f6g7h8i9j0",
+  "url": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0"
+}
+```
+
 ### POST /api/checkout/create-session
 
 Creates a Stripe checkout session for purchasing products.
@@ -147,6 +168,27 @@ Creates a Stripe checkout session for purchasing products.
 {
   "sessionId": "cs_test_a1b2c3d4e5f6g7h8i9j0",
   "url": "https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0"
+}
+```
+
+### POST /api/create-payment-intent
+
+Creates a Stripe payment intent for the main course purchase.
+
+**Request:**
+```json
+{
+  "amount": 297,
+  "email": "user@example.com",
+  "name": "John Doe",
+  "includeAdGenerator": true
+}
+```
+
+**Response:**
+```json
+{
+  "clientSecret": "pi_3NqXyZLkdIwHu7Yw1KfcBsqM_secret_vCSKqVCrNsLpZITdMUgTVOgZs"
 }
 ```
 

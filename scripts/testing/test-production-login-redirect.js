@@ -7,6 +7,9 @@ const BASE_URL = 'https://pmuprofitsystem.com';
 const WAIT_TIMEOUT = 15000; // Increased timeout for production
 const SCREENSHOT_DIR = path.join(__dirname, 'screenshots');
 
+// Test user credentials
+const TEST_EMAIL = 'george.efesopb@gmail.com';
+
 // Ensure screenshots directory exists
 if (!fs.existsSync(SCREENSHOT_DIR)) {
   fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });

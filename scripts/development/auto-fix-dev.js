@@ -19,10 +19,33 @@ function colorLog(color, message) {
   console.log(`${color}${message}${colors.reset}`);
 }
 
+// Function to check if middleware.ts file should be preserved
+function shouldPreserveMiddleware() {
+  try {
+    const middlewarePath = path.join(process.cwd(), 'src', 'middleware.ts');
+    if (fs.existsSync(middlewarePath)) {
+      const content = fs.readFileSync(middlewarePath, 'utf8');
+      return content.includes("import { middleware, config } from './middleware/implementation'");
+    }
+  } catch (err) {
+    // If there's an error, assume we should not preserve
+  }
+  return false;
+}
+
 // Main function to run the development server with auto-fixing
 async function runDevWithAutoFix() {
   try {
     colorLog(colors.cyan, '=== PMU Profit System Development Server with Real-time Error Logging ===\n');
+    
+    // Check if we should preserve the middleware file
+    const preserveMiddleware = shouldPreserveMiddleware();
+    if (preserveMiddleware) {
+      colorLog(colors.green, 'Found proper middleware.ts file that imports the modular middleware. This file will be preserved.');
+      
+      // Create a temporary environment variable to signal to browser-error-logger.js
+      process.env.PRESERVE_MIDDLEWARE = 'true';
+    }
     
     // Step 1: Set up browser error logging
     colorLog(colors.blue, 'Setting up browser console error logging...');

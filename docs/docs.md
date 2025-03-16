@@ -168,6 +168,7 @@ The PMU Profit System uses a PostgreSQL database managed by Supabase. The schema
   - `stripe_customer_id` (TEXT): Stripe customer ID
   - `stripe_checkout_session_id` (TEXT): Stripe checkout session ID
   - `stripe_payment_intent_id` (TEXT): Stripe payment intent ID
+  - `payment_intent_id` (TEXT): Stripe payment intent ID for direct card payments
   - `currency` (TEXT): Currency of the purchase (EUR)
   - `metadata` (JSONB): Additional purchase metadata
   - `created_at` (TIMESTAMP): When the purchase was created
@@ -441,13 +442,39 @@ The authentication flow in the PMU Profit System works as follows:
 
 #### Middleware Protection
 
-The middleware (`src/middleware.ts`) protects routes by:
+The middleware system (`src/middleware.ts` and `src/middleware/` directory) protects routes by:
 
-1. Checking if the route is protected (starts with `/dashboard`).
-2. Verifying if the user has an active session.
-3. If not authenticated, redirecting to the login page.
-4. If authenticated, checking if the user has active entitlements.
-5. If no entitlements, redirecting to the checkout page.
+1. Checking if the user is authenticated
+2. Verifying user entitlements for protected routes
+3. Redirecting unauthenticated users to login
+4. Redirecting authenticated users without entitlements to checkout
+5. Handling special routes like checkout success pages
+
+The middleware has been refactored into a modular structure for better maintainability:
+
+```
+src/
+├── middleware.ts                # Entry point that re-exports from middleware/index.ts
+└── middleware/
+    ├── index.ts                 # Main middleware implementation
+    ├── logger/
+    │   └── index.ts             # Configurable logging system
+    ├── utils/
+    │   ├── auth.ts              # Authentication utilities
+    │   ├── browser-logger.ts    # Browser error logging for development
+    │   ├── entitlements.ts      # Entitlements management
+    │   └── routes.ts            # Route configuration and checking
+    └── handlers/
+        ├── entitlements.ts      # Entitlements checking and handling
+        └── special-routes.ts    # Special route handlers
+```
+
+The middleware uses a configurable logging system that can be adjusted via the `MIDDLEWARE_LOG_LEVEL` environment variable:
+
+```typescript
+// Available log levels: 'debug', 'info', 'warn', 'error', 'none'
+const MIDDLEWARE_LOG_LEVEL = process.env.MIDDLEWARE_LOG_LEVEL || 'info';
+```
 
 ```typescript
 // Example middleware check for entitlements
@@ -682,930 +709,154 @@ Saves generated ad copy.
 
 ### Stripe Setup
 
-The PMU Profit System uses Stripe for payment processing. Setup includes:
+The PMU Profit System uses Stripe for payment processing. The integration includes:
 
-1. Creating products and prices in Stripe
-2. Configuring the Stripe API keys
-3. Setting up webhook endpoints
+- **Stripe Checkout**: For the main course purchase
+- **Direct Card Payments**: For add-on purchases using Stripe Elements
+- **Webhook Integration**: For handling post-payment events
 
-Required environment variables:
+#### Required Environment Variables
+
 ```
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-### Product Pricing
-
-The PMU Profit System offers the following products:
-
-1. **PMU Profit System Course**: €37.00
-2. **PMU Ad Generator Tool**: €27.00
-3. **Consultation Success Blueprint**: €33.00
-
-All prices are in euros (EUR).
-
 ### Checkout Flow
 
-The checkout flow works as follows:
+### Main Checkout Flow
+The main checkout flow uses Stripe Checkout Sessions to process payments for the main product and optional add-ons. The flow is as follows:
 
-1. User selects a product (and optional add-ons)
-2. User provides email/password (if not logged in)
-3. System creates a Stripe checkout session
-4. User is redirected to Stripe's checkout page
-5. User completes payment on Stripe
-6. Stripe redirects back to success page
-7. Webhook confirms payment and grants access
+1. User selects products and clicks "Checkout"
+2. The system creates a Stripe Checkout Session with the selected products
+3. User is redirected to the Stripe Checkout page
+4. User completes payment on the Stripe Checkout page
+5. User is redirected to the success page
+6. The success page verifies the purchase and creates entitlements
 
-#### Server-Side Implementation
+### Add-on Checkout Flow
+The add-on checkout flow uses Stripe Payment Intents to process payments for individual add-on products. The flow is as follows:
 
-```typescript
-// Example: Creating a checkout session
-const session = await stripe.checkout.sessions.create({
-  payment_method_types: ['card'],
-  client_reference_id: userId, // Important for linking the purchase to the user
-  line_items: [
-    {
-      price: 'price_1234567890', // Stripe price ID
-      quantity: 1,
-    },
-  ],
-  mode: 'payment',
-  success_url: `${YOUR_DOMAIN}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-  cancel_url: `${YOUR_DOMAIN}/checkout/cancel`,
-});
+1. User clicks "Purchase" on an add-on product
+2. User is redirected to the add-on checkout page
+3. The system creates a Stripe Payment Intent for the add-on product
+4. User enters payment details on the add-on checkout page
+5. Payment is processed using Stripe Elements
+6. User is redirected to the success page
+7. The success page verifies the purchase and creates entitlements
+
+### Verified Sessions
+To improve the reliability of the checkout process, we've implemented a `verified_sessions` table that stores information about verified checkout sessions and payment intents. This table is used to:
+
+1. Track which sessions and payment intents have been verified
+2. Store metadata about the purchase, including user ID, product ID, and email
+3. Provide a fallback mechanism for creating entitlements if the webhook fails
+
+The table schema is as follows:
+
+```sql
+CREATE TABLE public.verified_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id TEXT,
+  payment_intent_id TEXT,
+  user_id UUID,
+  customer_email TEXT,
+  payment_status TEXT,
+  metadata JSONB,
+  verified_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 ```
 
-#### Client-Side Implementation
+### Webhook Handler
+The webhook handler processes events from Stripe, including `checkout.session.completed` and `payment_intent.succeeded` events. When these events are received, the webhook handler:
+
+1. Stores the session or payment intent in the `verified_sessions` table
+2. Creates entitlements for the user based on the products purchased
+3. Updates the purchase status to `completed`
+
+If the webhook fails to process an event, the success page will attempt to verify the purchase directly with Stripe and create entitlements.
+
+### Direct Card Payment Flow
+
+Add-on products now use Stripe Checkout for a consistent payment experience:
+
+1. User selects an add-on product (e.g., Blueprint, Pricing Template)
+2. User clicks the "Buy Now" button on the product page
+3. System creates a Checkout Session via `/api/create-checkout-session` directly from the product page
+4. User is redirected to Stripe's hosted checkout page
+5. After payment, Stripe redirects the user back to the success page with the product parameter
+6. The success page verifies the purchase and grants access to the add-on
+7. User is redirected to the appropriate dashboard page for the purchased add-on
+
+#### Add-on Products
+
+The system supports the following add-on products:
+
+| Product | ID | UUID | Price | Description |
+|---------|----|----|-------|-------------|
+| Consultation Success Blueprint | `consultation-success-blueprint` | `e5749058-500d-4333-8938-c8a19b16cd65` | €33.00 | Transform your consultations into bookings with our proven framework |
+| Premium Pricing Template | `pricing-template` | `f2a8c6b1-9d3e-4c7f-b5a2-1e8d7f9b6c3a` | €27.00 | Create professional, conversion-optimized pricing packages in minutes |
+| PMU Ad Generator | `pmu-ad-generator` | `4ba5c775-a8e4-449e-828f-19f938e3710b` | €27.00 | AI-powered tool to create high-converting ad copy |
+
+All product IDs are defined in the `src/lib/product-ids.ts` file, which maintains mappings between string IDs (used in URLs and API calls) and UUIDs (used in the database).
+
+#### Add-on Payment Implementation
+
+The add-on payment system consists of:
+
+- **Product Purchase Pages**: Handle the direct creation of checkout sessions
+- **create-checkout-session API**: Creates a Stripe Checkout Session for the add-on
+- **Stripe Webhook Handler**: Processes the checkout.session.completed event
+- **Success Page**: Verifies the purchase and grants access to the add-on
+- **PurchaseContext**: Handles recording successful payments, including for unauthenticated users
 
 ```typescript
-// Example: Creating a checkout session
-const createCheckout = async (email: string, products: string[]) => {
+// Example: Creating a checkout session directly from the product page
+const handlePurchaseClick = async () => {
+  setIsProcessing(true);
+  
   try {
-    const response = await fetch('/api/create-checkout', {
+    const response = await fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, products }),
+      body: JSON.stringify({
+        productId: 'consultation-success-blueprint',
+        successUrl: `${window.location.origin}/checkout/success?product=consultation-success-blueprint`,
+        cancelUrl: `${window.location.origin}/dashboard/blueprint/purchase`,
+      }),
     });
     
-    const data = await response.json();
+    const { url } = await response.json();
     
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    // Redirect to Stripe Checkout
-    window.location.href = data.url;
-  } catch (error) {
-    console.error('Error creating checkout:', error);
-    throw error;
+    // Redirect directly to Stripe checkout
+    window.location.href = url;
+  } catch (err) {
+    console.error('Checkout error:', err);
   }
 };
-```
-
-### Direct Card Payment Flow
-
-The Direct Card Payment flow uses Stripe Elements for in-app card processing.
-
-#### Server-Side Implementation
-
-```typescript
-// Example: Creating a payment intent
-const paymentIntent = await stripe.paymentIntents.create({
-  amount,
-  currency,
-  metadata,
-  automatic_payment_methods: {
-    enabled: true,
-  },
-});
-```
-
-#### Client-Side Implementation
-
-```tsx
-// Example: Using Stripe Elements
-const { error, paymentIntent } = await stripe.confirmPayment({
-  elements,
-  clientSecret,
-  confirmParams: {
-    return_url: `${window.location.origin}/checkout/success`,
-  },
-  redirect: 'if_required',
-});
 ```
 
 ### Webhooks
 
-Stripe webhooks are used to handle asynchronous events:
+Stripe webhooks are used to handle asynchronous payment events:
 
-- `checkout.session.completed` - Process successful payment
-- `invoice.paid` - Process subscription payment
-- `customer.subscription.updated` - Update subscription status
-
-The webhook handler:
-1. Verifies the webhook signature
-2. Processes the event based on type
-3. Updates the database accordingly
-4. Creates user entitlements for purchased products
-5. Returns a 200 response to Stripe
+1. Stripe sends webhook events to `/api/webhooks/stripe`
+2. The webhook handler verifies the event signature
+3. Based on the event type, the system updates the database
+4. For successful payments, the system grants access to the purchased product
 
 #### Webhook Implementation
 
-```typescript
-// Example: Webhook handler
-export async function POST(request: Request) {
-  const body = await request.text();
-  const signature = request.headers.get('stripe-signature') as string;
-  
-  try {
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-    
-    // Log the event type for debugging
-    console.log(`Processing Stripe webhook event: ${event.type}`);
-    
-    try {
-      switch (event.type) {
-        case 'checkout.session.completed':
-          await handleCheckoutSessionCompleted(event.data.object);
-          break;
-        case 'invoice.paid':
-          await handleInvoicePaid(event.data.object);
-          break;
-        // Handle other event types
-      }
-    } catch (error) {
-      console.error(`Error processing webhook event ${event.type}:`, error);
-      // Don't return an error response here, as Stripe will retry the webhook
-    }
-    
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('Webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 400 }
-    );
-  }
-}
-```
+The webhook handler processes several types of events:
 
-#### Centralized Product ID Management
+- **checkout.session.completed**: Handles completed checkout sessions for both main course and add-on products
+  - For add-ons: Creates a purchase record and entitlement based on the product ID in the session metadata
+  - For main course: Creates entitlements for all included products
 
-To ensure consistent usage of product IDs across the application, a centralized module is used:
-
-```typescript
-// src/lib/product-ids.ts
-export const PRODUCT_IDS = {
-  // Main product
-  'pmu-profit-system': '4a554622-d759-42b7-b830-79c9136d2f96',
-  
-  // Add-ons
-  'pmu-ad-generator': '4ba5c775-a8e4-449e-828f-19f938e3710b',
-  'consultation-success-blueprint': 'e5749058-500d-4333-8938-c8a19b16cd65',
-};
-
-// Type for product IDs to enable type checking
-export type ProductId = keyof typeof PRODUCT_IDS;
-
-// Helper functions
-export function isValidProductId(id: string): id is ProductId {
-  return id in PRODUCT_IDS;
-}
-
-export function getAllProductIds(): string[] {
-  return Object.values(PRODUCT_IDS);
-}
-```
-
-This module provides:
-- Constants for all product IDs
-- Type checking for product IDs
-- Helper functions for validation and retrieval
-
-#### User Entitlement Creation
-
-When a purchase is completed, the webhook handler creates user entitlements for each purchased product:
-
-```typescript
-// Create user entitlement
-const { data: entitlement, error: entitlementError } = await supabase
-  .from("user_entitlements")
-  .insert({
-    user_id: userId,
-    product_id: productId,
-    source_type: "purchase",
-    source_id: purchaseId,
-    valid_from: new Date().toISOString(),
-    is_active: true,
-  })
-  .select()
-  .single();
-
-if (entitlementError) {
-  console.error("Error creating main product entitlement:", entitlementError);
-} else {
-  console.log("Created main product entitlement:", entitlement);
-}
-```
-
-The system handles both Stripe Checkout Sessions and Payment Intents for entitlement creation. The entitlement creation process automatically detects the type of ID (payment intent or checkout session) and processes it accordingly:
-
-```typescript
-// Check if it's a payment intent ID (starts with 'pi_') or a checkout session ID (starts with 'cs_')
-if (sessionOrIntentId.startsWith('pi_')) {
-  console.log(`[entitlements] Detected payment intent ID: ${sessionOrIntentId}`);
-  return await createEntitlementsFromPaymentIntent(sessionOrIntentId, userId);
-} else {
-  console.log(`[entitlements] Detected checkout session ID: ${sessionOrIntentId}`);
-  return await createEntitlementsFromCheckoutSession(sessionOrIntentId, userId);
-}
-```
-
-This dual handling ensures that entitlements are created correctly regardless of whether the payment was processed through Stripe Checkout or a direct Payment Intent, providing flexibility in the payment flow.
-
-#### Handling User Entitlement Issues
-
-If users are experiencing issues with entitlements, follow these steps:
-
-1. **Missing User Entitlements**: Verify that entitlements exist in the `user_entitlements` table for the user's purchases.
-
-```sql
-SELECT * FROM user_entitlements WHERE user_id = 'USER_ID';
-```
-
-2. **Inactive Entitlements**: Check if entitlements are marked as inactive.
-
-```sql
-SELECT * FROM user_entitlements WHERE user_id = 'USER_ID' AND is_active = false;
-```
-
-3. **Check Purchase Records**: Verify that the purchase records exist and are marked as completed.
-
-```sql
-SELECT * FROM purchases WHERE user_id = 'USER_ID';
-```
-
-4. **Check Payment Status**: Verify the payment status in Stripe.
-
-5. **Verify Purchase API**: Manually trigger the verify purchase API to create missing entitlements:
-
-```
-GET /api/create-entitlements?session_id=SESSION_ID&user_id=USER_ID
-```
-
-Note that the `session_id` parameter can be either a Stripe Checkout Session ID (starting with `cs_`) or a Payment Intent ID (starting with `pi_`). The system will automatically detect the type and process it accordingly.
-
-The checkout success page (`src/app/checkout/success/page.tsx`) handles the verification of purchases and creation of entitlements. The flow works as follows:
-
-1. After a successful checkout, the user is redirected to the success page with a `session_id` parameter
-2. The success page retrieves the session ID from the URL
-3. It calls the `/api/verify-purchase` endpoint to verify the payment and create entitlements
-4. If successful, it displays a success message and provides a link to the dashboard
-
----
-
-## Development Workflow
-
-### Local Development
-
-To set up the local development environment:
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up environment variables in `.env.local`
-4. Set up the database:
-   ```bash
-   npm run setup-db
-   ```
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-#### Database Environment Configuration
-
-### Shared Database Architecture
-
-The PMU Profit System uses a shared database architecture where both the local development environment and the production environment connect to the same Supabase database. This means that any changes made to the database schema or data in the local environment will affect the production environment as well.
-
-### Environment-Specific User Accounts
-
-To prevent confusion and authentication issues, user accounts are environment-specific. This means:
-
-1. **User Creation**: When a user is created, the system records which environment (local or production) the account was created in.
-2. **Login Restrictions**: Users can only log in from the same environment where their account was created.
-3. **Error Handling**: If a user tries to log in from a different environment, they will see a friendly error message explaining the situation.
-
-This approach ensures that:
-- Development testing doesn't interfere with production users
-- There's no confusion about which environment a user should use
-- Authentication tokens remain valid for the environment they were created in
-
-### Best Practices
-
-When working with this setup:
-
-1. **Create test accounts** specifically for local development
-2. **Don't try to use production accounts** in the local environment
-3. **Document which accounts** are used for which environment
-
-### Testing
-
-The PMU Profit System includes several testing utilities:
-
-- Unit tests for utility functions
-- Integration tests for API routes
-- End-to-end tests for user flows
-
-To run tests:
-```bash
-npm test
-```
-
-For specific test suites:
-```bash
-npm run test:unit
-npm run test:integration
-npm run test:e2e
-```
-
-#### Authentication Flow Testing
-
-We've implemented comprehensive testing tools to debug and verify the authentication flow between pages. These tools help identify issues with user authentication, session management, and page redirects.
-
-### Available Testing Tools
-
-#### 1. Browser-based Authentication Flow Test
-
-This test uses Puppeteer to run a real browser and simulate the entire authentication flow:
-
-- Navigates to the pre-checkout page
-- Clicks the "Create Account & Continue" button
-- Fills out the signup form with a test email and password
-- Submits the form and waits for the response
-- Verifies the redirect to the checkout page
-- Checks that the checkout page loads properly
-
-The test captures screenshots at each step, logs console messages, network requests, cookies, localStorage, and sessionStorage to help identify issues.
-
-#### 2. API-based Authentication Flow Test
-
-This test uses HTTP requests to test the authentication API endpoints directly:
-
-- Creates a test user with a unique email
-- Tests the signup API
-- Tests the login API
-- Tests session persistence
-- Tests checkout page authentication
-
-#### 3. Full User Journey Test
-
-This test provides the most comprehensive verification of the entire conversion funnel:
-
-- Starts at the homepage
-- Clicks the "Get Started" CTA button
-- Fills out the pre-checkout form to create an account
-- Completes the checkout process
-- Verifies the success page
-- Navigates to the dashboard
-
-This end-to-end test is particularly valuable for ensuring that the complete user journey works correctly, from initial landing to becoming a paying customer with dashboard access.
-
-### Running the Tests
-
-1. Install the required dependencies:
-   ```
-   npm run test:install-deps
-   ```
-
-2. Run the browser-based authentication test:
-   ```
-   npm run test:auth:browser
-   ```
-
-3. Run the API-based authentication test:
-   ```
-   npm run test:auth
-   ```
-
-4. Run the full user journey test:
-   ```
-   npm run test:full-journey
-   ```
-
-### Test Output
-
-The tests generate detailed logs and screenshots in the `browser-test-output` directory:
-
-- `auth-flow-browser-test-[timestamp].log`: Detailed log of the browser authentication test
-- `full-journey-test-[timestamp].log`: Detailed log of the full user journey test
-- Screenshots of each step in the process, numbered sequentially
-
-For the full user journey test, screenshots include the homepage, CTA click, pre-checkout form, checkout page, success page, and dashboard access.
-
-### Debugging Authentication Issues
-
-The authentication flow tests help identify several common issues:
-
-1. **Cookie Management**: The tests log all cookies at each step, helping to identify issues with cookie creation, storage, or transmission.
-
-2. **Session Storage**: The tests capture sessionStorage values, which are used to track the "justSignedUp" flag that prevents redirect loops.
-
-3. **Redirect Logic**: The tests verify that users are correctly redirected from pre-checkout to checkout after signup.
-
-4. **Authentication State**: The tests log the authentication state at each step, helping to identify issues with state management.
-
-5. **Network Requests**: The tests capture all network requests and responses, helping to identify issues with API calls.
-
-This documentation provides a comprehensive overview of the PMU Profit System. For specific questions or issues, please refer to the appropriate section or contact the development team. 
-
-### Error Handling
-
-The application uses a centralized error handling approach:
-
-- Client-side errors are caught and displayed using toast notifications
-- Server-side errors are logged and return appropriate HTTP status codes
-- Validation errors provide specific feedback to users
-- Critical errors are reported to monitoring systems
-
----
-
-## Deployment
-
-### Environment Setup
-
-Before deployment, ensure the following environment variables are set:
-
-```
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...
-SUPABASE_SERVICE_ROLE_KEY=eyJh...
-
-# Stripe
-STRIPE_SECRET_KEY=sk_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Application
-NEXT_PUBLIC_SITE_URL=https://your-site.com
-```
-
-### Deployment Process
-
-The PMU Profit System is deployed to Vercel:
-
-1. Push changes to the main branch
-2. Vercel automatically builds and deploys the application
-3. Verify the deployment by checking the Vercel dashboard
-4. Run post-deployment tests to ensure everything works
-
-For manual deployment:
-```bash
-npm run build
-npm run start
-```
-
-### Post-Deployment Verification
-
-After deploying, verify the following:
-
-1. The application loads correctly at your production URL
-2. User registration works
-3. User login works
-4. Protected routes (dashboard) are accessible only to authenticated users
-5. The purchase flow works correctly
-
----
-
-## Troubleshooting
-
-### Authentication Issues
-
-#### User Cannot Log In
-
-**Symptoms:**
-- User enters correct credentials but receives an error
-- Login button seems to do nothing
-- User gets redirected back to login page
-
-**Possible Causes and Solutions:**
-
-1. **Email Not Verified**
-   - Check if the user has verified their email
-   - Resend verification email from the login page
-   - Check Supabase logs for verification status
-
-2. **Account Banned**
-   - Some accounts may be incorrectly marked as banned after verification
-   - Use the "Resend Verification Email" feature which includes an automatic unban
-   - Admin can manually unban in Supabase dashboard
-
-3. **Missing User Profile**
-   - User exists in auth.users but not in public.users table
-   - The application should automatically create a profile if missing
-   - Check database for user profile
-
-4. **Environment Mismatch Error**
-   - User receives an error message stating they cannot access their account from this environment
-   - This occurs when a user tries to log in from an environment different from where their account was created
-   - **Cause**: The system enforces environment separation to prevent accidental data manipulation
-   - **Solution for Users**: Direct the user to log in from the correct environment (e.g., production website instead of local development)
-   - **Solution for Developers**: If testing is needed, create test users specifically in the development/local environment
-   - **Debugging**: Check the user's metadata in Supabase to verify their creation environment:
-     ```sql
-     SELECT id, email, raw_user_meta_data 
-     FROM auth.users 
-     WHERE email = 'user@example.com';
-     ```
-
-#### Middleware Authentication and Entitlement Checking
-
-The middleware (`src/middleware.ts`) has been improved to properly check for user entitlements:
-
-```typescript
-export async function middleware(request: NextRequest) {
-  // Check if the route is protected
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
-  const isTestPage = request.nextUrl.pathname.startsWith('/test');
-  
-  // Allow test pages without authentication
-  if (isTestPage) {
-    return NextResponse.next();
-  }
-  
-  // If it's not a protected route, allow access
-  if (!isProtectedRoute) {
-    return NextResponse.next();
-  }
-  
-  // Get the user's session
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    // If the user is not authenticated, redirect to login
-    if (!session) {
-      console.log('User not authenticated, redirecting to login');
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-    
-    // Check if the user has active entitlements
-    const { data: entitlements } = await supabase
-      .from('user_entitlements')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('is_active', true);
-    
-    // If the user doesn't have any active entitlements, redirect to checkout
-    if (!entitlements || entitlements.length === 0) {
-      console.log('User has no active entitlements, redirecting to checkout');
-      return NextResponse.redirect(new URL('/checkout', request.url));
-    }
-    
-    // User is authenticated and has entitlements, allow access
-    return NextResponse.next();
-  } catch (error) {
-    console.error('Error in middleware:', error);
-    // If there's an error, allow access to avoid blocking legitimate users
-    return NextResponse.next();
-  }
-}
-```
-
-This middleware ensures that:
-1. Protected routes are only accessible to authenticated users
-2. Users without active entitlements are redirected to the checkout page
-3. Test pages are accessible without authentication (for development purposes)
-4. Errors are properly handled to avoid blocking legitimate users
-
-#### Debug API Endpoint
-
-A debug API endpoint has been added at `/api/debug/user-entitlements` to help diagnose user entitlement issues:
-
-```typescript
-export async function GET(req: NextRequest) {
-  const supabase = createClient(cookies());
-  
-  try {
-    // Get the current user's session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
-    if (sessionError) {
-      console.error('Error getting session:', sessionError);
-      return NextResponse.json({ error: 'Error getting session' }, { status: 500 });
-    }
-    
-    if (!session) {
-      return NextResponse.json({ authenticated: false, message: 'No active session' }, { status: 200 });
-    }
-    
-    // Get the user's entitlements
-    const { data: entitlements, error: entitlementsError } = await supabase
-      .from('user_entitlements')
-      .select('*, products:product_id(id, name, description, price, type)')
-      .eq('user_id', session.user.id)
-      .eq('is_active', true);
-    
-    if (entitlementsError) {
-      console.error('Error getting entitlements:', entitlementsError);
-      return NextResponse.json({ error: 'Error getting entitlements' }, { status: 500 });
-    }
-    
-    // Get all active products
-    const { data: products, error: productsError } = await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true);
-    
-    if (productsError) {
-      console.error('Error getting products:', productsError);
-      return NextResponse.json({ error: 'Error getting products' }, { status: 500 });
-    }
-    
-    // Return the user's authentication status, entitlements, and products
-    return NextResponse.json({
-      authenticated: true,
-      user: {
-        id: session.user.id,
-        email: session.user.email,
-      },
-      entitlements,
-      entitlementCount: entitlements?.length || 0,
-      products,
-      productCount: products?.length || 0,
-    }, { status: 200 });
-  } catch (error) {
-    console.error('Error in debug endpoint:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-```
-
-This endpoint provides detailed information about:
-1. The user's authentication status
-2. The user's active entitlements
-3. All active products in the system
-4. Counts of entitlements and products
-
-It's a valuable tool for debugging issues with user entitlements and access control.
-
-### Payment Issues
-
-#### Payment Fails
-
-**Symptoms:**
-- User gets an error during checkout
-- Payment is declined
-- Stripe checkout doesn't load
-
-**Solutions:**
-1. Check Stripe dashboard for error logs
-2. Verify Stripe API keys are correct
-3. Ensure the application is using HTTPS (required for Stripe)
-4. Check that product and price IDs match in Stripe and the application
-5. Verify webhook endpoints are correctly configured
-
-#### Purchase Not Recorded
-
-**Symptoms:**
-- Payment succeeds but user doesn't get access to purchased content
-- No record in purchases table
-
-**Solutions:**
-1. Check Stripe webhook logs for delivery failures
-2. Verify that the webhook handler is correctly processing events
-3. Check database connection and permissions
-4. Manually add the purchase record if needed
-
-### Database Issues
-
-#### Missing Tables or Columns
-
-**Symptoms:**
-- Application throws errors about missing tables or columns
-- Features that rely on database fail
-
-**Solutions:**
-1. Run the database setup script from `scripts/database/setup-database.js`
-2. Check Supabase dashboard for schema issues
-3. Manually create missing tables or columns
-4. Verify database migrations have been applied
-
-#### Row Level Security Blocking Access
-
-**Symptoms:**
-- User can't access their own data
-- Queries return no results even though data exists
-
-**Solutions:**
-1. Check RLS policies in Supabase dashboard
-2. Verify that the user is authenticated when making requests
-3. Ensure policies are correctly written to allow access
-4. Test queries with service role key to bypass RLS for debugging
-
-### Deployment Problems
-
-#### Build Fails on Vercel
-
-**Symptoms:**
-- Deployment fails with TypeScript errors
-- Build process terminates with an error
-
-**Solutions:**
-1. Check the error logs for specific TypeScript errors
-2. Fix type issues in the codebase
-3. Ensure all dependencies are correctly installed
-4. Verify environment variables are properly set
-5. Check for compatibility issues between packages
-
-#### Application Crashes After Deployment
-
-**Symptoms:**
-- Application loads but crashes when using certain features
-- Server returns 500 errors
-
-**Solutions:**
-1. Check server logs for error details
-2. Verify environment variables are correctly set in production
-3. Ensure database connection is working
-4. Check for differences between development and production environments
-5. Roll back to a previous working version if necessary
-
-### UI/UX Issues
-
-#### Hydration Errors
-
-**Symptoms:**
-- Console shows React hydration errors
-- UI elements flicker or behave unexpectedly
-
-**Solutions:**
-1. Ensure server and client rendering match
-2. Avoid using browser-specific APIs during server rendering
-3. Use proper conditional rendering for client-side components
-4. Add the 'use client' directive where needed
-
-### User Entitlement Issues
-
-#### Row Level Security (RLS) Policy Mismatch
-
-**Symptoms:**
-- User purchases are successful but entitlements don't appear in the user's profile
-- User can't access content they've purchased
-- Database queries for entitlements return no results even though purchases exist
-
-**Root Cause:**
-The issue stems from a mismatch between how JWT claims are set in client-side requests versus server-side requests. When a user makes a purchase, the entitlements are created server-side using the service role key, but when the user tries to access their entitlements client-side, the JWT claims aren't properly set in the request headers.
-
-**Solutions:**
-
-1. **User-Specific Supabase Client**
-   - Created a new `createUserSpecificSupabaseClient` function in `src/lib/supabase.ts` that adds the user ID to request headers
-   - This ensures that the user ID is available for RLS policies
-   ```typescript
-   export const createUserSpecificSupabaseClient = (userId: string) => {
-     const supabase = createClient(
-       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-       {
-         global: {
-           headers: {
-             'x-user-id': userId,
-           },
-         },
-       }
-     );
-     return supabase;
-   };
-   ```
-
-2. **Middleware for JWT Claims**
-   - Updated the Next.js middleware to set the user ID in the request context
-   - Added functionality to set JWT claims using the `set_claim` RPC function
-   ```typescript
-   // In middleware.ts
-   if (session) {
-     try {
-       // Set JWT claims for the user
-       await supabase.rpc('set_claim', {
-         uid: session.user.id,
-         claim: 'user_id',
-         value: session.user.id,
-       });
-     } catch (error) {
-       console.error('Error setting JWT claims:', error);
-     }
-   }
-   ```
-
-3. **RLS Functions Setup**
-   - Created a script to set up the necessary RPC functions for setting JWT claims
-   - Added a `set_claim` function that updates the user's JWT claims in the database
-   ```sql
-   CREATE OR REPLACE FUNCTION public.set_claim(uid uuid, claim text, value jsonb)
-   RETURNS text
-   LANGUAGE plpgsql
-   SECURITY DEFINER
-   SET search_path = public
-   AS $$
-   BEGIN
-     IF NOT EXISTS (
-       SELECT 1 FROM auth.users WHERE id = uid
-     ) THEN
-       RETURN 'User not found';
-     END IF;
-     
-     UPDATE auth.users
-     SET raw_app_meta_data = 
-       raw_app_meta_data || 
-       json_build_object(claim, value)::jsonb
-     WHERE id = uid;
-     
-     RETURN 'OK';
-   END;
-   $$;
-   ```
-
-4. **Fallback Mechanism**
-   - Updated the UserEntitlements component to use the user-specific Supabase client
-   - Added a fallback to an API endpoint if the direct query fails due to RLS issues
-   ```typescript
-   // In UserEntitlements.tsx
-   async function fetchProductsAndEntitlements() {
-     try {
-       // First try with user-specific client
-       const userClient = createUserSpecificSupabaseClient(user.id);
-       const { data, error } = await userClient
-         .from('user_entitlements')
-         .select('*, products:product_id(*)');
-       
-       if (error || !data) {
-         // Fallback to API endpoint
-         const response = await fetch('/api/user-entitlements');
-         const apiData = await response.json();
-         return apiData.entitlements || [];
-       }
-       
-       return data;
-     } catch (error) {
-       console.error('Error fetching entitlements:', error);
-       return [];
-     }
-   }
-   ```
-
-5. **API Endpoint for Entitlements**
-   - Added a server-side API endpoint that uses the service role client to bypass RLS
-   - This ensures users can always access their entitlements even if RLS issues occur
-   ```typescript
-   // In src/app/api/user-entitlements/route.ts
-   export async function GET(req: NextRequest) {
-     const supabase = createClient(cookies());
-     const { data: { session } } = await supabase.auth.getSession();
-     
-     if (!session) {
-       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-     }
-     
-     // Use service role client to bypass RLS
-     const serviceClient = getServiceSupabase();
-     const { data, error } = await serviceClient
-       .from('user_entitlements')
-       .select('*, products:product_id(*)')
-       .eq('user_id', session.user.id);
-     
-     if (error) {
-       return NextResponse.json({ error: error.message }, { status: 500 });
-     }
-     
-     return NextResponse.json({ entitlements: data });
-   }
-   ```
-
-#### Product ID Format Mismatch
-
-**Symptoms:**
-- Purchases are recorded but entitlements aren't created
-- Inconsistent product IDs between purchases and entitlements
-- Some products use string IDs while others use UUID format
-
-**Root Cause:**
-The system was using two different formats for product IDs: legacy string IDs (e.g., 'pmu-profit-system') and UUID format (e.g., '4a554622-d759-42b7-b830-79c9136d2f96'). This inconsistency caused issues when creating entitlements from purchases.
-
-**Solutions:**
 
 1. **Enhanced Product ID Utility**
    - Added robust functions for handling both string and UUID formats in `src/lib/product-ids.ts`
@@ -1635,267 +886,75 @@ The system was using two different formats for product IDs: legacy string IDs (e
 2. **Updated Entitlements Creation**
    - Modified the entitlements creation function to use the normalized product IDs
    - Ensured consistent handling of product IDs across the application
-   ```typescript
-   // In src/lib/entitlements.ts
-   export async function createEntitlementsFromPurchase(purchase: any) {
-     const supabase = getServiceSupabase();
-     const now = new Date().toISOString();
-     
-     // Get the product ID from the purchase
-     let productId = purchase.product_id;
-     
-     // Normalize the product ID to ensure consistent format
-     productId = normalizeProductId(productId);
-     
-     // Create the entitlement
-     const { data, error } = await supabase
-       .from('user_entitlements')
-       .insert({
-         user_id: purchase.user_id,
-         product_id: productId,
-         source_type: 'purchase',
-         source_id: purchase.id,
-         valid_from: now,
-         is_active: true
-       })
-       .select()
-       .single();
-     
-     if (error) {
-       console.error('Error creating entitlement:', error);
-       return { success: false, error };
-     }
-     
-     return { success: true, entitlement: data };
-   }
    ```
 
-3. **Updated Fix Script**
-   - Enhanced the fix-user-entitlements script with the new product ID handling
-   - Added helper functions for consistent product ID normalization
-   ```javascript
-   // In scripts/database/fix-user-entitlements.js
-   function normalizeProductId(productId) {
-     // If it's already a valid UUID, return it
-     if (isValidUuidProductId(productId)) {
-       return productId;
-     }
-     
-     // If it's a legacy ID, convert it to UUID
-     if (isValidLegacyProductId(productId)) {
-       const uuidId = PRODUCT_IDS[productId];
-       if (uuidId) {
-         return uuidId;
-       }
-     }
-     
-     // If we can't normalize it, return the original
-     console.warn(`Could not normalize product ID: ${productId}`);
-     return productId;
-   }
-   
-   async function createEntitlementsFromPurchase(purchase) {
-     // Normalize the product ID
-     const productId = normalizeProductId(purchase.product_id);
-     
-     // Create the entitlement
-     // ...
-   }
-   ```
+## Unauthenticated Checkout Flow
 
-#### Fixing Existing User Entitlements
+The system now supports purchases by unauthenticated users through a webhook-first approach. This allows users to complete purchases even if they're not logged in, with the following key components:
 
-If users have purchases but no entitlements, you can run the fix script to create the missing entitlements:
+### Verified Sessions Table
 
-```bash
-node scripts/database/fix-user-entitlements.js USER_ID
-```
-
-This script:
-1. Fetches all purchases for the specified user
-2. Checks if entitlements already exist for those purchases
-3. Creates missing entitlements using the normalized product IDs
-4. Handles both legacy and UUID product ID formats
-
-For all users:
-
-```bash
-node scripts/database/fix-user-entitlements.js
-```
-
-#### Database Webhook for Automatic Entitlement Creation
-
-To ensure future purchases automatically create entitlements, a database webhook has been set up:
-
-1. The webhook triggers when a new row is inserted into the `purchases` table
-2. It sends a POST request to the `/api/webhooks/database` endpoint
-3. The endpoint creates entitlements based on the purchase data
-
-To set up the webhook:
+A new `verified_sessions` table has been added to store information about verified checkout sessions:
 
 ```sql
--- Enable the HTTP extension
-CREATE EXTENSION IF NOT EXISTS http;
-
--- Create the webhook function
-CREATE OR REPLACE FUNCTION notify_purchase_webhook()
-RETURNS TRIGGER AS $$
-BEGIN
-  PERFORM http_post(
-    'https://your-site.com/api/webhooks/database',
-    json_build_object('type', 'INSERT', 'table', 'purchases', 'record', row_to_json(NEW)),
-    'application/json'
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create the trigger
-CREATE TRIGGER purchases_webhook_trigger
-AFTER INSERT ON purchases
-FOR EACH ROW
-EXECUTE FUNCTION notify_purchase_webhook();
+CREATE TABLE public.verified_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id TEXT NOT NULL,
+  payment_intent_id TEXT,
+  user_id UUID,
+  customer_email TEXT,
+  payment_status TEXT,
+  metadata JSONB,
+  verified_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 ```
 
-Alternatively, you can use Supabase's built-in Database Webhooks feature in the Supabase dashboard.
+This table stores information about verified Stripe checkout sessions, including:
+- Session ID and payment intent ID for tracking
+- User ID (if available) for linking to authenticated users
+- Customer email for communication
+- Payment status and metadata for verification
 
----
+### Webhook Handler Enhancements
 
-## Implementation Guide
+The Stripe webhook handler has been enhanced to:
 
-### Step-by-Step Setup
+1. Store verified sessions in the `verified_sessions` table
+2. Handle unauthenticated users by:
+   - Finding existing users by email
+   - Creating temporary users when needed
+   - Creating purchase records and entitlements
 
-1. **Set up Supabase project**
-   - Create a new project in Supabase
-   - Enable email authentication
-   - Configure email templates
+### Purchase Verification API
 
-2. **Set up Stripe account**
-   - Create products and prices
-   - Configure webhook endpoints
-   - Get API keys
+A new API endpoint at `/api/verify-purchase` allows verification of purchases by:
+- Product ID
+- Session ID or payment intent ID
 
-3. **Configure environment variables**
-   - Create `.env.local` file with required variables
-   - Set up variables in deployment environment
+The API checks multiple sources:
+1. Verified sessions table
+2. Purchases table
+3. User entitlements
 
-4. **Set up database schema**
-   - Run the database setup script
-   - Verify the schema
+### PurchaseContext Updates
 
-5. **Configure authentication**
-   - Set up authentication in Supabase
-   - Configure redirect URLs
-   - Test signup and login flows
+The `PurchaseContext` has been updated to handle unauthenticated users by:
+- Checking if the user is authenticated
+- Using the verify-purchase API for unauthenticated users
+- Providing appropriate redirect URLs based on the product
 
-6. **Implement checkout flow**
-   - Connect to Stripe API
-   - Create checkout session
-   - Handle success and cancel scenarios
-   - Process webhook events
+### Implementation Details
 
-7. **Implement user dashboard**
-   - Create protected routes
-   - Display user's purchased content
-   - Implement ad generator tool
+When a webhook event is received:
+1. The session is verified and stored in the `verified_sessions` table
+2. If the user is not authenticated but has an email, we:
+   - Look for an existing user with that email
+   - Create a temporary user if needed
+   - Create purchase records and entitlements
+3. The success page can verify the purchase using the payment intent ID
 
-### Configuration
-
-The PMU Profit System can be configured through environment variables and settings in the Supabase and Stripe dashboards. Key configuration options include:
-
-- **Authentication settings**: Email verification, password policies
-- **Product configuration**: Available products, prices, features
-- **UI customization**: Colors, logos, text
-- **Email templates**: Verification, welcome, receipt emails
-
----
-
-## Authentication Flow Testing
-
-We've implemented comprehensive testing tools to debug and verify the authentication flow between pages. These tools help identify issues with user authentication, session management, and page redirects.
-
-### Available Testing Tools
-
-#### 1. Browser-based Authentication Flow Test
-
-This test uses Puppeteer to run a real browser and simulate the entire authentication flow:
-
-- Navigates to the pre-checkout page
-- Clicks the "Create Account & Continue" button
-- Fills out the signup form with a test email and password
-- Submits the form and waits for the response
-- Verifies the redirect to the checkout page
-- Checks that the checkout page loads properly
-
-The test captures screenshots at each step, logs console messages, network requests, cookies, localStorage, and sessionStorage to help identify issues.
-
-#### 2. API-based Authentication Flow Test
-
-This test uses HTTP requests to test the authentication API endpoints directly:
-
-- Creates a test user with a unique email
-- Tests the signup API
-- Tests the login API
-- Tests session persistence
-- Tests checkout page authentication
-
-#### 3. Full User Journey Test
-
-This test provides the most comprehensive verification of the entire conversion funnel:
-
-- Starts at the homepage
-- Clicks the "Get Started" CTA button
-- Fills out the pre-checkout form to create an account
-- Completes the checkout process
-- Verifies the success page
-- Navigates to the dashboard
-
-This end-to-end test is particularly valuable for ensuring that the complete user journey works correctly, from initial landing to becoming a paying customer with dashboard access.
-
-### Running the Tests
-
-1. Install the required dependencies:
-   ```
-   npm run test:install-deps
-   ```
-
-2. Run the browser-based authentication test:
-   ```
-   npm run test:auth:browser
-   ```
-
-3. Run the API-based authentication test:
-   ```
-   npm run test:auth
-   ```
-
-4. Run the full user journey test:
-   ```
-   npm run test:full-journey
-   ```
-
-### Test Output
-
-The tests generate detailed logs and screenshots in the `browser-test-output` directory:
-
-- `auth-flow-browser-test-[timestamp].log`: Detailed log of the browser authentication test
-- `full-journey-test-[timestamp].log`: Detailed log of the full user journey test
-- Screenshots of each step in the process, numbered sequentially
-
-For the full user journey test, screenshots include the homepage, CTA click, pre-checkout form, checkout page, success page, and dashboard access.
-
-### Debugging Authentication Issues
-
-The authentication flow tests help identify several common issues:
-
-1. **Cookie Management**: The tests log all cookies at each step, helping to identify issues with cookie creation, storage, or transmission.
-
-2. **Session Storage**: The tests capture sessionStorage values, which are used to track the "justSignedUp" flag that prevents redirect loops.
-
-3. **Redirect Logic**: The tests verify that users are correctly redirected from pre-checkout to checkout after signup.
-
-4. **Authentication State**: The tests log the authentication state at each step, helping to identify issues with state management.
-
-5. **Network Requests**: The tests capture all network requests and responses, helping to identify issues with API calls.
-
-This documentation provides a comprehensive overview of the PMU Profit System. For specific questions or issues, please refer to the appropriate section or contact the development team. 
+This approach ensures that:
+- Purchases are properly recorded even for unauthenticated users
+- Users can access their purchased content after payment
+- The system maintains data integrity and security

@@ -247,204 +247,80 @@ function injectErrorLogger() {
     }
     
     // Create the API route file
-    const apiRouteContent = `
-import { NextRequest, NextResponse } from 'next/server';
-
-// Colors for console output
-const colors = {
-  reset: '\\x1b[0m',
-  red: '\\x1b[31m',
-  yellow: '\\x1b[33m',
-  blue: '\\x1b[34m',
-  magenta: '\\x1b[35m',
-  cyan: '\\x1b[36m',
-  green: '\\x1b[32m',
-  gray: '\\x1b[90m',
-};
-
-export async function POST(req: NextRequest) {
-  // Only process in development
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json({ success: false, message: 'Only available in development' });
-  }
-  
-  try {
-    const data = await req.json();
-    
-    // Format the error message
-    const timestamp = new Date(data.timestamp).toLocaleTimeString();
-    const colorCode = data.type === 'error' ? colors.red : 
-                     data.type === 'warning' ? colors.yellow : 
-                     data.type === 'unhandled' ? colors.magenta : 
-                     data.type === 'unhandledrejection' ? colors.magenta : 
-                     data.type === 'react' ? colors.cyan :
-                     colors.blue;
-    
-    // Print header with timestamp, type, component, and URL
-    console.log(\`\${colorCode}[BROWSER \${data.type.toUpperCase()}]\${colors.reset} [\${timestamp}] in \${colors.cyan}\${data.component || 'Unknown'}\${colors.reset} at \${colors.blue}\${data.url || 'Unknown URL'}\${colors.reset}\`);
-    
-    // Log each message part
-    data.message.forEach((msg: string) => {
-      if (typeof msg === 'object') {
-        try {
-          const parsed = JSON.parse(msg);
-          console.log(\`  \${JSON.stringify(parsed, null, 2)}\`);
-        } catch (e) {
-          console.log(\`  \${msg}\`);
-        }
-      } else {
-        console.log(\`  \${msg}\`);
-      }
-    });
-    
-    // Log stack trace if available
-    if (data.stack) {
-      console.log(\`\${colors.gray}  Stack trace:\${colors.reset}\`);
-      data.stack.split('\\n').forEach((line: string) => {
-        console.log(\`  \${colors.gray}\${line}\${colors.reset}\`);
-      });
-    }
-    
-    // Log additional information if available
-    if (data.filename && data.lineno) {
-      console.log(\`\${colors.gray}  Location: \${data.filename}:\${data.lineno}:\${data.colno || 0}\${colors.reset}\`);
-    }
-    
-    if (data.componentStack) {
-      console.log(\`\${colors.gray}  Component stack:\${colors.reset}\`);
-      data.componentStack.split('\\n').forEach((line: string) => {
-        console.log(\`  \${colors.gray}\${line.trim()}\${colors.reset}\`);
-      });
-    }
-    
-    // Add a separator for readability
-    console.log('');
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error processing browser log:', error);
-    return NextResponse.json({ success: false });
-  }
-}
-`;
-    
     fs.writeFileSync(apiFilePath, apiRouteContent);
     colorLog(colors.green, `Created API route at ${apiFilePath}`);
     
-    // Create a middleware to inject the script
+    // Check if middleware/index.ts exists before creating middleware.ts
+    const middlewareDirPath = path.join(process.cwd(), 'src', 'middleware');
+    const middlewareIndexPath = path.join(middlewareDirPath, 'index.ts');
     const middlewarePath = path.join(process.cwd(), 'src', 'middleware.ts');
-    let middlewareContent = '';
-    
-    if (fs.existsSync(middlewarePath)) {
-      // Read existing middleware
-      middlewareContent = fs.readFileSync(middlewarePath, 'utf8');
-      
-      // Check if error logger is already injected
-      if (middlewareContent.includes('// Browser error logger')) {
-        colorLog(colors.yellow, 'Error logger already injected in middleware');
-        return;
-      }
-      
-      // Backup the original middleware
-      fs.writeFileSync(`${middlewarePath}.backup`, middlewareContent);
-      colorLog(colors.blue, 'Backed up original middleware');
-      
-      // Find the export function and inject our code
-      if (middlewareContent.includes('export async function middleware')) {
-        // Add the error logger to the response
-        middlewareContent = middlewareContent.replace(
-          /return (.*?);/,
-          `// Browser error logger injection (development only)
-  if (process.env.NODE_ENV === 'development') {
-    const response = $1;
-    
-    // Only inject in HTML responses
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
-      const html = await response.text();
-      
-      // Inject the error logger script
-      const modifiedHtml = html.replace(
-        '</head>',
-        \`<script>
-${errorLoggerScript}
-</script></head>\`
-      );
-      
-      return new NextResponse(modifiedHtml, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
-    }
-    
-    return response;
-  }
-  
-  return $1;`
-        );
-      } else {
-        // Create a new middleware function
-        middlewareContent += `
-// Browser error logger
-export async function middleware(request: NextRequest) {
-  // Process the request normally
-  const response = NextResponse.next();
-  
-  // Only inject in development
-  if (process.env.NODE_ENV === 'development') {
-    // Only inject in HTML responses
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('text/html')) {
-      const html = await response.text();
-      
-      // Inject the error logger script
-      const modifiedHtml = html.replace(
-        '</head>',
-        \`<script>
-${errorLoggerScript}
-</script></head>\`
-      );
-      
-      return new NextResponse(modifiedHtml, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
-    }
-  }
-  
-  return response;
-}
 
-// Configure which paths the middleware runs on
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api routes (API endpoints)
-     */
-    {
-      source: '/((?!_next/static|_next/image|favicon.ico|api/).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' },
-      ],
-    },
-  ],
-};
-`;
+    // Check if the new modular middleware structure exists
+    const hasModularMiddleware = fs.existsSync(middlewareDirPath) && fs.existsSync(middlewareIndexPath);
+
+    // Check if we should preserve the middleware file
+    const shouldPreserveMiddleware = process.env.PRESERVE_MIDDLEWARE === 'true';
+
+    if (hasModularMiddleware) {
+      // If middleware/index.ts exists, check if middleware.ts is a proper import
+      if (fs.existsSync(middlewarePath)) {
+        try {
+          // Read the content of middleware.ts
+          const middlewareContent = fs.readFileSync(middlewarePath, 'utf8');
+          
+          // Check if it's a proper import of the modular middleware
+          if (middlewareContent.includes("import { middleware, config } from './middleware/index'") || 
+              middlewareContent.includes("import { middleware, config } from './middleware/implementation'") || 
+              shouldPreserveMiddleware) {
+            // This is a proper import, keep the file
+            colorLog(colors.green, 'Found proper middleware.ts file that imports the modular middleware');
+          } else {
+            // This is not a proper import, create a backup and remove it
+            const backupPath = path.join(process.cwd(), 'src', 'middleware.ts.backup');
+            fs.copyFileSync(middlewarePath, backupPath);
+            fs.unlinkSync(middlewarePath);
+            colorLog(colors.yellow, `Removed conflicting middleware.ts file (backup created at ${backupPath})`);
+            
+            // Create a proper middleware.ts file
+            const properMiddlewareContent = `/**
+ * Next.js Middleware Entry Point
+ * 
+ * This file serves as the entry point for Next.js middleware.
+ * It imports and re-exports the middleware implementation from the modular structure.
+ * 
+ * Next.js requires this file to be in the src directory to register middleware.
+ */
+
+import { middleware, config } from './middleware/implementation';
+
+export { middleware, config };`;
+            fs.writeFileSync(middlewarePath, properMiddlewareContent);
+            colorLog(colors.green, `Created proper middleware.ts file that imports the modular middleware`);
+          }
+        } catch (err) {
+          colorLog(colors.yellow, `Warning: Could not check middleware.ts file: ${err.message}`);
+        }
+      } else if (!shouldPreserveMiddleware) {
+        // Create a proper middleware.ts file
+        const properMiddlewareContent = `/**
+ * Next.js Middleware Entry Point
+ * 
+ * This file serves as the entry point for Next.js middleware.
+ * It imports and re-exports the middleware implementation from the modular structure.
+ * 
+ * Next.js requires this file to be in the src directory to register middleware.
+ */
+
+import { middleware, config } from './middleware/implementation';
+
+export { middleware, config };`;
+        fs.writeFileSync(middlewarePath, properMiddlewareContent);
+        colorLog(colors.green, `Created proper middleware.ts file that imports the modular middleware`);
       }
-      
-      // Write the updated middleware
-      fs.writeFileSync(middlewarePath, middlewareContent);
-      colorLog(colors.green, 'Updated middleware to inject error logger');
-    } else {
-      // Create a new middleware file
-      middlewareContent = `import { NextRequest, NextResponse } from 'next/server';
+      colorLog(colors.green, 'Error logger already injected in middleware');
+    } else if (!fs.existsSync(middlewarePath) && !shouldPreserveMiddleware) {
+      // Only create middleware.ts if it doesn't exist and middleware/index.ts doesn't exist
+      const middlewareContent = `import { NextRequest, NextResponse } from 'next/server';
 
 // Browser error logger
 export async function middleware(request: NextRequest) {
@@ -461,15 +337,13 @@ export async function middleware(request: NextRequest) {
       // Inject the error logger script
       const modifiedHtml = html.replace(
         '</head>',
-        \`<script>
-${errorLoggerScript}
-</script></head>\`
+        \`<script>\n${errorLoggerScript}\n</script></head>\`
       );
       
       return new NextResponse(modifiedHtml, {
         status: response.status,
         statusText: response.statusText,
-        headers: response.headers
+        headers: response.headers,
       });
     }
   }
@@ -477,7 +351,6 @@ ${errorLoggerScript}
   return response;
 }
 
-// Configure which paths the middleware runs on
 export const config = {
   matcher: [
     /*

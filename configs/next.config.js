@@ -54,6 +54,8 @@ const nextConfig = {
           '*': ['**/diagnostics/**'] 
         } 
       : {},
+    // Explicitly enable middleware
+    middleware: true,
   },
   // Conditionally exclude pages from production builds
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'].filter(ext => {
